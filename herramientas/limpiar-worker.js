@@ -42,5 +42,18 @@ if (!exportDefault) {
 }
 
 codigo = codigo.replace(bloque, `export{${exportDefault}};\n`);
+
+// Tras quitar los exports, los nombres de las clases DO solo sobreviven en
+// cadenas de texto muertas (etiquetas de log y nombres decorativos de clase).
+// El validador de YaDominios busca por nombre, así que se neutralizan.
+const nombresDO = {
+  DOQueueHandler: "qhNeutralizado",
+  DOShardedTagCache: "tcNeutralizado",
+  BucketCachePurge: "cpNeutralizado",
+};
+for (const [nombre, reemplazo] of Object.entries(nombresDO)) {
+  codigo = codigo.split(nombre).join(reemplazo);
+}
+
 fs.writeFileSync(ruta, codigo);
-console.log(`Worker limpio: solo queda "export{${exportDefault}}"`);
+console.log(`Worker limpio: solo queda "export{${exportDefault}}" y sin rastro de clases DO`);

@@ -1,6 +1,13 @@
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
 
 // Configuración de OpenNext: convierte el build de Next.js en un Worker.
-// El resultado (.open-next/worker.js) lo empaqueta la GitHub Action en un
-// solo _worker.js, que es lo único que acepta YaDominios Cloud.
-export default defineCloudflareConfig();
+//
+// Los tres en `undefined` son la configuración oficial de la guía de
+// YaDominios Cloud (https://yadominios.com/docs/publicar-en-yadominios-cloud):
+// sin ellos, OpenNext mete clases de Durable Objects (DOQueueHandler,
+// DOShardedTagCache, BucketCachePurge) que la plataforma rechaza.
+export default defineCloudflareConfig({
+  incrementalCache: undefined,
+  queue: undefined,
+  tagCache: undefined,
+});
