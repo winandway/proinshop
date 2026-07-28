@@ -29,14 +29,18 @@ jobs:
       # esbuild a mano: el bundle de esbuild compila, pero al arrancar revienta
       # con "Dynamic require of 'fs' is not supported". Probado con workerd.
       # `--dry-run` no toca ninguna cuenta de Cloudflare: solo escribe el archivo.
+      # Después, limpiar-worker.js deja UN solo export (default): OpenNext
+      # exporta clases de Durable Objects que la plataforma no soporta.
       - name: Empaquetar en un solo _worker.js
         run: |
-          npx wrangler deploy --dry-run --outdir=.dist-worker
+          npx wrangler deploy --dry-run --outdir=.dist-worker --minify
           mkdir out-deploy
           cp .dist-worker/worker.js out-deploy/_worker.js
+          node herramientas/limpiar-worker.js out-deploy/_worker.js
           cp -r .open-next/assets/* out-deploy/ 2>/dev/null || true
           cp yadominios.json out-deploy/ 2>/dev/null || true
           echo "Tamaño del worker:" && du -h out-deploy/_worker.js
+          echo "Exports finales:" && tail -c 60 out-deploy/_worker.js
 
       - uses: peaceiris/actions-gh-pages@v4
         with:
