@@ -3,7 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Proinshop — Prototipo v1 · App de administración + Tienda virtual</title>
+<meta name="robots" content="noindex, nofollow">
+<title>Proinshop — Manual de la app y de la tienda virtual</title>
 <style>
 :root{
   --rojo:#FF2D2D; --rojo2:#D91414; --rojo-suave:#FFF0F0;
@@ -39,6 +40,33 @@ body{font-family:var(--sans);background:var(--board);color:#fff;-webkit-font-smo
 .num{background:var(--rojo);color:#fff;width:23px;height:23px;border-radius:7px;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
 .cell-h p{color:#8C929C;font-size:12.5px;line-height:1.55;margin-top:6px;padding-left:32px}
 .hide{display:none!important}
+
+/* enlace propio de cada pantalla — para pasarle al cliente solo lo que preguntó */
+.cell-h b{position:relative}
+.copiar{margin-left:auto;flex:none;border:1px solid #2C2F36;background:#191B20;color:#8C929C;border-radius:8px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:.15s;opacity:0}
+.cell:hover .copiar,.copiar:focus{opacity:1}
+.copiar:hover{border-color:var(--rojo);color:#fff}
+.copiar.ok{border-color:var(--verde);color:var(--verde);opacity:1}
+.cell.resaltada .phone{box-shadow:0 0 0 3px var(--rojo),0 26px 60px rgba(0,0,0,.55)}
+.cell.resaltada .num{animation:late 1.6s ease-in-out 2}
+@keyframes late{0%,100%{transform:scale(1)}50%{transform:scale(1.35)}}
+
+/* índice tipo wiki */
+.indice{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:26px}
+.indice-bloque{background:var(--board2);border:1px solid #24262C;border-radius:18px;padding:20px}
+.indice-bloque h2{font-size:14px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:9px}
+.indice-bloque h2 i{font-style:normal;font-size:17px}
+.indice-bloque > p{font-size:12px;color:#7B818C;line-height:1.5;margin-bottom:14px}
+.indice-bloque ol{list-style:none;counter-reset:t}
+.indice-bloque li{border-top:1px solid #1D1F25}
+.indice-bloque li a{display:flex;align-items:center;gap:10px;padding:9px 2px;color:#C9CDD4;text-decoration:none;font-size:13px;font-weight:600;transition:.12s}
+.indice-bloque li a:hover{color:#fff}
+.indice-bloque li a u{flex:none;width:22px;height:22px;border-radius:6px;background:#22252B;color:#8C929C;display:grid;place-items:center;font-size:10.5px;font-weight:800;text-decoration:none}
+.indice-bloque li a:hover u{background:var(--rojo);color:#fff}
+.indice-bloque li a span{margin-left:auto;font-size:10.5px;color:#5E646E;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.aviso{background:var(--board2);border:1px solid #24262C;border-left:3px solid var(--verde);border-radius:12px;padding:16px 18px;margin-bottom:26px;font-size:13px;color:#B7BCC4;line-height:1.7}
+.aviso b{color:#fff}
+.aviso code{background:#0B0C0E;border:1px solid #24262C;border-radius:5px;padding:2px 7px;font-size:12px;color:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
 
 /* ---------- TELÉFONO ---------- */
 .phone{width:360px;height:700px;background:#000;border-radius:42px;padding:9px;box-shadow:0 26px 60px rgba(0,0,0,.55), 0 0 0 1px #33363E;position:relative;flex:none}
@@ -377,9 +405,10 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
   <div class="board-top-in">
     <div class="brand">
       <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="#FF2D2D" stroke-width="10"/><circle cx="50" cy="50" r="29" fill="none" stroke="#FF2D2D" stroke-width="8.5"/><circle cx="50" cy="50" r="15" fill="none" stroke="#FF2D2D" stroke-width="7"/><circle cx="50" cy="50" r="5.5" fill="#FF2D2D"/></svg>
-      <div class="brand-txt">PROINSHOP<small>Prototipo v1 · julio 2026</small></div>
+      <div class="brand-txt">PROINSHOP<small>Manual de la app y de la tienda</small></div>
     </div>
     <div class="tabs">
+      <button class="tab" data-t="indice">📑 Índice</button>
       <button class="tab on" data-t="admin">1 · App de administración</button>
       <button class="tab" data-t="flujo">2 · Foto → producto publicado</button>
       <button class="tab" data-t="tienda">3 · Tienda virtual (celular)</button>
@@ -387,6 +416,19 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
       <button class="tab" data-t="alcance">5 · Alcance del proyecto</button>
     </div>
   </div>
+</div>
+
+<!-- ============ 0. ÍNDICE ============ -->
+<div class="wrap sec hide" id="s-indice">
+  <div class="sec-head">
+    <span class="kicker">Índice de temas</span>
+    <h1>Cada pantalla tiene su propio enlace</h1>
+    <p>Todo el manual vive en esta misma página. Cuando alguien pregunte por algo puntual — cómo se carga un producto, cómo se cobra un fiado, cómo llega un pedido de la web — le pasas <b style="color:#fff">solo el enlace de ese tema</b> y la página abre directo en esa pantalla, resaltada.</p>
+  </div>
+  <div class="aviso">
+    Para copiar el enlace de cualquier pantalla, pasa el mouse por encima de su título y toca <b>🔗 Copiar link</b>. También puedes armarlo a mano: la dirección del manual, un numeral y el nombre del tema — por ejemplo <code>#crear-producto</code>.
+  </div>
+  <div class="indice" id="indice-generado"></div>
 </div>
 
 <!-- ============ 1. ADMIN ============ -->
@@ -399,7 +441,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
   <div class="grid">
 
     <!-- 1 INICIO -->
-    <div class="cell"><div class="cell-h"><b><span class="num">1</span> Inicio</b><p>Lo primero que ve el dueño: cuánto vendió hoy, los dos botones que más usa y el acceso a cada módulo.</p></div>
+    <div class="cell" data-id="inicio" data-titulo="Inicio" data-num="1"><div class="cell-h"><b><span class="num">1</span> Inicio</b><p>Lo primero que ve el dueño: cuánto vendió hoy, los dos botones que más usa y el acceso a cada módulo.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:80px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="appbar red"><div class="avatar">👤</div><div><div class="ab-title">Proinshop <span style="font-size:8px;opacity:.55">▼</span></div><div class="ab-sub">Propietario</div></div><div class="ab-ico"><div class="ico">?</div><div class="ico">🔔</div></div></div>
@@ -436,7 +478,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 2 VENTA -->
-    <div class="cell"><div class="cell-h"><b><span class="num">2</span> Registrar venta</b><p>Busca o escanea el producto, elige cómo le pagaron y listo. Descuenta stock, suma al balance y —si es fiado— crea la cuenta por cobrar.</p></div>
+    <div class="cell" data-id="registrar-venta" data-titulo="Registrar venta" data-num="2"><div class="cell-h"><b><span class="num">2</span> Registrar venta</b><p>Busca o escanea el producto, elige cómo le pagaron y listo. Descuenta stock, suma al balance y —si es fiado— crea la cuenta por cobrar.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:150px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Registrar venta</h3></div>
@@ -459,7 +501,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 3 VENTA OK -->
-    <div class="cell"><div class="cell-h"><b><span class="num">3</span> Venta registrada</b><p>Comprobante inmediato: se descarga, se imprime o se manda por WhatsApp al cliente. Igual que en la app que ya usa.</p></div>
+    <div class="cell" data-id="venta-registrada" data-titulo="Venta registrada" data-num="3"><div class="cell-h"><b><span class="num">3</span> Venta registrada</b><p>Comprobante inmediato: se descarga, se imprime o se manda por WhatsApp al cliente. Igual que en la app que ya usa.</p></div>
     <div class="phone"><div class="screen"><div class="scroll">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Registrar venta</h3></div>
@@ -478,7 +520,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div></div>
 
     <!-- 4 GASTO -->
-    <div class="cell"><div class="cell-h"><b><span class="num">4</span> Registrar gasto</b><p>Categoría, monto, proveedor y foto del recibo. Es lo que hace que el balance y la ganancia real sean confiables.</p></div>
+    <div class="cell" data-id="registrar-gasto" data-titulo="Registrar gasto" data-num="4"><div class="cell-h"><b><span class="num">4</span> Registrar gasto</b><p>Categoría, monto, proveedor y foto del recibo. Es lo que hace que el balance y la ganancia real sean confiables.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:100px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Registrar gasto</h3></div>
@@ -496,7 +538,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 5 INVENTARIO -->
-    <div class="cell"><div class="cell-h"><b><span class="num">5</span> Inventario</b><p>Todo el stock con su costo y su precio. La etiqueta verde indica que el producto ya está publicado en la tienda virtual.</p></div>
+    <div class="cell" data-id="inventario" data-titulo="Inventario" data-num="5"><div class="cell-h"><b><span class="num">5</span> Inventario</b><p>Todo el stock con su costo y su precio. La etiqueta verde indica que el producto ya está publicado en la tienda virtual.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:220px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="appbar red"><div class="avatar">👤</div><div><div class="ab-title">Proinshop <span style="font-size:8px;opacity:.55">▼</span></div><div class="ab-sub">Propietario</div></div><div class="ab-ico"><div class="ico">🔍</div></div></div>
@@ -519,7 +561,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 6 CAMARA -->
-    <div class="cell"><div class="cell-h"><b><span class="num">6</span> Nuevo producto · la foto</b><p>El corazón del sistema. Se abre la cámara del celular, se encuadra el producto y se dispara. No hay que escribir nada todavía.</p></div>
+    <div class="cell" data-id="nuevo-producto-la-foto" data-titulo="Nuevo producto · la foto" data-num="6"><div class="cell-h"><b><span class="num">6</span> Nuevo producto · la foto</b><p>El corazón del sistema. Se abre la cámara del celular, se encuadra el producto y se dispara. No hay que escribir nada todavía.</p></div>
     <div class="phone"><div class="screen">
       <div class="cam">
         <div class="cam-view">
@@ -533,7 +575,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 7 IA -->
-    <div class="cell"><div class="cell-h"><b><span class="num">7</span> La IA llena la ficha</b><p>Con la foto, el sistema propone nombre, categoría, descripción de venta y precio sugerido —en español y en inglés—. El dueño solo revisa.</p></div>
+    <div class="cell" data-id="la-ia-llena-la-ficha" data-titulo="La IA llena la ficha" data-num="7"><div class="cell-h"><b><span class="num">7</span> La IA llena la ficha</b><p>Con la foto, el sistema propone nombre, categoría, descripción de venta y precio sugerido —en español y en inglés—. El dueño solo revisa.</p></div>
     <div class="phone"><div class="screen"><div class="scroll">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Creando el producto</h3></div>
@@ -554,7 +596,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div></div>
 
     <!-- 8 CREAR PRODUCTO -->
-    <div class="cell"><div class="cell-h"><b><span class="num">8</span> Crear producto</b><p>El mismo formulario al que ya está acostumbrado y en el mismo orden — la diferencia es que llega con todo lleno. Solo confirma cantidad y costo.</p></div>
+    <div class="cell" data-id="crear-producto" data-titulo="Crear producto" data-num="8"><div class="cell-h"><b><span class="num">8</span> Crear producto</b><p>El mismo formulario al que ya está acostumbrado y en el mismo orden — la diferencia es que llega con todo lleno. Solo confirma cantidad y costo.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:100px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="appbar red"><div class="ico" style="width:30px;height:30px;font-size:17px">←</div><div class="ab-title" style="font-size:16px">Crear producto</div></div>
@@ -580,7 +622,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 8a HOJA FOTO -->
-    <div class="cell"><div class="cell-h"><b><span class="num" style="font-size:10.5px">8a</span> Cargar imagen</b><p>Si prefiere entrar por el formulario en vez de la cámara, toca "Cargar imagen" y sale la misma hoja de siempre: tomar foto o subir de la galería.</p></div>
+    <div class="cell" data-id="cargar-imagen" data-titulo="Cargar imagen" data-num="8a"><div class="cell-h"><b><span class="num" style="font-size:10.5px">8a</span> Cargar imagen</b><p>Si prefiere entrar por el formulario en vez de la cámara, toca "Cargar imagen" y sale la misma hoja de siempre: tomar foto o subir de la galería.</p></div>
     <div class="phone"><div class="screen"><div class="scroll">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="appbar red"><div class="ico" style="width:30px;height:30px;font-size:17px">←</div><div class="ab-title" style="font-size:16px">Crear producto</div></div>
@@ -601,7 +643,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 8b HOJA CATEGORIA -->
-    <div class="cell"><div class="cell-h"><b><span class="num" style="font-size:10.5px">8b</span> Elegir categoría</b><p>Misma hoja que ya conoce, con sus propias categorías. Si le falta una, la crea ahí mismo — y esa categoría aparece sola en el menú de la tienda virtual.</p></div>
+    <div class="cell" data-id="elegir-categoria" data-titulo="Elegir categoría" data-num="8b"><div class="cell-h"><b><span class="num" style="font-size:10.5px">8b</span> Elegir categoría</b><p>Misma hoja que ya conoce, con sus propias categorías. Si le falta una, la crea ahí mismo — y esa categoría aparece sola en el menú de la tienda virtual.</p></div>
     <div class="phone"><div class="screen"><div class="scroll">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="appbar red"><div class="ico" style="width:30px;height:30px;font-size:17px">←</div><div class="ab-title" style="font-size:16px">Crear producto</div></div>
@@ -626,7 +668,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 9 PUBLICADO -->
-    <div class="cell"><div class="cell-h"><b><span class="num">9</span> Producto publicado</b><p>Desde la foto hasta estar a la venta: menos de un minuto. Se puede compartir el enlace del producto por WhatsApp de una vez.</p></div>
+    <div class="cell" data-id="producto-publicado" data-titulo="Producto publicado" data-num="9"><div class="cell-h"><b><span class="num">9</span> Producto publicado</b><p>Desde la foto hasta estar a la venta: menos de un minuto. Se puede compartir el enlace del producto por WhatsApp de una vez.</p></div>
     <div class="phone"><div class="screen"><div class="scroll">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div style="padding:46px 20px 0" class="center">
@@ -644,7 +686,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div></div>
 
     <!-- 10 PEDIDOS -->
-    <div class="cell"><div class="cell-h"><b><span class="num">10</span> Pedidos de la tienda</b><p>Cuando alguien compra en la web, entra aquí con notificación. Es el puente entre la tienda y la contabilidad.</p></div>
+    <div class="cell" data-id="pedidos-de-la-tienda" data-titulo="Pedidos de la tienda" data-num="10"><div class="cell-h"><b><span class="num">10</span> Pedidos de la tienda</b><p>Cuando alguien compra en la web, entra aquí con notificación. Es el puente entre la tienda y la contabilidad.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:90px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Pedidos</h3><div style="margin-left:auto" class="ico">🔍</div></div>
@@ -670,7 +712,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 11 DETALLE PEDIDO -->
-    <div class="cell"><div class="cell-h"><b><span class="num">11</span> Detalle del pedido</b><p>Al confirmar, el pedido se convierte en venta: descuenta stock, entra al balance y el cliente recibe la notificación.</p></div>
+    <div class="cell" data-id="detalle-del-pedido" data-titulo="Detalle del pedido" data-num="11"><div class="cell-h"><b><span class="num">11</span> Detalle del pedido</b><p>Al confirmar, el pedido se convierte en venta: descuenta stock, entra al balance y el cliente recibe la notificación.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:100px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Pedido #1042</h3><div style="margin-left:auto" class="ico">⋮</div></div>
@@ -697,7 +739,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 12 POR COBRAR -->
-    <div class="cell"><div class="cell-h"><b><span class="num">12</span> Cuentas por cobrar</b><p>El fiado bajo control: cuánto debe cada cliente, los abonos que ha hecho y el recordatorio de pago por WhatsApp con un toque.</p></div>
+    <div class="cell" data-id="cuentas-por-cobrar" data-titulo="Cuentas por cobrar" data-num="12"><div class="cell-h"><b><span class="num">12</span> Cuentas por cobrar</b><p>El fiado bajo control: cuánto debe cada cliente, los abonos que ha hecho y el recordatorio de pago por WhatsApp con un toque.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:90px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Cuentas por cobrar</h3></div>
@@ -722,7 +764,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div></div>
 
     <!-- 13 COTIZACIONES -->
-    <div class="cell"><div class="cell-h"><b><span class="num">13</span> Cotizaciones</b><p>Arma la cotización con productos del inventario y la manda por WhatsApp en PDF. Si el cliente acepta, se convierte en venta con un toque.</p></div>
+    <div class="cell" data-id="cotizaciones" data-titulo="Cotizaciones" data-num="13"><div class="cell-h"><b><span class="num">13</span> Cotizaciones</b><p>Arma la cotización con productos del inventario y la manda por WhatsApp en PDF. Si el cliente acepta, se convierte en venta con un toque.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:100px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Cotizaciones</h3><div style="margin-left:auto;display:flex;gap:7px"><div class="ico">🕐</div><div class="ico">⚙︎</div></div></div>
@@ -740,7 +782,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- 14 ESTADISTICAS -->
-    <div class="cell"><div class="cell-h"><b><span class="num">14</span> Estadísticas</b><p>Qué se vende más y cuándo, ganancia real después de costos, y comparación con el periodo anterior. Separado por canal: tienda vs. local.</p></div>
+    <div class="cell" data-id="estadisticas" data-titulo="Estadísticas" data-num="14"><div class="cell-h"><b><span class="num">14</span> Estadísticas</b><p>Qué se vende más y cuándo, ganancia real después de costos, y comparación con el periodo anterior. Separado por canal: tienda vs. local.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:90px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Estadísticas</h3><div style="margin-left:auto" class="ico">📅</div></div>
@@ -761,7 +803,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div></div>
 
     <!-- 15 BALANCE -->
-    <div class="cell"><div class="cell-h"><b><span class="num">15</span> Balance y reportes</b><p>La parte contable: ingresos, egresos, utilidad y descarga del reporte en Excel o PDF para el contador.</p></div>
+    <div class="cell" data-id="balance-y-reportes" data-titulo="Balance y reportes" data-num="15"><div class="cell-h"><b><span class="num">15</span> Balance y reportes</b><p>La parte contable: ingresos, egresos, utilidad y descarga del reporte en Excel o PDF para el contador.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:90px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Balance</h3><div style="margin-left:auto" class="ico">📅</div></div>
@@ -789,7 +831,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div></div>
 
     <!-- 16 CONFIG TIENDA -->
-    <div class="cell"><div class="cell-h"><b><span class="num">16</span> Mi tienda (configuración)</b><p>Desde aquí se maneja la cara pública: el banner de arriba, las categorías, el WhatsApp de ventas y las formas de pago y entrega.</p></div>
+    <div class="cell" data-id="mi-tienda-configuracion" data-titulo="Mi tienda (configuración)" data-num="16"><div class="cell-h"><b><span class="num">16</span> Mi tienda (configuración)</b><p>Desde aquí se maneja la cara pública: el banner de arriba, las categorías, el WhatsApp de ventas y las formas de pago y entrega.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="padding-bottom:90px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="subbar"><div class="back">‹</div><h3>Mi tienda</h3></div>
@@ -859,7 +901,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
   <div class="grid">
 
     <!-- T1 HOME -->
-    <div class="cell"><div class="cell-h"><b><span class="num">1</span> Portada</b><p>El banner rota solo entre 3 mensajes. Debajo, las categorías y lo más vendido. Todo lo que carga el dueño aparece aquí sin tocar nada.</p></div>
+    <div class="cell" data-id="portada" data-titulo="Portada" data-num="1"><div class="cell-h"><b><span class="num">1</span> Portada</b><p>El banner rota solo entre 3 mensajes. Debajo, las categorías y lo más vendido. Todo lo que carga el dueño aparece aquí sin tocar nada.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="background:var(--bg)">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="shop-top">
@@ -905,7 +947,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div></div>
 
     <!-- T2 CATEGORIA -->
-    <div class="cell"><div class="cell-h"><b><span class="num">2</span> Categoría con filtros</b><p>Listado por categoría, con orden por precio y filtro por marca o potencia. Se arma solo con lo que hay en inventario.</p></div>
+    <div class="cell" data-id="categoria-con-filtros" data-titulo="Categoría con filtros" data-num="2"><div class="cell-h"><b><span class="num">2</span> Categoría con filtros</b><p>Listado por categoría, con orden por precio y filtro por marca o potencia. Se arma solo con lo que hay en inventario.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="background:var(--bg)">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="shop-top"><div class="shop-nav"><div class="back">‹</div><div><div style="font-size:14.5px;font-weight:900;color:var(--tinta);letter-spacing:-.3px">Plantas eléctricas</div><div style="font-size:11px;color:var(--gris)">14 productos</div></div><div class="lang" style="margin-left:auto"><b class="on">🇪🇸</b><b>🇺🇸</b></div><div class="cartb">🛒<u>2</u></div></div></div>
@@ -923,7 +965,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div></div>
 
     <!-- T3 PRODUCTO -->
-    <div class="cell"><div class="cell-h"><b><span class="num">3</span> Ficha del producto</b><p>La foto que tomó el dueño con el fondo ya recortado, el precio, las existencias reales y dos formas de comprar: carrito o WhatsApp.</p></div>
+    <div class="cell" data-id="ficha-del-producto" data-titulo="Ficha del producto" data-num="3"><div class="cell-h"><b><span class="num">3</span> Ficha del producto</b><p>La foto que tomó el dueño con el fondo ya recortado, el precio, las existencias reales y dos formas de comprar: carrito o WhatsApp.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="background:#fff;padding-bottom:86px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="pdp-img">⚡<div class="back">‹</div><div class="heart">♡</div></div>
@@ -953,7 +995,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- T4 CARRITO -->
-    <div class="cell"><div class="cell-h"><b><span class="num">4</span> Carrito</b><p>Sencillo y sin registro obligatorio. El cliente puede seguir por checkout normal o mandar el pedido por WhatsApp.</p></div>
+    <div class="cell" data-id="carrito" data-titulo="Carrito" data-num="4"><div class="cell-h"><b><span class="num">4</span> Carrito</b><p>Sencillo y sin registro obligatorio. El cliente puede seguir por checkout normal o mandar el pedido por WhatsApp.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="background:var(--bg);padding-bottom:150px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="shop-top"><div class="shop-nav"><div class="back">‹</div><div style="font-size:15px;font-weight:900;color:var(--tinta)">Tu carrito</div><div class="lang" style="margin-left:auto"><b class="on">🇪🇸</b><b>🇺🇸</b></div></div></div>
@@ -973,7 +1015,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- T5 CHECKOUT -->
-    <div class="cell"><div class="cell-h"><b><span class="num">5</span> Datos y pago</b><p>Un solo formulario corto. Los métodos de pago y de entrega los define el dueño desde "Mi tienda".</p></div>
+    <div class="cell" data-id="datos-y-pago" data-titulo="Datos y pago" data-num="5"><div class="cell-h"><b><span class="num">5</span> Datos y pago</b><p>Un solo formulario corto. Los métodos de pago y de entrega los define el dueño desde "Mi tienda".</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="background:var(--bg);padding-bottom:100px">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div class="shop-top"><div class="shop-nav"><div class="back">‹</div><div style="font-size:15px;font-weight:900;color:var(--tinta)">Finalizar pedido</div></div></div>
@@ -994,7 +1036,7 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
     </div></div></div>
 
     <!-- T6 CONFIRMADO -->
-    <div class="cell"><div class="cell-h"><b><span class="num">6</span> Pedido confirmado</b><p>El cliente ve el estado en vivo. En ese mismo instante le suena la notificación al dueño en la app de administración.</p></div>
+    <div class="cell" data-id="pedido-confirmado" data-titulo="Pedido confirmado" data-num="6"><div class="cell-h"><b><span class="num">6</span> Pedido confirmado</b><p>El cliente ve el estado en vivo. En ese mismo instante le suena la notificación al dueño en la app de administración.</p></div>
     <div class="phone"><div class="screen"><div class="scroll" style="background:var(--bg)">
       <div class="status"><span>9:41</span><span>▂▄▆ ⌁ ▮</span></div>
       <div style="background:linear-gradient(135deg,#FF3B3B,#D91414);padding:34px 20px 28px;text-align:center;color:#fff;border-radius:0 0 26px 26px">
@@ -1118,15 +1160,101 @@ table.mods td:first-child{font-weight:800;color:#fff;white-space:nowrap}
 </div>
 
 <script>
+var SECCIONES = {
+  admin:   {icono:'📱', titulo:'App de administración', detalle:'Lo que usa el dueño para llevar el negocio desde el celular.'},
+  flujo:   {icono:'📷', titulo:'Foto → producto publicado', detalle:'El concepto: una sola acción alimenta tienda, inventario y contabilidad.'},
+  tienda:  {icono:'🛒', titulo:'Tienda virtual en el celular', detalle:'Lo que ve el cliente que entra a proinshop.com desde el teléfono.'},
+  desktop: {icono:'💻', titulo:'Tienda virtual en computador', detalle:'La misma tienda vista en pantalla grande.'},
+  alcance: {icono:'🧭', titulo:'Alcance del proyecto', detalle:'Qué incluye el sistema, con qué está hecho y en qué orden se construye.'}
+};
+
+function mostrarSeccion(clave){
+  document.querySelectorAll('.tab').forEach(function(x){
+    x.classList.toggle('on', x.dataset.t === clave);
+  });
+  document.querySelectorAll('.sec').forEach(function(s){
+    s.classList.toggle('hide', s.id !== 's-' + clave);
+  });
+}
+
 document.querySelectorAll('.tab').forEach(function(b){
   b.addEventListener('click',function(){
-    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on')});
-    b.classList.add('on');
-    document.querySelectorAll('.sec').forEach(function(s){s.classList.add('hide')});
-    document.getElementById('s-'+b.dataset.t).classList.remove('hide');
+    mostrarSeccion(b.dataset.t);
+    history.replaceState(null,'',location.pathname);
     window.scrollTo({top:0,behavior:'smooth'});
   });
 });
+
+/* --- un enlace por pantalla ------------------------------------------- */
+var TEMAS = [];
+
+document.querySelectorAll('.cell[data-id]').forEach(function(celda){
+  var clave = celda.closest('.sec').id.replace('s-','');
+  TEMAS.push({id:celda.dataset.id, titulo:celda.dataset.titulo, num:celda.dataset.num, seccion:clave});
+
+  var boton = document.createElement('button');
+  boton.type = 'button';
+  boton.className = 'copiar';
+  boton.textContent = '🔗 Copiar link';
+  boton.addEventListener('click', function(e){
+    e.preventDefault();
+    var url = location.origin + location.pathname + '#' + celda.dataset.id;
+    var listo = function(){
+      boton.textContent = '✓ Copiado';
+      boton.classList.add('ok');
+      setTimeout(function(){ boton.textContent = '🔗 Copiar link'; boton.classList.remove('ok'); }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(url).then(listo, function(){ window.prompt('Copia el enlace:', url); });
+    } else {
+      window.prompt('Copia el enlace:', url);
+    }
+  });
+  celda.querySelector('.cell-h b').appendChild(boton);
+});
+
+/* índice agrupado por sección */
+(function(){
+  var contenedor = document.getElementById('indice-generado');
+  if (!contenedor) return;
+  Object.keys(SECCIONES).forEach(function(clave){
+    var temas = TEMAS.filter(function(t){ return t.seccion === clave; });
+    var info = SECCIONES[clave];
+    var bloque = document.createElement('div');
+    bloque.className = 'indice-bloque';
+    var filas = temas.length
+      ? temas.map(function(t){
+          return '<li><a href="#' + t.id + '"><u>' + t.num + '</u>' + t.titulo +
+                 '<span>#' + t.id + '</span></a></li>';
+        }).join('')
+      : '<li><a href="#' + clave + '"><u>→</u>Ver la sección completa' +
+        '<span>#' + clave + '</span></a></li>';
+    bloque.innerHTML = '<h2><i>' + info.icono + '</i>' + info.titulo + '</h2>' +
+                       '<p>' + info.detalle + '</p><ol>' + filas + '</ol>';
+    contenedor.appendChild(bloque);
+  });
+})();
+
+/* abrir directo en el tema del enlace */
+function irAlTema(id, suave){
+  var celda = document.querySelector('.cell[data-id="' + CSS.escape(id) + '"]');
+  if (!celda) { mostrarSeccion(SECCIONES[id] ? id : 'indice'); return; }
+  mostrarSeccion(celda.closest('.sec').id.replace('s-',''));
+  document.querySelectorAll('.cell.resaltada').forEach(function(c){ c.classList.remove('resaltada'); });
+  celda.classList.add('resaltada');
+  var y = celda.getBoundingClientRect().top + window.scrollY - 120;
+  window.scrollTo({top: y, behavior: suave ? 'smooth' : 'auto'});
+}
+
+function leerHash(suave){
+  var id = decodeURIComponent(location.hash.replace('#',''));
+  if (!id) return;
+  if (SECCIONES[id] || id === 'indice') { mostrarSeccion(id); window.scrollTo({top:0}); return; }
+  irAlTema(id, suave);
+}
+
+window.addEventListener('hashchange', function(){ leerHash(true); });
+leerHash(false);
 document.querySelectorAll('.lang b').forEach(function(b){
   b.addEventListener('click',function(){
     var en = b.textContent.indexOf('🇺🇸')>-1;

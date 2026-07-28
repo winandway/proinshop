@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# empaquetado para YaDominios Cloud
+/.open-next
+/.dist-worker
+/out-deploy
+/.wrangler

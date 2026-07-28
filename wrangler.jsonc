@@ -1,0 +1,14 @@
+{
+  // Configuración del Worker para compilar en local con OpenNext.
+  // En YaDominios Cloud la base (env.DB) y el bucket (env.BUCKET) se crean
+  // solos al publicar; por eso aquí no se declara ningún id de recurso.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "proinshop",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
+}

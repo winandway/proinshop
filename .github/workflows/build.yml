@@ -1,0 +1,45 @@
+name: build-para-yadominios-cloud
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Convierte el build de Next.js en un Worker de Cloudflare.
+      - run: npx opennextjs-cloudflare build
+
+      # YaDominios Cloud solo acepta UN archivo `_worker.js`, y el .open-next
+      # crudo son más de mil archivos. El empaquetado lo hace wrangler y no
+      # esbuild a mano: el bundle de esbuild compila, pero al arrancar revienta
+      # con "Dynamic require of 'fs' is not supported". Probado con workerd.
+      # `--dry-run` no toca ninguna cuenta de Cloudflare: solo escribe el archivo.
+      - name: Empaquetar en un solo _worker.js
+        run: |
+          npx wrangler deploy --dry-run --outdir=.dist-worker
+          mkdir out-deploy
+          cp .dist-worker/worker.js out-deploy/_worker.js
+          cp -r .open-next/assets/* out-deploy/ 2>/dev/null || true
+          cp yadominios.json out-deploy/ 2>/dev/null || true
+          echo "Tamaño del worker:" && du -h out-deploy/_worker.js
+
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: yapanel-build
+          publish_dir: ./out-deploy

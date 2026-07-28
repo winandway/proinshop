@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Resultados del empaquetado para YaDominios Cloud: son generados.
+    ".open-next/**",
+    ".dist-worker/**",
+    "out-deploy/**",
+    // Generadores archivados de las imágenes de marca (ver herramientas/LEEME.md).
+    "herramientas/**",
   ]),
 ]);
 
