@@ -80,9 +80,46 @@ idioma. Si a un producto le falta la traducción, se muestra el español.
 
 ## Datos
 
-Hoy el catálogo sale de `src/lib/catalogo-desarrollo.ts`, un archivo de trabajo
-que se borra en la Etapa 3. Todas las funciones de `src/lib/catalogo.ts` ya son
-asíncronas para que el cambio a D1 no obligue a tocar las pantallas.
+El catálogo vive en la base **D1** del sitio (`env.DB`) y las fotos en el
+bucket **R2** (`env.BUCKET`). Ambos los crea y enlaza YaDominios Cloud al
+publicar.
+
+- `src/lib/d1.ts` — expone los bindings. Si no hay entorno de Cloudflare
+  (`npm run dev` suelto) devuelve `null`.
+- `src/lib/catalogo.ts` — consulta D1. Sin base, cae a
+  `src/lib/catalogo-desarrollo.ts` para poder trabajar sin conexión.
+- `/media/<clave>` — sirve las fotos desde el bucket.
+- `/estado` — dice si base y bucket están conectados, con conteos.
+
+### Consultar la base de producción
+
+```bash
+curl -s -X POST https://yapanel.yadominios.com/api/hosting/db/query \
+  -H "Content-Type: application/json" \
+  -d '{"sitio":"proinshop","token":"<token>","sql":"SELECT COUNT(*) AS n FROM producto","params":[]}'
+```
+
+El token sale del panel (YaDominios Cloud → tarjeta del sitio → "Ver token").
+**Nunca se guarda en el repositorio**: se pasa en línea con el comando o por la
+variable `DB_TOKEN`.
+
+### Herramientas
+
+```bash
+# Crear o actualizar el esquema en la base del sitio
+DB_TOKEN=<token> node herramientas/db-remota.mjs db/schema.sql
+
+# Cargar el catálogo inicial (solo la primera vez)
+node herramientas/generar-seed.mjs > /tmp/seed.json
+DB_TOKEN=<token> node herramientas/db-remota.mjs /tmp/seed.json
+```
+
+### Probar en local con base y bucket reales
+
+```bash
+npx opennextjs-cloudflare build
+npx wrangler dev            # levanta D1 y R2 locales según wrangler.jsonc
+```
 
 ## Variables de entorno
 

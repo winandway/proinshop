@@ -14,11 +14,23 @@ Ver [PROYECTO.md](PROYECTO.md) para el alcance completo.
 ## Perímetro: qué se puede tocar
 
 - **Carpeta:** solo `/Users/windocellc/Proinshop.com`.
-- **Recursos en la nube:** **NINGUNO todavía.** No existe repo en GitHub, ni
-  base D1, ni bucket R2, ni sitio en YaDominios Cloud. **Prohibido crearlos**
-  sin que el usuario lo pida explícitamente. Todo el desarrollo es local.
-- Cuando se autoricen, se anotan aquí con su nombre exacto y esta lista pasa a
-  ser cerrada: lo que no esté escrito acá, no se toca.
+- **Lista cerrada de recursos.** Lo que no esté en esta tabla, no existe para
+  ninguna sesión:
+
+  | Recurso | Nombre exacto |
+  |---|---|
+  | Repositorio | `github.com/winandway/proinshop` (público) |
+  | Sitio | `proinshop` en YaDominios Cloud → proinshop.com |
+  | Base de datos | `env.DB` del sitio (la crea la plataforma) |
+  | Bucket | `env.BUCKET` del sitio (la crea la plataforma) |
+
+- **Prohibido crear recursos nuevos** (bases, buckets, repos, subdominios) sin
+  que el usuario lo pida explícitamente.
+- **El token de la base nunca se guarda.** Se usa en línea con el comando o por
+  `DB_TOKEN`; jamás en un archivo, en el historial ni commiteado.
+- **Operaciones destructivas en la base de producción** (`DROP`, `DELETE`
+  masivo, `TRUNCATE`, `UPDATE` sin `WHERE`) requieren confirmación explícita
+  cada vez.
 
 ## Convenciones de código
 
