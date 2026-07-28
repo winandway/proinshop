@@ -8,10 +8,8 @@ import { obtenerCategoria, obtenerCategorias, obtenerProductos } from "@/lib/cat
 import { texto, textos } from "@/lib/i18n";
 import { idiomaActual } from "@/lib/idioma-servidor";
 
-export async function generateStaticParams() {
-  const categorias = await obtenerCategorias();
-  return categorias.map((categoria) => ({ slug: categoria.slug }));
-}
+// Sin `generateStaticParams`: las categorías las administra el dueño desde la
+// app, así que se resuelven en cada visita.
 
 export async function generateMetadata({
   params,

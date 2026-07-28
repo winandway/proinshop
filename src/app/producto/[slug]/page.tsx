@@ -8,10 +8,8 @@ import { obtenerCategoria, obtenerProducto, obtenerProductos } from "@/lib/catal
 import { texto, textos } from "@/lib/i18n";
 import { idiomaActual } from "@/lib/idioma-servidor";
 
-export async function generateStaticParams() {
-  const productos = await obtenerProductos();
-  return productos.map((producto) => ({ slug: producto.slug }));
-}
+// Sin `generateStaticParams`: el catálogo vive en la base y cambia cuando el
+// dueño carga productos, así que las fichas se arman en cada visita.
 
 export async function generateMetadata({
   params,

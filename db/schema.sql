@@ -57,6 +57,11 @@ CREATE TABLE IF NOT EXISTS producto (
   stock_minimo    INTEGER NOT NULL DEFAULT 0,
   publicado       INTEGER NOT NULL DEFAULT 1,
   destacado       INTEGER NOT NULL DEFAULT 0,
+  -- Etiqueta de promoción ("Más vendido", "Nuevo") en los dos idiomas.
+  etiqueta_es     TEXT,
+  etiqueta_en     TEXT,
+  -- Ícono provisional mientras el producto no tenga foto en R2.
+  emoji           TEXT,
   creado_por_ia   INTEGER NOT NULL DEFAULT 0,
   creado_en       TEXT    NOT NULL DEFAULT (datetime('now'))
 );
