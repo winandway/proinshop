@@ -1,6 +1,4 @@
 {
-  "compatibility_flags": ["nodejs_compat"],
-  "vars": {
-    "NEXT_PUBLIC_WHATSAPP": ""
-  }
+  "compatibility_date": "2026-07-01",
+  "compatibility_flags": ["nodejs_compat"]
 }
