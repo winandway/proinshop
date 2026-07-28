@@ -1,0 +1,103 @@
+@import "tailwindcss";
+
+@theme {
+  --color-rojo: #ff2d2d;
+  --color-rojo-oscuro: #d91414;
+  --color-rojo-suave: #fff0f0;
+  --color-tinta: #14161a;
+  --color-gris: #6e7480;
+  --color-gris2: #9aa0aa;
+  --color-linea: #e7e9ee;
+  --color-crema: #f3f4f7;
+  --color-verde: #0fa958;
+  --color-verde-suave: #e8f7ef;
+  --color-ambar: #b7791f;
+  --color-whatsapp: #25d366;
+
+  --font-sans: var(--font-geist-sans), "Segoe UI", -apple-system, sans-serif;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: var(--color-tinta);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* La tienda se ve igual en claro y oscuro: la marca es blanco + rojo. */
+@media (prefers-color-scheme: dark) {
+  body {
+    background: #ffffff;
+    color: var(--color-tinta);
+  }
+}
+
+/* Carrusel del banner: los mensajes se turnan solos. */
+@keyframes banner-entra {
+  0% {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  4% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  36% {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+}
+
+.banner-slide {
+  animation: banner-entra 18s infinite;
+}
+
+@keyframes flota {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(2deg);
+  }
+}
+
+.flota {
+  animation: flota 4.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner-slide,
+  .flota {
+    animation: none;
+  }
+  .banner-slide {
+    opacity: 0;
+  }
+  .banner-slide:first-child {
+    opacity: 1;
+  }
+}
+
+/* Listas horizontales que se desplazan sin barra de scroll visible. */
+.sin-barra {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.sin-barra::-webkit-scrollbar {
+  display: none;
+}
