@@ -2,14 +2,50 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
-/** Imagen que se ve al compartir el sitio por WhatsApp, Facebook o X. */
+/**
+ * Tarjeta que se ve al compartir el sitio por WhatsApp, Facebook o X.
+ *
+ * Fondo oscuro a propósito: en el chat de WhatsApp, que es claro, una tarjeta
+ * oscura resalta y se lee de un vistazo. Todo el contenido queda dentro de un
+ * margen amplio porque algunas apps recortan los bordes.
+ */
 export const alt = "Proinshop — Importación directa desde China";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+const ROJO = "#FF2D2D";
+
+function Diana({ tamano }: { tamano: number }) {
+  return (
+    <svg width={tamano} height={tamano} viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="44" fill="none" stroke={ROJO} strokeWidth="10" />
+      <circle cx="50" cy="50" r="29" fill="none" stroke={ROJO} strokeWidth="8.5" />
+      <circle cx="50" cy="50" r="15" fill="none" stroke={ROJO} strokeWidth="7" />
+      <circle cx="50" cy="50" r="5.5" fill={ROJO} />
+    </svg>
+  );
+}
+
+function Sello({ texto }: { texto: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        border: "2px solid #2A2D34",
+        borderRadius: 999,
+        padding: "12px 26px",
+        fontSize: 23,
+        fontWeight: 400,
+        color: "#C9CDD4",
+      }}
+    >
+      {texto}
+    </div>
+  );
+}
+
 export default async function ImagenSocial() {
-  // Geist en negra y regular: sin cargarlas, el generador dibuja todo con el
-  // mismo grosor y el logotipo pierde la fuerza de la marca.
   const [negra, regular] = await Promise.all([
     readFile(join(process.cwd(), "src/fuentes/Geist-Black.ttf")),
     readFile(join(process.cwd(), "src/fuentes/Geist-Regular.ttf")),
@@ -24,66 +60,82 @@ export default async function ImagenSocial() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          padding: "0 90px",
-          background: "#ffffff",
+          padding: "0 80px",
+          background: "#0E0F12",
           position: "relative",
         }}
       >
+        {/* La propia diana, gigante y apenas visible, hace de marca de agua:
+            es la forma del logo, no una mancha decorativa. */}
+        <div style={{ position: "absolute", top: 110, right: -215, display: "flex" }}>
+          <svg width="560" height="560" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,45,45,0.11)" strokeWidth="10" />
+            <circle cx="50" cy="50" r="29" fill="none" stroke="rgba(255,45,45,0.11)" strokeWidth="8.5" />
+            <circle cx="50" cy="50" r="15" fill="none" stroke="rgba(255,45,45,0.11)" strokeWidth="7" />
+            <circle cx="50" cy="50" r="5.5" fill="rgba(255,45,45,0.11)" />
+          </svg>
+        </div>
+        {/* Filo rojo superior. */}
         <div
           style={{
             position: "absolute",
-            top: -180,
-            right: -180,
-            width: 640,
-            height: 640,
-            borderRadius: 320,
-            background: "#FFF0F0",
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 10,
+            background: ROJO,
             display: "flex",
           }}
         />
 
-        <div style={{ display: "flex", alignItems: "center", gap: 26 }}>
-          <svg width="118" height="118" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="44" fill="none" stroke="#FF2D2D" strokeWidth="10" />
-            <circle cx="50" cy="50" r="29" fill="none" stroke="#FF2D2D" strokeWidth="8.5" />
-            <circle cx="50" cy="50" r="15" fill="none" stroke="#FF2D2D" strokeWidth="7" />
-            <circle cx="50" cy="50" r="5.5" fill="#FF2D2D" />
-          </svg>
-          <span style={{ fontSize: 86, fontWeight: 900, color: "#14161A", letterSpacing: -3 }}>
-            PROINSHOP
-          </span>
+        {/* Logo a la izquierda y dominio a la derecha: la fila superior enmarca
+            la tarjeta y deja libre la parte de abajo para los sellos. */}
+        <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 22 }}>
+            <Diana tamano={78} />
+            <span style={{ fontSize: 60, fontWeight: 900, color: "#FFFFFF", letterSpacing: -2 }}>
+              PROINSHOP
+            </span>
+          </div>
+          <div
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              alignItems: "center",
+              background: ROJO,
+              color: "#FFFFFF",
+              fontSize: 25,
+              fontWeight: 900,
+              padding: "16px 34px",
+              borderRadius: 999,
+            }}
+          >
+            proinshop.com
+          </div>
         </div>
 
         <span
           style={{
-            marginTop: 36,
-            fontSize: 42,
+            marginTop: 40,
+            fontSize: 68,
             fontWeight: 900,
-            color: "#14161A",
-            letterSpacing: -1.4,
+            color: "#FFFFFF",
+            letterSpacing: -2.6,
+            lineHeight: 1.05,
+            maxWidth: 820,
           }}
         >
           Importación directa desde China
         </span>
-        <span style={{ marginTop: 16, fontSize: 27, color: "#6E7480" }}>
+
+        <span style={{ marginTop: 22, fontSize: 28, color: "#8C929C", maxWidth: 860 }}>
           Plantas eléctricas · Motos · Bicicletas · Herramientas · Repuestos
         </span>
 
-        <div
-          style={{
-            marginTop: 42,
-            display: "flex",
-            alignItems: "center",
-            background: "#FF2D2D",
-            color: "#ffffff",
-            fontSize: 25,
-            fontWeight: 900,
-            padding: "18px 40px",
-            borderRadius: 999,
-            alignSelf: "flex-start",
-          }}
-        >
-          proinshop.com
+        <div style={{ display: "flex", gap: 16, marginTop: 46 }}>
+          <Sello texto="Garantía de 12 meses" />
+          <Sello texto="Envíos a todo el país" />
+          <Sello texto="Precio de mayorista" />
         </div>
       </div>
     ),

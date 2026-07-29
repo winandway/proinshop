@@ -5,7 +5,7 @@ import { CompraProducto } from "@/componentes/CompraProducto";
 import { FotoProducto } from "@/componentes/FotoProducto";
 import { TarjetaProducto } from "@/componentes/TarjetaProducto";
 import { obtenerCategoria, obtenerProducto, obtenerProductos } from "@/lib/catalogo";
-import { texto, textos } from "@/lib/i18n";
+import { formatearPrecio, texto, textos } from "@/lib/i18n";
 import { idiomaActual } from "@/lib/idioma-servidor";
 
 // Sin `generateStaticParams`: el catálogo vive en la base y cambia cuando el
@@ -22,10 +22,30 @@ export async function generateMetadata({
   const idioma = await idiomaActual();
   const nombre = texto(producto.nombre, idioma);
   const descripcion = texto(producto.descripcion, idioma);
+
+  // Si el producto ya tiene foto, esa es la miniatura al compartirlo por
+  // WhatsApp. Si no la tiene, se nombra la tarjeta de la marca a propósito:
+  // al declarar `openGraph` aquí, Next reemplaza el del layout, y sin esta
+  // línea el enlace se compartiría sin miniatura.
+  const imagenes = producto.fotos.length
+    ? [{ url: `/media/${producto.fotos[0]}`, alt: nombre }]
+    : [{ url: "/opengraph-image.png", alt: "Proinshop", width: 1200, height: 630 }];
+
   return {
     title: nombre,
     description: descripcion,
-    openGraph: { title: nombre, description: descripcion, type: "website" },
+    openGraph: {
+      title: `${nombre} · ${formatearPrecio(producto.precio)}`,
+      description: descripcion,
+      type: "website",
+      images: imagenes,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${nombre} · ${formatearPrecio(producto.precio)}`,
+      description: descripcion,
+      images: imagenes?.map((i) => i.url),
+    },
   };
 }
 
