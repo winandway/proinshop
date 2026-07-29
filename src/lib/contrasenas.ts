@@ -78,3 +78,28 @@ export function revisarContrasena(contrasena: string): string | null {
 export function correoValido(correo: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo.trim());
 }
+
+/** Dominios de quien desarrolla y da soporte al sistema. */
+const DOMINIOS_SOPORTE = ["windoce.com"];
+
+/**
+ * Nuestras cuentas dentro del negocio de un cliente deben decir "Soporte".
+ *
+ * Cuando el dueño mire la lista de usuarios con permisos altos, tiene que
+ * distinguir de un vistazo quién es de su equipo y quién es soporte externo.
+ * Un nombre propio suelto no le dice nada; "Soporte" sí.
+ */
+export function revisarNombreDeSoporte(nombre: string, correo: string): string | null {
+  const dominio = correo.trim().toLowerCase().split("@")[1] ?? "";
+  const esDeSoporte = DOMINIOS_SOPORTE.includes(dominio);
+  if (!esDeSoporte) return null;
+
+  const sinTildes = nombre
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+
+  return sinTildes.includes("soporte")
+    ? null
+    : 'Las cuentas de soporte deben llevar la palabra "Soporte" en el nombre, para que el dueño del negocio sepa quién eres. Por ejemplo: "Soporte Windoce".';
+}

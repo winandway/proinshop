@@ -52,11 +52,19 @@ Ver [PROYECTO.md](PROYECTO.md) para el alcance completo.
 - **No usar rutas `/api/`** — chocan con los estáticos en YaDominios Cloud.
   Usar `/datos`, `/media`, `/upload`.
 
+## Cuentas de soporte
+
+Nuestras cuentas dentro del panel del cliente **siempre llevan "Soporte" en el
+nombre** (regla global). Aquí está hecho cumplir por código: si el correo es
+`@windoce.com`, el alta y la invitación no dejan guardar sin esa palabra —
+ver `revisarNombreDeSoporte` en `src/lib/contrasenas.ts`.
+
 ## Datos
 
 - `src/lib/catalogo-desarrollo.ts` es **solo para desarrollar**. Se borra
   cuando entre D1. Nunca agregar ahí datos reales de nadie.
-- `db/schema.sql` es la fuente de verdad del modelo de datos.
+- `db/schema.sql` es la fuente de verdad del modelo de datos; las migraciones
+  aplicadas están en `db/migraciones/`.
 
 ## Antes de dar algo por terminado
 

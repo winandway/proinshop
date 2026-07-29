@@ -8,6 +8,7 @@ import {
   correoValido,
   nuevaSal,
   revisarContrasena,
+  revisarNombreDeSoporte,
   verificarContrasena,
 } from "@/lib/contrasenas";
 import { cerrarSesion, crearSesion, hayUsuarios } from "@/lib/sesion";
@@ -37,6 +38,9 @@ export async function crearCuenta(_previo: Resultado, datos: FormData): Promise<
   if (nombre.length < 2) return { error: "Escribe tu nombre" };
   if (!correoValido(correo)) return { error: "El correo electrónico no es válido" };
   if (contrasena !== repetida) return { error: "Las dos contraseñas no coinciden" };
+
+  const nombreSoporte = revisarNombreDeSoporte(nombre, correo);
+  if (nombreSoporte) return { error: nombreSoporte };
 
   const problema = revisarContrasena(contrasena);
   if (problema) return { error: problema };
@@ -127,6 +131,9 @@ export async function aceptarInvitacion(_previo: Resultado, datos: FormData): Pr
   if (nombre.length < 2) return { error: "Escribe tu nombre" };
   if (!correoValido(correo)) return { error: "El correo electrónico no es válido" };
   if (contrasena !== repetida) return { error: "Las dos contraseñas no coinciden" };
+
+  const nombreSoporte = revisarNombreDeSoporte(nombre, correo);
+  if (nombreSoporte) return { error: nombreSoporte };
 
   const problema = revisarContrasena(contrasena);
   if (problema) return { error: problema };
