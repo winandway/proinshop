@@ -103,6 +103,10 @@ El token sale del panel (YaDominios Cloud → tarjeta del sitio → "Ver token")
 **Nunca se guarda en el repositorio**: se pasa en línea con el comando o por la
 variable `DB_TOKEN`.
 
+> **La base sobrevive a recrear el sitio.** Se nombra por el nombre del sitio
+> (`site-proinshop-db`), no por su id: si se borra y vuelve a crear el sitio en
+> el panel, los datos siguen ahí. Lo único que cambia es el token.
+
 ### Herramientas
 
 ```bash
@@ -112,6 +116,12 @@ DB_TOKEN=<token> node herramientas/db-remota.mjs db/schema.sql
 # Cargar el catálogo inicial (solo la primera vez)
 node herramientas/generar-seed.mjs > /tmp/seed.json
 DB_TOKEN=<token> node herramientas/db-remota.mjs /tmp/seed.json
+
+# Subir los archivos de marca al bucket y comprobar que se sirven
+DB_TOKEN=<token> node herramientas/subir-marca.mjs
+
+# Subir una foto y vincularla a un producto (el 1, en este ejemplo)
+DB_TOKEN=<token> node herramientas/subir-a-r2.mjs foto.jpg productos/foto.jpg 1
 ```
 
 ### Probar en local con base y bucket reales

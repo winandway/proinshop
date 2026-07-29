@@ -24,6 +24,11 @@ Ver [PROYECTO.md](PROYECTO.md) para el alcance completo.
   | Base de datos | `env.DB` del sitio (la crea la plataforma) |
   | Bucket | `env.BUCKET` del sitio (la crea la plataforma) |
 
+- **La base y el bucket se nombran por el NOMBRE del sitio, no por su id.** Si
+  se borra y recrea el sitio en el panel, la plataforma **reutiliza la misma
+  base** (`site-proinshop-db`) con todos sus datos. Lo que sí cambia es el
+  **token**, que va atado al registro del sitio. Conclusión práctica: recrear
+  el sitio **no** borra el catálogo; solo hay que pedir el token nuevo.
 - **Prohibido crear recursos nuevos** (bases, buckets, repos, subdominios) sin
   que el usuario lo pida explícitamente.
 - **El token de la base nunca se guarda.** Se usa en línea con el comando o por
