@@ -8,12 +8,8 @@ import { useCarrito } from "./carrito";
 import { NEGOCIO } from "@/lib/config";
 import { formatearPrecio, texto, textos } from "@/lib/i18n";
 import type { Idioma, MetodoEntrega, MetodoPago, Producto } from "@/lib/tipos";
-import {
-  fechaDeAhora,
-  guardarPedido,
-  nuevoNumeroDePedido,
-  type PedidoGuardado,
-} from "@/lib/pedidos-navegador";
+import { fechaDeAhora, guardarPedido as guardarEnNavegador, type PedidoGuardado } from "@/lib/pedidos-navegador";
+import { guardarPedido } from "@/app/(tienda)/checkout/acciones";
 
 export function FormularioCheckout({
   productos,
@@ -29,6 +25,7 @@ export function FormularioCheckout({
   const [entrega, setEntrega] = useState<MetodoEntrega>("domicilio");
   const [pago, setPago] = useState<MetodoPago>("transferencia");
   const [enviando, setEnviando] = useState(false);
+  const [fallo, setFallo] = useState<string | null>(null);
 
   if (!listo) {
     return <div className="py-24 text-center text-sm text-gris">…</div>;
@@ -53,12 +50,39 @@ export function FormularioCheckout({
     );
   }
 
-  function enviar(evento: React.FormEvent<HTMLFormElement>) {
+  async function enviar(evento: React.FormEvent<HTMLFormElement>) {
     evento.preventDefault();
     setEnviando(true);
+    setFallo(null);
 
     const datos = new FormData(evento.currentTarget);
-    const numero = nuevoNumeroDePedido();
+
+    // El pedido se guarda en la base del negocio. Si eso falla, el cliente se
+    // entera: antes el pedido se perdía en silencio.
+    const guardado = await guardarPedido({
+      cliente: {
+        nombre: String(datos.get("nombre") ?? ""),
+        celular: String(datos.get("celular") ?? ""),
+        correo: String(datos.get("correo") ?? ""),
+        direccion: String(datos.get("direccion") ?? ""),
+      },
+      entrega,
+      pago,
+      envio: NEGOCIO.costoEnvio,
+      lineas: lineas.map((l) => ({
+        productoSlug: l.productoSlug,
+        varianteId: l.varianteId,
+        cantidad: l.cantidad,
+      })),
+    });
+
+    if (guardado.error || !guardado.numero) {
+      setEnviando(false);
+      setFallo(guardado.error ?? "No se pudo enviar el pedido. Inténtalo de nuevo.");
+      return;
+    }
+
+    const numero = guardado.numero;
 
     const pedido: PedidoGuardado = {
       numero,
@@ -83,7 +107,7 @@ export function FormularioCheckout({
       total,
     };
 
-    guardarPedido(pedido);
+    guardarEnNavegador(pedido);
     vaciar();
     router.push(`/pedido/${numero}`);
   }
@@ -94,6 +118,14 @@ export function FormularioCheckout({
   return (
     <form onSubmit={enviar} className="grid gap-8 lg:grid-cols-[1fr_360px]">
       <div>
+        {fallo && (
+          <p
+            role="alert"
+            className="mb-4 rounded-xl border border-rojo bg-rojo-suave px-4 py-3 text-[13px] font-bold text-rojo-oscuro"
+          >
+            {fallo}
+          </p>
+        )}
         <h2 className="text-[13px] font-extrabold uppercase tracking-wide text-gris">
           1. {t.tusDatos}
         </h2>

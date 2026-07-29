@@ -13,9 +13,8 @@ export const NEGOCIO = {
 } as const;
 
 /** Arma el enlace de WhatsApp con el mensaje ya escrito. */
-export function enlaceWhatsapp(mensaje: string): string {
+export function enlaceWhatsapp(mensaje: string, numero?: string): string {
   const texto = encodeURIComponent(mensaje);
-  return NEGOCIO.whatsapp
-    ? `https://wa.me/${NEGOCIO.whatsapp}?text=${texto}`
-    : `https://wa.me/?text=${texto}`;
+  const destino = (numero ?? NEGOCIO.whatsapp).replace(/\D/g, "");
+  return destino ? `https://wa.me/${destino}?text=${texto}` : `https://wa.me/?text=${texto}`;
 }
