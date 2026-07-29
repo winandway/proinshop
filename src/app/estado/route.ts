@@ -30,8 +30,19 @@ export async function GET() {
     if (!almacen) {
       informe.almacenamiento = { conectado: false, motivo: "sin binding BUCKET" };
     } else {
-      const listado = await almacen.list({ limit: 1 });
-      informe.almacenamiento = { conectado: true, archivos: listado.objects.length };
+      // El listado viene por páginas: hay que recorrerlas o el conteo se queda
+      // en el tamaño de la primera página y siempre informa de menos.
+      let archivos = 0;
+      let bytes = 0;
+      let cursor: string | undefined;
+      do {
+        const pagina = await almacen.list({ cursor });
+        archivos += pagina.objects.length;
+        bytes += pagina.objects.reduce((suma, objeto) => suma + objeto.size, 0);
+        cursor = pagina.truncated ? pagina.cursor : undefined;
+      } while (cursor);
+
+      informe.almacenamiento = { conectado: true, archivos, bytes };
     }
   } catch (error) {
     informe.almacenamiento = { conectado: false, motivo: String(error) };

@@ -13,6 +13,7 @@
 
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { armarMultipart } from "./multipart.mjs";
 
 const API_DB = "https://yapanel.yadominios.com/api/hosting/db/query";
 const SITIO = process.env.DB_SITIO ?? "proinshop";
@@ -66,14 +67,12 @@ for (const nombre of archivos) {
   const contenido = readFileSync(join("marca", nombre));
   const clave = `marca/${nombre}`;
 
-  const formulario = new FormData();
-  formulario.append("archivo", new Blob([contenido], { type: "image/png" }), nombre);
-  formulario.append("clave", clave);
+  const { cuerpo, tipoContenido } = armarMultipart({ clave }, { nombre, contenido });
 
   const respuesta = await fetch(`${BASE}/upload`, {
     method: "POST",
-    headers: { "x-codigo-subida": codigo },
-    body: formulario,
+    headers: { "x-codigo-subida": codigo, "content-type": tipoContenido },
+    body: cuerpo,
   });
   const resultado = await respuesta.json().catch(() => ({}));
 

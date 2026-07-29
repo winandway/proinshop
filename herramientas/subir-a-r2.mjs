@@ -10,6 +10,7 @@
 
 import { readFileSync } from "node:fs";
 import { basename } from "node:path";
+import { armarMultipart } from "./multipart.mjs";
 
 const API_DB = "https://yapanel.yadominios.com/api/hosting/db/query";
 const SITIO = process.env.DB_SITIO ?? "proinshop";
@@ -50,22 +51,15 @@ await consultar(
 
 const contenido = readFileSync(archivo);
 const clave = claveArgumento ?? `productos/${basename(archivo)}`;
-const tipos = { png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg", webp: "image/webp" };
-const extension = archivo.split(".").pop()?.toLowerCase() ?? "";
-
-const formulario = new FormData();
-formulario.append(
-  "archivo",
-  new Blob([contenido], { type: tipos[extension] ?? "application/octet-stream" }),
-  basename(archivo),
+const { cuerpo, tipoContenido } = armarMultipart(
+  { clave, producto_id: productoId },
+  { nombre: basename(archivo), contenido },
 );
-formulario.append("clave", clave);
-if (productoId) formulario.append("producto_id", productoId);
 
 const respuesta = await fetch(`${BASE}/upload`, {
   method: "POST",
-  headers: { "x-codigo-subida": codigo },
-  body: formulario,
+  headers: { "x-codigo-subida": codigo, "content-type": tipoContenido },
+  body: cuerpo,
 });
 
 const resultado = await respuesta.json().catch(() => ({}));
