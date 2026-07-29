@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
-import { Encabezado } from "@/componentes/Encabezado";
-import { PieDePagina } from "@/componentes/PieDePagina";
-import { ProveedorCarrito } from "@/componentes/carrito";
 import { NEGOCIO } from "@/lib/config";
 import { idiomaActual } from "@/lib/idioma-servidor";
 
@@ -56,13 +53,7 @@ export default async function RootLayout({
 
   return (
     <html lang={idioma} className={`${geist.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-white">
-        <ProveedorCarrito>
-          <Encabezado />
-          <main className="flex-1">{children}</main>
-          <PieDePagina />
-        </ProveedorCarrito>
-      </body>
+      <body className="flex min-h-full flex-col bg-white">{children}</body>
     </html>
   );
 }
