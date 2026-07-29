@@ -9,18 +9,24 @@ import { usePathname } from "next/navigation";
  */
 const DESTINOS = [
   { href: "/panel", icono: "🏠", texto: "Inicio", exacto: true },
-  { href: "/panel/balance", icono: "📊", texto: "Balance" },
+  { href: "/panel/balance", icono: "📊", texto: "Balance", soloDueno: true },
   { href: "/panel/pedidos", icono: "🛒", texto: "Pedidos" },
   { href: "/panel/inventario", icono: "📦", texto: "Inventario" },
   { href: "/panel/explorar", icono: "⊞", texto: "Explorar" },
 ];
 
-export function BarraInferior() {
+/** El balance no se le ofrece a quien no puede abrirlo. */
+function destinosDe(esDueno: boolean) {
+  return DESTINOS.filter((d) => esDueno || !d.soloDueno);
+}
+
+export function BarraInferior({ esDueno }: { esDueno: boolean }) {
   const ruta = usePathname();
+  const destinos = destinosDe(esDueno);
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 flex h-[74px] items-center justify-around bg-tinta px-1 pb-3 md:hidden">
-      {DESTINOS.map((destino) => {
+      {destinos.map((destino) => {
         const activo = destino.exacto ? ruta === destino.href : ruta.startsWith(destino.href);
         return (
           <Link
@@ -48,12 +54,13 @@ export function BarraInferior() {
 }
 
 /** En pantalla grande la navegación va al costado, no abajo. */
-export function MenuLateral() {
+export function MenuLateral({ esDueno }: { esDueno: boolean }) {
   const ruta = usePathname();
+  const destinos = destinosDe(esDueno);
 
   return (
     <nav className="hidden w-56 shrink-0 border-r border-linea p-3 md:block">
-      {DESTINOS.map((destino) => {
+      {destinos.map((destino) => {
         const activo = destino.exacto ? ruta === destino.href : ruta.startsWith(destino.href);
         return (
           <Link

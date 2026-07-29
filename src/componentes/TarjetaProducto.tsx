@@ -6,9 +6,11 @@ import { FotoProducto } from "./FotoProducto";
 export function TarjetaProducto({
   producto,
   idioma,
+  mostrarStock = true,
 }: {
   producto: Producto;
   idioma: Idioma;
+  mostrarStock?: boolean;
 }) {
   const t = textos(idioma);
   const nombre = texto(producto.nombre, idioma);
@@ -62,9 +64,11 @@ export function TarjetaProducto({
         >
           {agotado
             ? t.agotado
-            : pocas
-              ? `● ${t.ultimasUnidades} · ${producto.stock}`
-              : `● ${producto.stock} ${t.disponibles}`}
+            : mostrarStock
+              ? pocas
+                ? `● ${t.ultimasUnidades} · ${producto.stock}`
+                : `● ${producto.stock} ${t.disponibles}`
+              : `● ${t.disponible}`}
         </p>
 
         <span className="mt-4 block rounded-xl bg-rojo py-2.5 text-center text-[13px] font-extrabold text-white transition group-hover:bg-rojo-oscuro">

@@ -4,6 +4,7 @@ import { TarjetaProducto } from "@/componentes/TarjetaProducto";
 import { OrdenarPor, type Orden } from "@/componentes/OrdenarPor";
 import { obtenerCategorias, obtenerProductos } from "@/lib/catalogo";
 import { texto, textos } from "@/lib/i18n";
+import { obtenerConfigTienda } from "@/lib/config-tienda";
 import { idiomaActual } from "@/lib/idioma-servidor";
 
 export default async function Catalogo({
@@ -19,9 +20,10 @@ export default async function Catalogo({
     ? parametros.orden
     : "recientes") as Orden;
 
-  const [productos, categorias] = await Promise.all([
+  const [productos, categorias, config] = await Promise.all([
     obtenerProductos({ buscar: parametros.q, orden }),
     obtenerCategorias(),
+    obtenerConfigTienda(),
   ]);
 
   return (
@@ -72,7 +74,12 @@ export default async function Catalogo({
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {productos.map((producto) => (
-            <TarjetaProducto key={producto.slug} producto={producto} idioma={idioma} />
+            <TarjetaProducto
+              key={producto.slug}
+              producto={producto}
+              idioma={idioma}
+              mostrarStock={config.mostrarStock}
+            />
           ))}
         </div>
       )}

@@ -38,11 +38,11 @@ export default async function DisenoPanel({ children }: { children: React.ReactN
       </header>
 
       <div className="mx-auto flex max-w-5xl">
-        <MenuLateral />
+        <MenuLateral esDueno={usuario.rol === "dueno"} />
         <main className="min-w-0 flex-1 p-4">{children}</main>
       </div>
 
-      <BarraInferior />
+      <BarraInferior esDueno={usuario.rol === "dueno"} />
     </div>
   );
 }

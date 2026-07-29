@@ -2,6 +2,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
+import { usuarioActual } from "@/lib/sesion";
+import { alternarPublicado } from "./acciones";
 
 export const metadata: Metadata = { title: "Inventario", robots: { index: false } };
 
@@ -23,6 +25,8 @@ export default async function Inventario({
   searchParams: Promise<{ q?: string; categoria?: string }>;
 }) {
   const { q, categoria } = await searchParams;
+  const usuario = await usuarioActual();
+  const esDueno = usuario?.rol === "dueno";
   const db = await baseDeDatos();
 
   const resumen = db
@@ -71,24 +75,28 @@ export default async function Inventario({
 
   return (
     <div className="pb-36">
-      <Link
-        href="/panel/balance"
-        className="mb-3 block rounded-xl border-[1.5px] border-linea bg-white py-3 text-center text-[13.5px] font-bold transition hover:border-gris2"
-      >
-        🧾 Reportes
-      </Link>
+      {esDueno && (
+        <Link
+          href="/panel/balance"
+          className="mb-3 block rounded-xl border-[1.5px] border-linea bg-white py-3 text-center text-[13.5px] font-bold transition hover:border-gris2"
+        >
+          🧾 Reportes
+        </Link>
+      )}
 
       <div className="mb-3 flex gap-2.5">
         <div className="flex-1 rounded-2xl bg-white p-3 shadow-sm">
           <p className="text-[11px] font-semibold text-gris">Total de referencias</p>
           <p className="mt-0.5 text-xl font-black tracking-tight">{resumen?.referencias ?? 0}</p>
         </div>
-        <div className="flex-1 rounded-2xl bg-white p-3 shadow-sm">
-          <p className="text-[11px] font-semibold text-gris">Costo total</p>
-          <p className="mt-0.5 text-xl font-black tracking-tight">
-            {formatearPrecio(resumen?.costo_total ?? 0)}
-          </p>
-        </div>
+        {esDueno && (
+          <div className="flex-1 rounded-2xl bg-white p-3 shadow-sm">
+            <p className="text-[11px] font-semibold text-gris">Costo total</p>
+            <p className="mt-0.5 text-xl font-black tracking-tight">
+              {formatearPrecio(resumen?.costo_total ?? 0)}
+            </p>
+          </div>
+        )}
       </div>
 
       <form className="mb-3">
@@ -133,10 +141,10 @@ export default async function Inventario({
       ) : (
         <ul className="space-y-2.5">
           {productos.map((producto) => (
-            <li key={producto.id}>
+            <li key={producto.id} className="rounded-2xl bg-white shadow-sm">
               <Link
                 href={`/panel/inventario/${producto.id}`}
-                className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm transition hover:shadow-md"
+                className="flex items-center gap-3 p-3 transition hover:opacity-80"
               >
                 <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-crema text-2xl">
                   {producto.foto ? (
@@ -155,7 +163,7 @@ export default async function Inventario({
                   <p className="truncate text-[13px] font-extrabold">{producto.nombre_es}</p>
                   <p className="text-[12px] text-gris">
                     {formatearPrecio(producto.precio)}
-                    {producto.costo > 0 && ` · Costo ${formatearPrecio(producto.costo)}`}
+                    {esDueno && producto.costo > 0 && ` · Costo ${formatearPrecio(producto.costo)}`}
                   </p>
                   <p className="mt-0.5 text-[13.5px] font-extrabold">
                     {producto.stock} disponibles
@@ -171,6 +179,17 @@ export default async function Inventario({
                   </span>
                 </div>
               </Link>
+
+              {/* Publicar o esconder sin entrar a editar: es lo que más se usa. */}
+              <form action={alternarPublicado} className="mt-1.5 px-3 pb-1">
+                <input type="hidden" name="id" value={producto.id} />
+                <button
+                  type="submit"
+                  className="text-[11px] font-bold text-gris transition hover:text-rojo"
+                >
+                  {producto.publicado === 1 ? "Quitar de la tienda" : "Publicar en la tienda"}
+                </button>
+              </form>
             </li>
           ))}
         </ul>

@@ -1,10 +1,15 @@
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
+import { usuarioActual } from "@/lib/sesion";
 
 export const metadata: Metadata = { title: "Estadísticas", robots: { index: false } };
 
 export default async function Estadisticas() {
+  const usuario = await usuarioActual();
+  if (usuario?.rol !== "dueno") redirect("/panel");
+
   const db = await baseDeDatos();
 
   const resumen = db

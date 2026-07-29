@@ -7,6 +7,7 @@
  */
 
 import { CATEGORIAS_DESARROLLO, PRODUCTOS_DESARROLLO } from "./catalogo-desarrollo";
+import { obtenerConfigTienda } from "./config-tienda";
 import { baseDeDatos } from "./d1";
 import type { Categoria, Especificacion, Producto, Variante } from "./tipos";
 
@@ -175,6 +176,12 @@ export async function obtenerProductos(opciones?: {
   }
   if (opciones?.destacados) {
     condiciones.push("p.destacado = 1");
+  }
+  // El dueño puede pedir que lo agotado no se muestre: si no se respeta aquí,
+  // el ajuste del panel no sirve de nada.
+  const config = await obtenerConfigTienda();
+  if (config.ocultarAgotados) {
+    condiciones.push("p.stock > 0");
   }
   if (opciones?.buscar) {
     condiciones.push("(lower(p.nombre_es) LIKE ? OR lower(p.nombre_en) LIKE ? OR lower(p.sku) LIKE ?)");

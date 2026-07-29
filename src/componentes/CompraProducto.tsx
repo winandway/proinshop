@@ -10,9 +10,11 @@ import { useCarrito } from "./carrito";
 export function CompraProducto({
   producto,
   idioma,
+  whatsapp,
 }: {
   producto: Producto;
   idioma: Idioma;
+  whatsapp: string;
 }) {
   const t = textos(idioma);
   const router = useRouter();
@@ -127,7 +129,7 @@ export function CompraProducto({
           {agotado ? t.agotado : agregado ? `✓ ${t.agregado}` : t.agregarAlCarrito}
         </button>
         <a
-          href={enlaceWhatsapp(mensaje)}
+          href={enlaceWhatsapp(mensaje, whatsapp)}
           target="_blank"
           rel="noopener noreferrer"
           className="rounded-2xl bg-whatsapp px-6 py-4 text-center text-sm font-extrabold text-white transition hover:brightness-95"

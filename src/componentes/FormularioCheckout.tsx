@@ -5,18 +5,18 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { resolverLineas } from "./VistaCarrito";
 import { useCarrito } from "./carrito";
-import { NEGOCIO } from "@/lib/config";
 import { formatearPrecio, texto, textos } from "@/lib/i18n";
 import type { Idioma, MetodoEntrega, MetodoPago, Producto } from "@/lib/tipos";
-import { fechaDeAhora, guardarPedido as guardarEnNavegador, type PedidoGuardado } from "@/lib/pedidos-navegador";
 import { guardarPedido } from "@/app/(tienda)/checkout/acciones";
 
 export function FormularioCheckout({
   productos,
   idioma,
+  costoEnvioTienda,
 }: {
   productos: Producto[];
   idioma: Idioma;
+  costoEnvioTienda: number;
 }) {
   const t = textos(idioma);
   const router = useRouter();
@@ -33,7 +33,7 @@ export function FormularioCheckout({
 
   const resueltas = resolverLineas(lineas, productos, idioma);
   const subtotal = resueltas.reduce((suma, l) => suma + l.subtotal, 0);
-  const costoEnvio = entrega === "domicilio" ? NEGOCIO.costoEnvio : 0;
+  const costoEnvio = entrega === "domicilio" ? costoEnvioTienda : 0;
   const total = subtotal + costoEnvio;
 
   if (resueltas.length === 0) {
@@ -68,7 +68,7 @@ export function FormularioCheckout({
       },
       entrega,
       pago,
-      envio: NEGOCIO.costoEnvio,
+      envio: costoEnvioTienda,
       lineas: lineas.map((l) => ({
         productoSlug: l.productoSlug,
         varianteId: l.varianteId,
@@ -84,30 +84,6 @@ export function FormularioCheckout({
 
     const numero = guardado.numero;
 
-    const pedido: PedidoGuardado = {
-      numero,
-      fecha: fechaDeAhora(),
-      cliente: {
-        nombre: String(datos.get("nombre") ?? ""),
-        celular: String(datos.get("celular") ?? ""),
-        correo: String(datos.get("correo") ?? ""),
-        direccion: String(datos.get("direccion") ?? ""),
-      },
-      entrega,
-      pago,
-      lineas: resueltas.map((l) => ({
-        nombre: texto(l.producto.nombre, idioma),
-        variante: l.nombreVariante,
-        emoji: l.producto.emoji,
-        cantidad: l.cantidad,
-        precioUnitario: l.precioUnitario,
-      })),
-      subtotal,
-      envio: costoEnvio,
-      total,
-    };
-
-    guardarEnNavegador(pedido);
     vaciar();
     router.push(`/pedido/${numero}`);
   }
@@ -160,7 +136,7 @@ export function FormularioCheckout({
               <span className="block text-[13px] font-extrabold">{t.envioDomicilio}</span>
               <span className="block text-[11.5px] text-gris">{t.envioDomicilioTexto}</span>
             </span>
-            <span className="text-sm font-black">{formatearPrecio(NEGOCIO.costoEnvio)}</span>
+            <span className="text-sm font-black">{formatearPrecio(costoEnvioTienda)}</span>
           </button>
 
           <button

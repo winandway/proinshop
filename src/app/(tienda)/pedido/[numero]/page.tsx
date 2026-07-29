@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { SeguimientoPedido } from "@/componentes/SeguimientoPedido";
 import { textos } from "@/lib/i18n";
 import { idiomaActual } from "@/lib/idioma-servidor";
+import { obtenerConfigTienda } from "@/lib/config-tienda";
+import { obtenerPedidoPublico } from "@/lib/pedidos";
 
 export async function generateMetadata({
   params,
@@ -20,10 +22,19 @@ export default async function PaginaPedido({
 }) {
   const { numero } = await params;
   const idioma = await idiomaActual();
+  const [config, pedido] = await Promise.all([
+    obtenerConfigTienda(),
+    obtenerPedidoPublico(numero),
+  ]);
 
   return (
     <div className="px-4 py-8 sm:px-6 sm:py-10">
-      <SeguimientoPedido numero={numero} idioma={idioma} />
+      <SeguimientoPedido
+        numero={numero}
+        idioma={idioma}
+        whatsapp={config.whatsapp}
+        pedido={pedido}
+      />
     </div>
   );
 }

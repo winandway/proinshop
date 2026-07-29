@@ -6,6 +6,7 @@ import { TarjetaProducto } from "@/componentes/TarjetaProducto";
 import { OrdenarPor, type Orden } from "@/componentes/OrdenarPor";
 import { obtenerCategoria, obtenerCategorias, obtenerProductos } from "@/lib/catalogo";
 import { texto, textos } from "@/lib/i18n";
+import { obtenerConfigTienda } from "@/lib/config-tienda";
 import { idiomaActual } from "@/lib/idioma-servidor";
 
 // Sin `generateStaticParams`: las categorías las administra el dueño desde la
@@ -42,9 +43,10 @@ export default async function PaginaCategoria({
     ? parametros.orden
     : "recientes") as Orden;
 
-  const [productos, categorias] = await Promise.all([
+  const [productos, categorias, config] = await Promise.all([
     obtenerProductos({ categoriaSlug: slug, orden }),
     obtenerCategorias(),
+    obtenerConfigTienda(),
   ]);
 
   return (
@@ -116,7 +118,12 @@ export default async function PaginaCategoria({
       ) : (
         <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {productos.map((producto) => (
-            <TarjetaProducto key={producto.slug} producto={producto} idioma={idioma} />
+            <TarjetaProducto
+              key={producto.slug}
+              producto={producto}
+              idioma={idioma}
+              mostrarStock={config.mostrarStock}
+            />
           ))}
         </div>
       )}

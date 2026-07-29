@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
+import { usuarioActual } from "@/lib/sesion";
 
 export const metadata: Metadata = { title: "Balance", robots: { index: false } };
 
@@ -18,6 +20,11 @@ export default async function Balance({
 }: {
   searchParams: Promise<{ rango?: string }>;
 }) {
+  // La utilidad y el costo de la mercancía son del dueño: un empleado no
+  // tiene por qué saber cuánto gana el negocio.
+  const usuario = await usuarioActual();
+  if (usuario?.rol !== "dueno") redirect("/panel");
+
   const { rango } = await searchParams;
   const elegido: Rango = rango === "dia" || rango === "ano" ? rango : "mes";
   const filtro = RANGOS[elegido].filtro;

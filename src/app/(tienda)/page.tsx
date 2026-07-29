@@ -3,15 +3,17 @@ import { Banner } from "@/componentes/Banner";
 import { TarjetaProducto } from "@/componentes/TarjetaProducto";
 import { contarProductosPorCategoria, obtenerCategorias, obtenerProductos } from "@/lib/catalogo";
 import { texto, textos } from "@/lib/i18n";
+import { obtenerConfigTienda } from "@/lib/config-tienda";
 import { idiomaActual } from "@/lib/idioma-servidor";
 
 export default async function Portada() {
   const idioma = await idiomaActual();
   const t = textos(idioma);
-  const [categorias, destacados, conteo] = await Promise.all([
+  const [categorias, destacados, conteo, config] = await Promise.all([
     obtenerCategorias(),
     obtenerProductos({ destacados: true }),
     contarProductosPorCategoria(),
+    obtenerConfigTienda(),
   ]);
 
   const confianza = [
@@ -66,7 +68,12 @@ export default async function Portada() {
 
         <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
           {destacados.map((producto) => (
-            <TarjetaProducto key={producto.slug} producto={producto} idioma={idioma} />
+            <TarjetaProducto
+              key={producto.slug}
+              producto={producto}
+              idioma={idioma}
+              mostrarStock={config.mostrarStock}
+            />
           ))}
         </div>
       </section>

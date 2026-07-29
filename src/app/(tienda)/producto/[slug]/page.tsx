@@ -7,6 +7,7 @@ import { TarjetaProducto } from "@/componentes/TarjetaProducto";
 import { obtenerCategoria, obtenerProducto, obtenerProductos } from "@/lib/catalogo";
 import { formatearPrecio, texto, textos } from "@/lib/i18n";
 import { idiomaActual } from "@/lib/idioma-servidor";
+import { obtenerConfigTienda } from "@/lib/config-tienda";
 
 // Sin `generateStaticParams`: el catálogo vive en la base y cambia cuando el
 // dueño carga productos, así que las fichas se arman en cada visita.
@@ -60,6 +61,7 @@ export default async function PaginaProducto({
 
   const idioma = await idiomaActual();
   const t = textos(idioma);
+  const config = await obtenerConfigTienda();
   const categoria = await obtenerCategoria(producto.categoriaSlug);
   const relacionados = (await obtenerProductos({ categoriaSlug: producto.categoriaSlug }))
     .filter((otro) => otro.slug !== producto.slug)
@@ -104,9 +106,11 @@ export default async function PaginaProducto({
           >
             {producto.stock <= 0
               ? t.agotado
-              : pocas
-                ? `● ${t.ultimasUnidades} · ${producto.stock}`
-                : `● ${producto.stock} ${t.disponibles}`}
+              : config.mostrarStock
+                ? pocas
+                  ? `● ${t.ultimasUnidades} · ${producto.stock}`
+                  : `● ${producto.stock} ${t.disponibles}`
+                : `● ${t.disponible}`}
           </p>
 
           <h1 className="mt-2 text-2xl font-black leading-tight tracking-tight sm:text-3xl">
@@ -115,7 +119,7 @@ export default async function PaginaProducto({
           <p className="mt-1.5 text-xs text-gris">SKU {producto.sku}</p>
 
           <div className="mt-5">
-            <CompraProducto producto={producto} idioma={idioma} />
+            <CompraProducto producto={producto} idioma={idioma} whatsapp={config.whatsapp} />
           </div>
 
           <div className="mt-9">
@@ -151,7 +155,12 @@ export default async function PaginaProducto({
           </h2>
           <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4">
             {relacionados.map((otro) => (
-              <TarjetaProducto key={otro.slug} producto={otro} idioma={idioma} />
+              <TarjetaProducto
+                key={otro.slug}
+                producto={otro}
+                idioma={idioma}
+                mostrarStock={config.mostrarStock}
+              />
             ))}
           </div>
         </section>

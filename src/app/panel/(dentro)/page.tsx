@@ -15,8 +15,8 @@ const ACCESOS = [
 const MODULOS = [
   { href: "/panel/inventario", icono: "📦", texto: "Inventario" },
   { href: "/panel/pedidos", icono: "🛒", texto: "Pedidos" },
-  { href: "/panel/tienda", icono: "🏪", texto: "Mi tienda" },
-  { href: "/panel/estadisticas", icono: "📊", texto: "Estadísticas" },
+  { href: "/panel/tienda", icono: "🏪", texto: "Mi tienda", soloDueno: true },
+  { href: "/panel/estadisticas", icono: "📊", texto: "Estadísticas", soloDueno: true },
   { href: "/panel/clientes", icono: "👥", texto: "Clientes" },
   { href: "/panel/deudas", icono: "💰", texto: "Deudas" },
   { href: "/panel/cotizaciones", icono: "📄", texto: "Cotizaciones" },
@@ -41,6 +41,10 @@ export default async function InicioPanel() {
 
   const ventas = resumen?.ventas ?? 0;
   const gastos = resumen?.gastos ?? 0;
+  // Un empleado no ve cuánto entró ni cuánto se gastó.
+  const esDueno = usuario?.rol === "dueno";
+  const modulos = MODULOS.filter((m) => esDueno || !m.soloDueno);
+  const accesos = esDueno ? ACCESOS : ACCESOS.filter((a) => a.href !== "/panel/gastos/nuevo");
 
   return (
     <>
@@ -48,7 +52,7 @@ export default async function InicioPanel() {
 
       <h2 className="mb-3 text-[13px] font-extrabold">Accesos rápidos</h2>
       <div className="flex gap-2.5">
-        {ACCESOS.map((acceso) => (
+        {accesos.map((acceso) => (
           <Link
             key={acceso.href}
             href={acceso.href}
@@ -66,6 +70,7 @@ export default async function InicioPanel() {
         ))}
       </div>
 
+      {esDueno && (
       <div className="mt-3 rounded-2xl bg-linear-to-br from-[#ff3b3b] to-[#d91414] p-4 text-white shadow-lg">
         <p className="text-xs font-semibold opacity-90">Hoy vendiste</p>
         <p className="mt-0.5 text-3xl font-black tracking-tight">{formatearPrecio(ventas)}</p>
@@ -83,10 +88,11 @@ export default async function InicioPanel() {
           Ver balance ›
         </Link>
       </div>
+      )}
 
       <h2 className="mb-3 mt-5 text-[13px] font-extrabold">Sugeridos para ti</h2>
       <div className="grid grid-cols-4 gap-2.5">
-        {MODULOS.map((modulo) => (
+        {modulos.map((modulo) => (
           <Link
             key={modulo.href}
             href={modulo.href}

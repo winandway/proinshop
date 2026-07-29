@@ -43,9 +43,11 @@ export function resolverLineas(
 export function VistaCarrito({
   productos,
   idioma,
+  whatsapp,
 }: {
   productos: Producto[];
   idioma: Idioma;
+  whatsapp: string;
 }) {
   const t = textos(idioma);
   const { lineas, listo, cambiarCantidad, quitar } = useCarrito();
@@ -181,7 +183,7 @@ export function VistaCarrito({
           {t.continuarPedido}
         </Link>
         <a
-          href={enlaceWhatsapp(mensaje)}
+          href={enlaceWhatsapp(mensaje, whatsapp)}
           target="_blank"
           rel="noopener noreferrer"
           className="mt-2.5 block rounded-2xl bg-whatsapp py-4 text-center text-sm font-extrabold text-white transition hover:brightness-95"
