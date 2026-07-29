@@ -218,6 +218,17 @@ CREATE TABLE IF NOT EXISTS pedido (
 
 CREATE INDEX IF NOT EXISTS idx_pedido_estado ON pedido(estado, fecha);
 
+-- ------------------------------------------------- permisos de subida a R2
+-- Códigos de un solo uso que autorizan escribir en el bucket. Los crea quien
+-- tiene el token de la base; así la ruta /upload no necesita ningún secreto
+-- dentro del repositorio, que es público.
+CREATE TABLE IF NOT EXISTS codigo_subida (
+  codigo    TEXT    PRIMARY KEY,
+  expira    TEXT    NOT NULL,
+  usado     INTEGER NOT NULL DEFAULT 0,
+  creado_en TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS pedido_item (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   pedido_id   INTEGER NOT NULL REFERENCES pedido(id) ON DELETE CASCADE,
