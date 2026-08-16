@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { BotonCopiar } from "@/componentes/panel/BotonCopiar";
+import { BotonRecuperacion } from "@/componentes/panel/BotonRecuperacion";
 import { FormularioInvitar } from "@/componentes/panel/FormularioInvitar";
 import { baseDeDatos } from "@/lib/d1";
 import { NEGOCIO } from "@/lib/config";
@@ -56,7 +57,7 @@ export default async function Equipo() {
         {personas.map((persona) => (
           <div
             key={persona.id}
-            className="flex items-center gap-3 rounded-2xl border border-linea bg-white p-3.5"
+            className="flex items-start gap-3 rounded-2xl border border-linea bg-white p-3.5"
           >
             <span
               aria-hidden="true"
@@ -89,17 +90,24 @@ export default async function Equipo() {
               </p>
             </div>
 
-            {persona.id !== usuario.id && (
-              <form action={cambiarActivo}>
-                <input type="hidden" name="id" value={persona.id} />
-                <button
-                  type="submit"
-                  className="rounded-lg border-[1.5px] border-linea px-3 py-2 text-[11.5px] font-bold text-gris transition hover:border-gris2"
-                >
-                  {persona.activo === 1 ? "Desactivar" : "Activar"}
-                </button>
-              </form>
-            )}
+            <div className="flex shrink-0 flex-col items-end gap-2">
+              {persona.id !== usuario.id && (
+                <form action={cambiarActivo}>
+                  <input type="hidden" name="id" value={persona.id} />
+                  <button
+                    type="submit"
+                    className="rounded-lg border-[1.5px] border-linea px-3 py-2 text-[11.5px] font-bold text-gris transition hover:border-gris2"
+                  >
+                    {persona.activo === 1 ? "Desactivar" : "Activar"}
+                  </button>
+                </form>
+              )}
+              <BotonRecuperacion
+                usuarioId={persona.id}
+                nombre={persona.nombre}
+                dominio={NEGOCIO.url}
+              />
+            </div>
           </div>
         ))}
       </div>

@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import type { Resultado } from "@/app/panel/acciones";
+import { CampoClave } from "@/componentes/CampoClave";
 
 type Campo = {
   nombre: string;
@@ -42,38 +43,42 @@ export function FormularioAcceso({
         </p>
       )}
 
-      {campos.map((campo) => (
-        <div key={campo.nombre}>
-          <label
-            htmlFor={campo.nombre}
-            className="mb-1.5 block text-[12.5px] font-bold text-gris"
-          >
-            {campo.etiqueta}
-          </label>
-          <input
+      {campos.map((campo) =>
+        campo.tipo === "password" ? (
+          // Las contraseñas van con el ojito: nadie debería escribirlas a ciegas.
+          <CampoClave
+            key={campo.nombre}
             id={campo.nombre}
             name={campo.nombre}
-            type={campo.tipo ?? "text"}
-            defaultValue={campo.valor}
-            readOnly={campo.soloLectura}
-            placeholder={campo.marcador}
-            required
-            autoComplete={
-              campo.tipo === "password"
-                ? campo.nombre === "contrasena"
-                  ? "new-password"
-                  : "off"
-                : campo.tipo === "email"
-                  ? "email"
-                  : "off"
-            }
-            className={`w-full rounded-xl border-[1.5px] border-linea px-4 py-3.5 text-sm font-semibold text-tinta outline-none transition placeholder:font-normal placeholder:text-gris2 focus:border-rojo ${
-              campo.soloLectura ? "bg-crema text-gris" : ""
-            }`}
+            etiqueta={campo.etiqueta}
+            ayuda={campo.ayuda}
+            autoComplete={campo.nombre === "contrasena" ? "new-password" : "off"}
           />
-          {campo.ayuda && <p className="mt-1.5 text-[11.5px] text-gris2">{campo.ayuda}</p>}
-        </div>
-      ))}
+        ) : (
+          <div key={campo.nombre}>
+            <label
+              htmlFor={campo.nombre}
+              className="mb-1.5 block text-[12.5px] font-bold text-gris"
+            >
+              {campo.etiqueta}
+            </label>
+            <input
+              id={campo.nombre}
+              name={campo.nombre}
+              type={campo.tipo ?? "text"}
+              defaultValue={campo.valor}
+              readOnly={campo.soloLectura}
+              placeholder={campo.marcador}
+              required
+              autoComplete={campo.tipo === "email" ? "email" : "off"}
+              className={`w-full rounded-xl border-[1.5px] border-linea px-4 py-3.5 text-sm font-semibold text-tinta outline-none transition placeholder:font-normal placeholder:text-gris2 focus:border-rojo ${
+                campo.soloLectura ? "bg-crema text-gris" : ""
+              }`}
+            />
+            {campo.ayuda && <p className="mt-1.5 text-[11.5px] text-gris2">{campo.ayuda}</p>}
+          </div>
+        ),
+      )}
 
       <button
         type="submit"

@@ -42,6 +42,10 @@ export default async function Entrar() {
           Usa tu invitación
         </Link>
       </p>
+      <p className="mt-2 text-center text-[11.5px] text-gris2">
+        ¿Olvidaste tu contraseña? Pídele al propietario que te genere un enlace
+        desde Equipo.
+      </p>
     </>
   );
 }

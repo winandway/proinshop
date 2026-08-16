@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { FormularioProducto } from "@/componentes/panel/FormularioProducto";
 import { BotonCopiar } from "@/componentes/panel/BotonCopiar";
+import { DetallesProducto } from "@/componentes/panel/DetallesProducto";
 import { baseDeDatos } from "@/lib/d1";
 import { NEGOCIO } from "@/lib/config";
 import { actualizarProducto } from "../acciones";
@@ -50,6 +51,30 @@ export default async function EditarProducto({
     await db
       .prepare("SELECT id, nombre_es FROM categoria WHERE visible = 1 ORDER BY orden")
       .all<{ id: number; nombre_es: string }>()
+  ).results;
+
+  const variantes = (
+    await db
+      .prepare(
+        "SELECT id, nombre_es, nombre_en, stock, precio_extra FROM variante WHERE producto_id = ? ORDER BY id",
+      )
+      .bind(producto.id)
+      .all<{
+        id: number;
+        nombre_es: string;
+        nombre_en: string | null;
+        stock: number;
+        precio_extra: number;
+      }>()
+  ).results;
+
+  const especificaciones = (
+    await db
+      .prepare(
+        "SELECT id, etiqueta_es, valor_es FROM especificacion WHERE producto_id = ? ORDER BY orden",
+      )
+      .bind(producto.id)
+      .all<{ id: number; etiqueta_es: string; valor_es: string }>()
   ).results;
 
   const movimientos = (
@@ -143,6 +168,12 @@ export default async function EditarProducto({
           }}
         />
       </div>
+
+      <DetallesProducto
+        productoId={producto.id}
+        variantes={variantes}
+        especificaciones={especificaciones}
+      />
 
       {movimientos.length > 0 && (
         <div className="mt-3 rounded-2xl bg-white p-4 shadow-sm">

@@ -167,3 +167,53 @@ export async function salir(): Promise<void> {
   await cerrarSesion();
   redirect("/panel/entrar");
 }
+
+/**
+ * Estrena la contraseña con el enlace de recuperación.
+ *
+ * El código es de un solo uso y dura 2 horas. Al cambiarla se cierran todas
+ * las sesiones de esa cuenta: si alguien había entrado con la clave vieja,
+ * queda fuera de inmediato.
+ */
+export async function restablecerContrasena(
+  _previo: Resultado,
+  datos: FormData,
+): Promise<Resultado> {
+  const db = await baseDeDatos();
+  if (!db) return { error: "La base de datos no está disponible" };
+
+  const codigo = String(datos.get("codigo") ?? "").trim();
+  const contrasena = String(datos.get("contrasena") ?? "");
+  const repetida = String(datos.get("repetida") ?? "");
+
+  const recuperacion = await db
+    .prepare(
+      `SELECT codigo, usuario_id FROM recuperacion
+       WHERE codigo = ? AND usada = 0 AND expira > datetime('now')`,
+    )
+    .bind(codigo)
+    .first<{ codigo: string; usuario_id: number }>()
+    .catch(() => null);
+
+  if (!recuperacion) return { error: "El enlace ya se usó o venció" };
+  if (contrasena !== repetida) return { error: "Las dos contraseñas no coinciden" };
+
+  const problema = revisarContrasena(contrasena);
+  if (problema) return { error: problema };
+
+  const sal = nuevaSal();
+  const hash = await cifrarContrasena(contrasena, sal);
+
+  await db
+    .prepare("UPDATE usuario SET contrasena_hash = ?, sal = ? WHERE id = ?")
+    .bind(hash, sal, recuperacion.usuario_id)
+    .run();
+
+  await db.prepare("UPDATE recuperacion SET usada = 1 WHERE codigo = ?").bind(codigo).run();
+  await db.prepare("DELETE FROM sesion WHERE usuario_id = ?").bind(recuperacion.usuario_id).run();
+
+  const agente = (await headers()).get("user-agent") ?? undefined;
+  await crearSesion(recuperacion.usuario_id, agente);
+
+  redirect("/panel");
+}

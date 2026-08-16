@@ -5,7 +5,7 @@ import { baseDeDatos } from "@/lib/d1";
 import { valorAleatorio } from "@/lib/contrasenas";
 import { usuarioActual, type Rol } from "@/lib/sesion";
 
-export type ResultadoEquipo = { error?: string; codigo?: string };
+export type ResultadoEquipo = { error?: string; codigo?: string; recuperacion?: string };
 
 const ROLES: Rol[] = ["dueno", "vendedor", "bodega"];
 const DIAS_INVITACION = 7;
@@ -79,4 +79,51 @@ export async function anularInvitacion(datos: FormData): Promise<void> {
     .run();
 
   revalidatePath("/panel/equipo");
+}
+
+/** Genera un enlace para que alguien del equipo estrene contraseña. */
+export async function generarRecuperacion(
+  _previo: ResultadoEquipo,
+  datos: FormData,
+): Promise<ResultadoEquipo> {
+  const usuario = await usuarioActual();
+  if (!usuario) return { error: "Tu sesión venció" };
+  if (usuario.rol !== "dueno") return { error: "Solo el propietario puede hacer esto" };
+
+  const db = await baseDeDatos();
+  if (!db) return { error: "La base de datos no está disponible" };
+
+  const id = Number(datos.get("id"));
+  if (!id) return { error: "Persona no encontrada" };
+
+  const persona = await db
+    .prepare("SELECT id FROM usuario WHERE id = ? AND negocio_id = ?")
+    .bind(id, usuario.negocioId)
+    .first<{ id: number }>();
+  if (!persona) return { error: "Persona no encontrada" };
+
+  // La tabla puede no existir todavía si la migración no se aplicó: se crea
+  // sola, que es más seguro que dejar al dueño fuera de su propio panel.
+  await db
+    .prepare(
+      `CREATE TABLE IF NOT EXISTS recuperacion (
+         codigo TEXT PRIMARY KEY,
+         usuario_id INTEGER NOT NULL,
+         expira TEXT NOT NULL,
+         usada INTEGER NOT NULL DEFAULT 0,
+         creada_en TEXT NOT NULL DEFAULT (datetime('now'))
+       )`,
+    )
+    .run();
+
+  const codigo = valorAleatorio(16);
+  await db
+    .prepare(
+      "INSERT INTO recuperacion (codigo, usuario_id, expira) VALUES (?, ?, datetime('now', '+2 hours'))",
+    )
+    .bind(codigo, id)
+    .run();
+
+  revalidatePath("/panel/equipo");
+  return { recuperacion: codigo };
 }

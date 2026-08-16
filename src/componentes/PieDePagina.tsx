@@ -2,13 +2,14 @@ import Link from "next/link";
 import { obtenerCategorias } from "@/lib/catalogo";
 import { texto, textos } from "@/lib/i18n";
 import { idiomaActual } from "@/lib/idioma-servidor";
-import { NEGOCIO } from "@/lib/config";
+import { NEGOCIO, enlaceWhatsapp } from "@/lib/config";
+import { obtenerConfigTienda } from "@/lib/config-tienda";
 import { Diana } from "./Logo";
 
 export async function PieDePagina() {
   const idioma = await idiomaActual();
   const t = textos(idioma);
-  const categorias = await obtenerCategorias();
+  const [categorias, config] = await Promise.all([obtenerCategorias(), obtenerConfigTienda()]);
   const anio = new Date().getFullYear();
 
   return (
@@ -49,10 +50,29 @@ export async function PieDePagina() {
           <div>
             <h2 className="mb-3 text-[13px] font-extrabold">{t.contacto}</h2>
             <ul className="space-y-2 text-[13px] text-[#8c929c]">
-              <li>💬 WhatsApp</li>
-              <li>✉️ {t.correo}</li>
-              <li>📍 {t.direccion}</li>
-              <li>🕐 {t.horario}</li>
+              {config.whatsapp && (
+                <li>
+                  <a
+                    href={enlaceWhatsapp(
+                      idioma === "es" ? "Hola, quiero información." : "Hi, I'd like some info.",
+                      config.whatsapp,
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="transition hover:text-white"
+                  >
+                    💬 WhatsApp
+                  </a>
+                </li>
+              )}
+              {config.correo && (
+                <li>
+                  <a href={`mailto:${config.correo}`} className="transition hover:text-white">
+                    ✉️ {config.correo}
+                  </a>
+                </li>
+              )}
+              {config.direccion && <li>📍 {config.direccion}</li>}
             </ul>
           </div>
         </div>

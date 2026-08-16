@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { cambiarContrasena, type ResultadoCuenta } from "@/app/panel/(dentro)/cuenta/acciones";
+import { CampoClave } from "@/componentes/CampoClave";
 
 const CAMPOS = [
   { nombre: "actual", etiqueta: "Contraseña actual", autocompletado: "current-password" },
@@ -35,19 +36,13 @@ export function FormularioContrasena() {
       )}
 
       {CAMPOS.map((campo) => (
-        <div key={campo.nombre}>
-          <label htmlFor={campo.nombre} className="mb-1.5 block text-[12.5px] font-bold text-gris">
-            {campo.etiqueta}
-          </label>
-          <input
-            id={campo.nombre}
-            name={campo.nombre}
-            type="password"
-            required
-            autoComplete={campo.autocompletado}
-            className="w-full rounded-xl border-[1.5px] border-linea px-4 py-3 text-[13.5px] font-semibold outline-none transition focus:border-rojo"
-          />
-        </div>
+        <CampoClave
+          key={campo.nombre}
+          id={campo.nombre}
+          name={campo.nombre}
+          etiqueta={campo.etiqueta}
+          autoComplete={campo.autocompletado}
+        />
       ))}
 
       <p className="text-[11.5px] text-gris2">Mínimo 8 caracteres, con letras y números.</p>
