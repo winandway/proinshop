@@ -12,6 +12,12 @@ import { usuarioActual } from "@/lib/sesion";
  * "el mismo producto en rojo y en negro" ni poner la ficha técnica.
  */
 
+/** Igual que el resto del catálogo: propietario y bodega; el vendedor solo mira. */
+async function puedeEditar(): Promise<boolean> {
+  const usuario = await usuarioActual();
+  return usuario?.rol === "dueno" || usuario?.rol === "bodega";
+}
+
 function aNumero(valor: FormDataEntryValue | null): number {
   const limpio = String(valor ?? "").replace(/[^0-9.,-]/g, "").replace(",", ".");
   const numero = Number.parseFloat(limpio);
@@ -19,8 +25,7 @@ function aNumero(valor: FormDataEntryValue | null): number {
 }
 
 export async function agregarVariante(datos: FormData): Promise<void> {
-  const usuario = await usuarioActual();
-  if (!usuario) return;
+  if (!(await puedeEditar())) return;
 
   const db = await baseDeDatos();
   if (!db) return;
@@ -49,8 +54,7 @@ export async function agregarVariante(datos: FormData): Promise<void> {
 }
 
 export async function quitarVariante(datos: FormData): Promise<void> {
-  const usuario = await usuarioActual();
-  if (!usuario) return;
+  if (!(await puedeEditar())) return;
 
   const db = await baseDeDatos();
   if (!db) return;
@@ -66,8 +70,7 @@ export async function quitarVariante(datos: FormData): Promise<void> {
 }
 
 export async function agregarEspecificacion(datos: FormData): Promise<void> {
-  const usuario = await usuarioActual();
-  if (!usuario) return;
+  if (!(await puedeEditar())) return;
 
   const db = await baseDeDatos();
   if (!db) return;
@@ -97,8 +100,7 @@ export async function agregarEspecificacion(datos: FormData): Promise<void> {
 }
 
 export async function quitarEspecificacion(datos: FormData): Promise<void> {
-  const usuario = await usuarioActual();
-  if (!usuario) return;
+  if (!(await puedeEditar())) return;
 
   const db = await baseDeDatos();
   if (!db) return;

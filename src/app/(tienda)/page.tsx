@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Banner } from "@/componentes/Banner";
 import { TarjetaProducto } from "@/componentes/TarjetaProducto";
-import { contarProductosPorCategoria, obtenerCategorias, obtenerProductos } from "@/lib/catalogo";
+import { contarProductosPorCategoria, obtenerCategoriasConProductos, obtenerProductos } from "@/lib/catalogo";
 import { texto, textos } from "@/lib/i18n";
 import { obtenerConfigTienda } from "@/lib/config-tienda";
 import { idiomaActual } from "@/lib/idioma-servidor";
@@ -9,12 +9,16 @@ import { idiomaActual } from "@/lib/idioma-servidor";
 export default async function Portada() {
   const idioma = await idiomaActual();
   const t = textos(idioma);
-  const [categorias, destacados, conteo, config] = await Promise.all([
-    obtenerCategorias(),
+  const [categorias, marcados, conteo, config] = await Promise.all([
+    obtenerCategoriasConProductos(),
     obtenerProductos({ destacados: true }),
     contarProductosPorCategoria(),
     obtenerConfigTienda(),
   ]);
+
+  // Si el dueño todavía no marcó ninguno como destacado, la portada muestra
+  // lo último que cargó: una portada con la sección vacía parece abandonada.
+  const destacados = (marcados.length > 0 ? marcados : await obtenerProductos()).slice(0, 8);
 
   const confianza = [
     { emoji: "🚢", titulo: t.importacionDirecta, detalle: t.importacionDirectaTexto },

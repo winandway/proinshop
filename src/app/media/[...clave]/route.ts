@@ -1,4 +1,12 @@
 import { bucket } from "@/lib/d1";
+import { usuarioActual } from "@/lib/sesion";
+
+/**
+ * Carpetas que solo ve el equipo del negocio. Los recibos de los gastos son
+ * papeles internos: antes cualquiera que adivinara el nombre del archivo los
+ * podía abrir.
+ */
+const CARPETAS_PRIVADAS = ["recibos/"];
 
 /**
  * Sirve las fotos de los productos desde el bucket del sitio (`env.BUCKET`).
@@ -12,6 +20,11 @@ export async function GET(
 ) {
   const { clave } = await params;
   const ruta = clave.join("/");
+  const privada = CARPETAS_PRIVADAS.some((carpeta) => ruta.startsWith(carpeta));
+
+  if (privada && !(await usuarioActual())) {
+    return new Response("No encontrado", { status: 404 });
+  }
 
   const almacen = await bucket();
   if (!almacen) {
@@ -45,7 +58,11 @@ export async function GET(
   }
 
   // Las fotos se guardan con nombre único al subirlas: se pueden cachear fuerte.
-  cabeceras.set("cache-control", "public, max-age=31536000, immutable");
+  // Lo privado no se guarda en ninguna caché compartida.
+  cabeceras.set(
+    "cache-control",
+    privada ? "private, no-store" : "public, max-age=31536000, immutable",
+  );
 
   return new Response(objeto.body as unknown as BodyInit, { headers: cabeceras });
 }

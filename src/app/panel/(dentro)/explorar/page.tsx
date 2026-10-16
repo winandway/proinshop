@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { usuarioActual } from "@/lib/sesion";
+import { esCuentaDeSoporte } from "@/lib/contrasenas";
 
 export const metadata: Metadata = { title: "Explorar", robots: { index: false } };
 
@@ -36,6 +37,7 @@ const SECCIONES = [
 
 export default async function Explorar() {
   const usuario = await usuarioActual();
+  const soporte = usuario ? esCuentaDeSoporte(usuario.nombre, usuario.correo) : false;
 
   return (
     <>
@@ -70,6 +72,15 @@ export default async function Explorar() {
           </section>
         );
       })}
+
+      {soporte && (
+        <Link
+          href="/panel/soporte"
+          className="mb-3 block rounded-2xl border border-dashed border-gris2 bg-white p-4 text-center text-[13px] font-bold transition hover:bg-crema"
+        >
+          🛠 Soporte: franja de estado del trabajo
+        </Link>
+      )}
 
       <a
         href="/guia"

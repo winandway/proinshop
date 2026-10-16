@@ -1,6 +1,7 @@
 "use server";
 
 import { baseDeDatos } from "@/lib/d1";
+import { obtenerConfigTienda } from "@/lib/config-tienda";
 
 export type LineaPedido = {
   productoSlug: string;
@@ -21,7 +22,6 @@ export async function guardarPedido(datos: {
   entrega: "domicilio" | "local";
   pago: "transferencia" | "tarjeta" | "contraentrega";
   lineas: LineaPedido[];
-  envio: number;
 }): Promise<ResultadoPedido> {
   const db = await baseDeDatos();
   if (!db) return { error: "No se pudo conectar con la tienda" };
@@ -33,31 +33,66 @@ export async function guardarPedido(datos: {
 
   const slugs = datos.lineas.map((l) => l.productoSlug);
   const marcas = slugs.map(() => "?").join(",");
+  // Solo lo publicado se puede pedir: un producto escondido no se vende
+  // aunque alguien arme el pedido a mano.
   const { results: productos } = await db
-    .prepare(`SELECT id, slug, nombre_es, precio FROM producto WHERE slug IN (${marcas})`)
+    .prepare(
+      `SELECT id, slug, nombre_es, precio FROM producto WHERE publicado = 1 AND slug IN (${marcas})`,
+    )
     .bind(...slugs)
     .all<{ id: number; slug: string; nombre_es: string; precio: number }>();
 
+  // El color, la talla o la potencia que eligió el cliente viajan con el
+  // pedido. Antes se perdían: el dueño no sabía qué variante despachar y el
+  // recargo de la variante no se cobraba.
+  const idsVariante = datos.lineas
+    .map((l) => l.varianteId)
+    .filter((id): id is number => Number.isInteger(id) && (id as number) > 0);
+  const variantes = idsVariante.length
+    ? (
+        await db
+          .prepare(
+            `SELECT id, producto_id, nombre_es, precio_extra FROM variante
+             WHERE id IN (${idsVariante.map(() => "?").join(",")})`,
+          )
+          .bind(...idsVariante)
+          .all<{ id: number; producto_id: number; nombre_es: string; precio_extra: number }>()
+      ).results
+    : [];
+
   // Los precios salen de la base, nunca del navegador.
   let subtotal = 0;
-  const items: { productoId: number; descripcion: string; cantidad: number; precio: number }[] = [];
+  const items: {
+    productoId: number;
+    varianteId: number | null;
+    descripcion: string;
+    cantidad: number;
+    precio: number;
+  }[] = [];
 
   for (const linea of datos.lineas) {
     const producto = productos.find((p) => p.slug === linea.productoSlug);
     if (!producto) continue;
-    const cantidad = Math.max(1, Math.round(linea.cantidad));
-    subtotal += producto.precio * cantidad;
+    const variante =
+      variantes.find((v) => v.id === linea.varianteId && v.producto_id === producto.id) ?? null;
+    const cantidad = Math.min(999, Math.max(1, Math.round(linea.cantidad)));
+    const precio = producto.precio + (variante?.precio_extra ?? 0);
+    subtotal += precio * cantidad;
     items.push({
       productoId: producto.id,
-      descripcion: producto.nombre_es,
+      varianteId: variante?.id ?? null,
+      descripcion: variante ? `${producto.nombre_es} (${variante.nombre_es})` : producto.nombre_es,
       cantidad,
-      precio: producto.precio,
+      precio,
     });
   }
 
   if (items.length === 0) return { error: "Los productos del carrito ya no están disponibles" };
 
-  const envio = datos.entrega === "domicilio" ? Math.max(0, datos.envio) : 0;
+  // El envío también sale del panel: si viniera del navegador, cualquiera
+  // podría mandarlo en cero.
+  const config = await obtenerConfigTienda();
+  const envio = datos.entrega === "domicilio" ? Math.max(0, config.costoEnvio) : 0;
   const total = subtotal + envio;
 
   // Número correlativo y legible para el dueño y el cliente.
@@ -92,10 +127,10 @@ export async function guardarPedido(datos: {
   for (const item of items) {
     await db
       .prepare(
-        `INSERT INTO pedido_item (pedido_id, producto_id, descripcion, cantidad, precio_unit)
-         VALUES (?, ?, ?, ?, ?)`,
+        `INSERT INTO pedido_item (pedido_id, producto_id, variante_id, descripcion, cantidad, precio_unit)
+         VALUES (?, ?, ?, ?, ?, ?)`,
       )
-      .bind(pedidoId, item.productoId, item.descripcion, item.cantidad, item.precio)
+      .bind(pedidoId, item.productoId, item.varianteId, item.descripcion, item.cantidad, item.precio)
       .run();
   }
 

@@ -3,9 +3,20 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { baseDeDatos, bucket } from "@/lib/d1";
-import { usuarioActual } from "@/lib/sesion";
+import { usuarioActual, type UsuarioSesion } from "@/lib/sesion";
 
 export type ResultadoProducto = { error?: string };
+
+/**
+ * Quién puede tocar el catálogo: el propietario y bodega. El vendedor solo lo
+ * consulta. La regla vive aquí, en el servidor: esconder el botón no basta,
+ * porque la acción se puede llamar igual.
+ */
+async function editorDeCatalogo(): Promise<UsuarioSesion | null> {
+  const usuario = await usuarioActual();
+  if (!usuario || (usuario.rol !== "dueno" && usuario.rol !== "bodega")) return null;
+  return usuario;
+}
 
 const TAMANO_MAXIMO_FOTO = 15 * 1024 * 1024;
 
@@ -50,8 +61,8 @@ export async function crearProducto(
   _previo: ResultadoProducto,
   datos: FormData,
 ): Promise<ResultadoProducto> {
-  const usuario = await usuarioActual();
-  if (!usuario) return { error: "Tu sesión venció" };
+  const usuario = await editorDeCatalogo();
+  if (!usuario) return { error: "Tu cuenta no tiene permiso para cargar productos" };
 
   const db = await baseDeDatos();
   if (!db) return { error: "La base de datos no está disponible" };
@@ -68,7 +79,9 @@ export async function crearProducto(
   const categoriaId = Number(datos.get("categoria_id")) || null;
   const codigoBarras = String(datos.get("codigo_barras") ?? "").trim() || null;
   const descripcion = String(datos.get("descripcion") ?? "").trim() || null;
+  const descripcionIngles = String(datos.get("descripcion_en") ?? "").trim() || null;
   const publicado = datos.get("publicado") === "on" ? 1 : 0;
+  const destacado = datos.get("destacado") === "on" ? 1 : 0;
 
   // Slug único: si ya existe uno igual, se le añade un número.
   const base = aSlug(nombre) || "producto";
@@ -92,9 +105,9 @@ export async function crearProducto(
   const insertado = await db
     .prepare(
       `INSERT INTO producto
-         (categoria_id, slug, nombre_es, nombre_en, descripcion_es, sku, codigo_barras,
-          costo, precio, stock, publicado, destacado, emoji)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, '📦')`,
+         (categoria_id, slug, nombre_es, nombre_en, descripcion_es, descripcion_en, sku,
+          codigo_barras, costo, precio, stock, publicado, destacado, emoji)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '📦')`,
     )
     .bind(
       categoriaId,
@@ -102,12 +115,14 @@ export async function crearProducto(
       nombre,
       nombreIngles || null,
       descripcion,
+      descripcionIngles,
       String(datos.get("sku") ?? "").trim() || null,
       codigoBarras,
       costo,
       precio,
       stock,
       publicado,
+      destacado,
     )
     .run();
 
@@ -140,8 +155,8 @@ export async function actualizarProducto(
   _previo: ResultadoProducto,
   datos: FormData,
 ): Promise<ResultadoProducto> {
-  const usuario = await usuarioActual();
-  if (!usuario) return { error: "Tu sesión venció" };
+  const usuario = await editorDeCatalogo();
+  if (!usuario) return { error: "Tu cuenta no tiene permiso para editar productos" };
 
   const db = await baseDeDatos();
   if (!db) return { error: "La base de datos no está disponible" };
@@ -173,8 +188,8 @@ export async function actualizarProducto(
   await db
     .prepare(
       `UPDATE producto SET
-         categoria_id = ?, nombre_es = ?, nombre_en = ?, descripcion_es = ?,
-         sku = ?, codigo_barras = ?, costo = ?, precio = ?, stock = ?, publicado = ?
+         categoria_id = ?, nombre_es = ?, nombre_en = ?, descripcion_es = ?, descripcion_en = ?,
+         sku = ?, codigo_barras = ?, costo = ?, precio = ?, stock = ?, publicado = ?, destacado = ?
        WHERE id = ?`,
     )
     .bind(
@@ -182,20 +197,27 @@ export async function actualizarProducto(
       nombre,
       String(datos.get("nombre_en") ?? "").trim() || null,
       String(datos.get("descripcion") ?? "").trim() || null,
+      String(datos.get("descripcion_en") ?? "").trim() || null,
       String(datos.get("sku") ?? "").trim() || null,
       String(datos.get("codigo_barras") ?? "").trim() || null,
       aNumero(datos.get("costo")),
       precio,
       stock,
       datos.get("publicado") === "on" ? 1 : 0,
+      datos.get("destacado") === "on" ? 1 : 0,
       id,
     )
     .run();
 
+  // La foto nueva pasa adelante de las que ya había. Antes entraba con el
+  // mismo orden que la vieja y la tienda seguía mostrando la anterior.
   if (claveFoto) {
     await db
-      .prepare("INSERT INTO foto (producto_id, clave_r2, clave_r2_web, orden) VALUES (?, ?, ?, 0)")
-      .bind(id, claveFoto, claveFoto)
+      .prepare(
+        `INSERT INTO foto (producto_id, clave_r2, clave_r2_web, orden)
+         VALUES (?, ?, ?, (SELECT COALESCE(MIN(orden), 1) - 1 FROM foto WHERE producto_id = ?))`,
+      )
+      .bind(id, claveFoto, claveFoto, id)
       .run();
   }
 
@@ -219,7 +241,7 @@ export async function actualizarProducto(
 }
 
 export async function alternarPublicado(datos: FormData): Promise<void> {
-  const usuario = await usuarioActual();
+  const usuario = await editorDeCatalogo();
   if (!usuario) return;
 
   const db = await baseDeDatos();
@@ -235,7 +257,7 @@ export async function alternarPublicado(datos: FormData): Promise<void> {
 }
 
 export async function crearCategoria(datos: FormData): Promise<void> {
-  const usuario = await usuarioActual();
+  const usuario = await editorDeCatalogo();
   if (!usuario) return;
 
   const db = await baseDeDatos();
@@ -243,6 +265,7 @@ export async function crearCategoria(datos: FormData): Promise<void> {
 
   const nombre = String(datos.get("nombre") ?? "").trim();
   if (nombre.length < 2) return;
+  const nombreIngles = String(datos.get("nombre_en") ?? "").trim() || null;
 
   const orden = await db
     .prepare("SELECT COALESCE(MAX(orden), 0) + 1 AS siguiente FROM categoria")
@@ -250,12 +273,97 @@ export async function crearCategoria(datos: FormData): Promise<void> {
 
   await db
     .prepare(
-      `INSERT OR IGNORE INTO categoria (slug, nombre_es, emoji, orden, visible)
-       VALUES (?, ?, '📦', ?, 1)`,
+      `INSERT OR IGNORE INTO categoria (slug, nombre_es, nombre_en, emoji, orden, visible)
+       VALUES (?, ?, ?, '📦', ?, 1)`,
     )
-    .bind(aSlug(nombre), nombre, orden?.siguiente ?? 1)
+    .bind(aSlug(nombre), nombre, nombreIngles, orden?.siguiente ?? 1)
     .run();
 
   revalidatePath("/panel/inventario");
+  revalidatePath("/panel/inventario/categorias");
   revalidatePath("/");
+}
+
+/**
+ * Cambia el nombre de la categoría en los dos idiomas. El enlace de la
+ * categoría no cambia, para no romper los que ya se compartieron.
+ */
+export async function editarCategoria(datos: FormData): Promise<void> {
+  const usuario = await editorDeCatalogo();
+  if (!usuario) return;
+
+  const db = await baseDeDatos();
+  if (!db) return;
+
+  const id = Number(datos.get("id"));
+  const nombre = String(datos.get("nombre") ?? "").trim();
+  if (!id || nombre.length < 2) return;
+
+  await db
+    .prepare("UPDATE categoria SET nombre_es = ?, nombre_en = ?, emoji = ? WHERE id = ?")
+    .bind(
+      nombre,
+      String(datos.get("nombre_en") ?? "").trim() || null,
+      String(datos.get("emoji") ?? "").trim().slice(0, 8) || "📦",
+      id,
+    )
+    .run();
+
+  revalidatePath("/panel/inventario/categorias");
+  revalidatePath("/panel/inventario");
+  revalidatePath("/");
+}
+
+/** Esconde o vuelve a mostrar la categoría en la tienda, sin borrar nada. */
+export async function alternarCategoria(datos: FormData): Promise<void> {
+  const usuario = await editorDeCatalogo();
+  if (!usuario) return;
+
+  const db = await baseDeDatos();
+  if (!db) return;
+
+  const id = Number(datos.get("id"));
+  if (!id) return;
+
+  await db.prepare("UPDATE categoria SET visible = 1 - visible WHERE id = ?").bind(id).run();
+
+  revalidatePath("/panel/inventario/categorias");
+  revalidatePath("/panel/inventario");
+  revalidatePath("/");
+}
+
+/**
+ * Elimina el producto. Solo el propietario.
+ *
+ * Las ventas, pedidos y cotizaciones donde aparece se conservan con el nombre
+ * que tenía: el balance no cambia. Lo que se va es la ficha, sus fotos, sus
+ * variantes y su historial de stock.
+ */
+export async function eliminarProducto(datos: FormData): Promise<void> {
+  const usuario = await usuarioActual();
+  if (!usuario || usuario.rol !== "dueno") return;
+
+  const db = await baseDeDatos();
+  if (!db) return;
+
+  const id = Number(datos.get("id"));
+  if (!id) return;
+
+  // Se hace a mano y en orden, sin depender de que la base aplique las
+  // cascadas: así no queda nada colgando aunque esa opción esté apagada.
+  await db.batch([
+    db.prepare("UPDATE venta_item SET producto_id = NULL, variante_id = NULL WHERE producto_id = ?").bind(id),
+    db.prepare("UPDATE pedido_item SET producto_id = NULL, variante_id = NULL WHERE producto_id = ?").bind(id),
+    db.prepare("UPDATE cotizacion_item SET producto_id = NULL WHERE producto_id = ?").bind(id),
+    db.prepare("UPDATE compra_item SET producto_id = NULL, variante_id = NULL WHERE producto_id = ?").bind(id),
+    db.prepare("DELETE FROM movimiento_inventario WHERE producto_id = ?").bind(id),
+    db.prepare("DELETE FROM especificacion WHERE producto_id = ?").bind(id),
+    db.prepare("DELETE FROM variante WHERE producto_id = ?").bind(id),
+    db.prepare("DELETE FROM foto WHERE producto_id = ?").bind(id),
+    db.prepare("DELETE FROM producto WHERE id = ?").bind(id),
+  ]);
+
+  revalidatePath("/panel/inventario");
+  revalidatePath("/");
+  redirect("/panel/inventario?eliminado=1");
 }

@@ -101,3 +101,28 @@ body {
 .sin-barra::-webkit-scrollbar {
   display: none;
 }
+
+/* Barra de la franja "estamos trabajando": se mueve sola, sin porcentajes
+   inventados. Quien prefiere menos movimiento la ve quieta. */
+@keyframes avance {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 28px 0;
+  }
+}
+.barra-proceso {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-gris2) 0 7px,
+    var(--color-linea) 7px 14px
+  );
+  background-size: 28px 100%;
+  animation: avance 1.2s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .barra-proceso {
+    animation: none;
+  }
+}

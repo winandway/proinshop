@@ -83,6 +83,19 @@ export function correoValido(correo: string): boolean {
 const DOMINIOS_SOPORTE = ["windoce.com"];
 
 /**
+ * ¿Es una cuenta nuestra? Por el dominio del correo o porque el nombre dice
+ * "Soporte", que es como el cliente la reconoce en su lista de usuarios.
+ */
+export function esCuentaDeSoporte(nombre: string, correo: string): boolean {
+  const dominio = correo.trim().toLowerCase().split("@")[1] ?? "";
+  const sinTildes = nombre
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+  return DOMINIOS_SOPORTE.includes(dominio) || sinTildes.includes("soporte");
+}
+
+/**
  * Nuestras cuentas dentro del negocio de un cliente deben decir "Soporte".
  *
  * Cuando el dueño mire la lista de usuarios con permisos altos, tiene que

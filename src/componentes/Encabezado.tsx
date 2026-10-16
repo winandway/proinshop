@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { obtenerCategorias } from "@/lib/catalogo";
+import { obtenerCategoriasConProductos } from "@/lib/catalogo";
 import { textos } from "@/lib/i18n";
 import { idiomaActual } from "@/lib/idioma-servidor";
 import { texto } from "@/lib/i18n";
@@ -11,7 +11,7 @@ import { Buscador } from "./Buscador";
 export async function Encabezado() {
   const idioma = await idiomaActual();
   const t = textos(idioma);
-  const categorias = await obtenerCategorias();
+  const categorias = await obtenerCategoriasConProductos();
 
   return (
     <header className="sticky top-0 z-40 bg-white">

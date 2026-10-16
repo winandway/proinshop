@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { TarjetaProducto } from "@/componentes/TarjetaProducto";
 import { OrdenarPor, type Orden } from "@/componentes/OrdenarPor";
-import { obtenerCategoria, obtenerCategorias, obtenerProductos } from "@/lib/catalogo";
+import { obtenerCategoria, obtenerCategoriasConProductos, obtenerProductos } from "@/lib/catalogo";
 import { texto, textos } from "@/lib/i18n";
 import { obtenerConfigTienda } from "@/lib/config-tienda";
 import { idiomaActual } from "@/lib/idioma-servidor";
@@ -45,7 +45,7 @@ export default async function PaginaCategoria({
 
   const [productos, categorias, config] = await Promise.all([
     obtenerProductos({ categoriaSlug: slug, orden }),
-    obtenerCategorias(),
+    obtenerCategoriasConProductos(),
     obtenerConfigTienda(),
   ]);
 

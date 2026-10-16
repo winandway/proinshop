@@ -1,18 +1,23 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { FormularioProducto } from "@/componentes/panel/FormularioProducto";
 import { baseDeDatos } from "@/lib/d1";
+import { usuarioActual } from "@/lib/sesion";
 import { crearProducto } from "../acciones";
 
 export const metadata: Metadata = { title: "Crear producto", robots: { index: false } };
 
 export default async function NuevoProducto() {
+  const usuario = await usuarioActual();
+  if (!usuario || usuario.rol === "vendedor") redirect("/panel/inventario");
+
   const db = await baseDeDatos();
   const categorias = db
     ? (
         await db
-          .prepare("SELECT id, nombre_es FROM categoria WHERE visible = 1 ORDER BY orden")
-          .all<{ id: number; nombre_es: string }>()
+          .prepare("SELECT id, nombre_es, visible FROM categoria ORDER BY visible DESC, orden")
+          .all<{ id: number; nombre_es: string; visible: number }>()
       ).results
     : [];
 
@@ -32,7 +37,10 @@ export default async function NuevoProducto() {
       <div className="rounded-2xl bg-white p-4 shadow-sm">
         <FormularioProducto
           accion={crearProducto}
-          categorias={categorias.map((c) => ({ id: c.id, nombre: c.nombre_es }))}
+          categorias={categorias.map((c) => ({
+            id: c.id,
+            nombre: c.visible ? c.nombre_es : `${c.nombre_es} (oculta)`,
+          }))}
           boton="Crear producto"
         />
       </div>

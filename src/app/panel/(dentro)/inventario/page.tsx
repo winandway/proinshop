@@ -22,11 +22,13 @@ type FilaInventario = {
 export default async function Inventario({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; categoria?: string }>;
+  searchParams: Promise<{ q?: string; categoria?: string; eliminado?: string }>;
 }) {
-  const { q, categoria } = await searchParams;
+  const { q, categoria, eliminado } = await searchParams;
   const usuario = await usuarioActual();
   const esDueno = usuario?.rol === "dueno";
+  // El vendedor consulta precios y existencias; no edita el catálogo.
+  const editaCatalogo = usuario?.rol === "dueno" || usuario?.rol === "bodega";
   const db = await baseDeDatos();
 
   const resumen = db
@@ -63,7 +65,7 @@ export default async function Inventario({
           .prepare(
             `SELECT p.id, p.nombre_es, p.precio, p.costo, p.stock, p.publicado, p.emoji,
                     c.nombre_es AS categoria,
-                    (SELECT clave_r2_web FROM foto WHERE producto_id = p.id ORDER BY orden LIMIT 1) AS foto
+                    (SELECT clave_r2_web FROM foto WHERE producto_id = p.id ORDER BY orden, id DESC LIMIT 1) AS foto
              FROM producto p LEFT JOIN categoria c ON c.id = p.categoria_id
              ${condiciones.length ? "WHERE " + condiciones.join(" AND ") : ""}
              ORDER BY p.id DESC`,
@@ -74,7 +76,16 @@ export default async function Inventario({
     : [];
 
   return (
-    <div className="pb-36">
+    <div className={editaCatalogo ? "pb-36" : "pb-6"}>
+      {eliminado && (
+        <p
+          role="status"
+          className="mb-3 rounded-xl border border-verde bg-verde-suave px-3.5 py-2.5 text-[12.5px] font-bold text-verde"
+        >
+          Producto eliminado. Ya no aparece en la tienda.
+        </p>
+      )}
+
       {esDueno && (
         <Link
           href="/panel/balance"
@@ -136,15 +147,20 @@ export default async function Inventario({
         <p className="rounded-2xl border border-linea bg-white p-6 text-center text-[13px] text-gris">
           {q || categoria
             ? "No hay productos con ese filtro."
-            : "Todavía no hay productos. Carga el primero con el botón de abajo."}
+            : editaCatalogo
+              ? "Todavía no hay productos. Carga el primero con el botón de abajo."
+              : "Todavía no hay productos cargados."}
         </p>
       ) : (
         <ul className="space-y-2.5">
           {productos.map((producto) => (
             <li key={producto.id} className="rounded-2xl bg-white shadow-sm">
               <Link
-                href={`/panel/inventario/${producto.id}`}
-                className="flex items-center gap-3 p-3 transition hover:opacity-80"
+                href={editaCatalogo ? `/panel/inventario/${producto.id}` : "#"}
+                aria-disabled={!editaCatalogo}
+                className={`flex items-center gap-3 p-3 transition ${
+                  editaCatalogo ? "hover:opacity-80" : "pointer-events-none"
+                }`}
               >
                 <span className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-crema text-2xl">
                   {producto.foto ? (
@@ -181,34 +197,38 @@ export default async function Inventario({
               </Link>
 
               {/* Publicar o esconder sin entrar a editar: es lo que más se usa. */}
-              <form action={alternarPublicado} className="mt-1.5 px-3 pb-1">
-                <input type="hidden" name="id" value={producto.id} />
-                <button
-                  type="submit"
-                  className="text-[11px] font-bold text-gris transition hover:text-rojo"
-                >
-                  {producto.publicado === 1 ? "Quitar de la tienda" : "Publicar en la tienda"}
-                </button>
-              </form>
+              {editaCatalogo && (
+                <form action={alternarPublicado} className="mt-1.5 px-3 pb-1">
+                  <input type="hidden" name="id" value={producto.id} />
+                  <button
+                    type="submit"
+                    className="text-[11px] font-bold text-gris transition hover:text-rojo"
+                  >
+                    {producto.publicado === 1 ? "Quitar de la tienda" : "Publicar en la tienda"}
+                  </button>
+                </form>
+              )}
             </li>
           ))}
         </ul>
       )}
 
-      <div className="fixed inset-x-0 bottom-[74px] z-30 border-t border-linea bg-white p-3.5 md:bottom-0 md:left-auto md:right-0 md:w-[calc(100%-14rem)] md:max-w-3xl">
-        <Link
-          href="/panel/inventario/nuevo"
-          className="block rounded-xl bg-tinta py-3.5 text-center text-sm font-extrabold text-white transition hover:opacity-90"
-        >
-          ＋ Crear producto
-        </Link>
-        <Link
-          href="/panel/inventario/categorias"
-          className="mt-2 block rounded-xl border-[1.5px] border-linea py-3.5 text-center text-sm font-extrabold transition hover:border-gris2"
-        >
-          ⊞ Categorías
-        </Link>
-      </div>
+      {editaCatalogo && (
+        <div className="fixed inset-x-0 bottom-[74px] z-30 border-t border-linea bg-white p-3.5 md:bottom-0 md:left-auto md:right-0 md:w-[calc(100%-14rem)] md:max-w-3xl">
+          <Link
+            href="/panel/inventario/nuevo"
+            className="block rounded-xl bg-tinta py-3.5 text-center text-sm font-extrabold text-white transition hover:opacity-90"
+          >
+            ＋ Crear producto
+          </Link>
+          <Link
+            href="/panel/inventario/categorias"
+            className="mt-2 block rounded-xl border-[1.5px] border-linea py-3.5 text-center text-sm font-extrabold transition hover:border-gris2"
+          >
+            ⊞ Categorías
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

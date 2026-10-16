@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { BarraInferior, MenuLateral } from "@/componentes/panel/BarraInferior";
+import { FranjaTrabajo } from "@/componentes/panel/FranjaTrabajo";
 import { NOMBRE_ROL, usuarioActual } from "@/lib/sesion";
 import { salir } from "../acciones";
 
@@ -36,6 +37,8 @@ export default async function DisenoPanel({ children }: { children: React.ReactN
           </form>
         </div>
       </header>
+
+      <FranjaTrabajo />
 
       <div className="mx-auto flex max-w-5xl">
         <MenuLateral esDueno={usuario.rol === "dueno"} />

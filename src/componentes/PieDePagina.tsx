@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { obtenerCategorias } from "@/lib/catalogo";
+import { obtenerCategoriasConProductos } from "@/lib/catalogo";
 import { texto, textos } from "@/lib/i18n";
 import { idiomaActual } from "@/lib/idioma-servidor";
 import { NEGOCIO, enlaceWhatsapp } from "@/lib/config";
@@ -9,7 +9,7 @@ import { Diana } from "./Logo";
 export async function PieDePagina() {
   const idioma = await idiomaActual();
   const t = textos(idioma);
-  const [categorias, config] = await Promise.all([obtenerCategorias(), obtenerConfigTienda()]);
+  const [categorias, config] = await Promise.all([obtenerCategoriasConProductos(), obtenerConfigTienda()]);
   const anio = new Date().getFullYear();
 
   return (

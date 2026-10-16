@@ -1,12 +1,14 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { FormularioProducto } from "@/componentes/panel/FormularioProducto";
 import { BotonCopiar } from "@/componentes/panel/BotonCopiar";
 import { DetallesProducto } from "@/componentes/panel/DetallesProducto";
 import { baseDeDatos } from "@/lib/d1";
 import { NEGOCIO } from "@/lib/config";
-import { actualizarProducto } from "../acciones";
+import { usuarioActual } from "@/lib/sesion";
+import { MenuTresPuntos } from "@/componentes/panel/MenuTresPuntos";
+import { actualizarProducto, eliminarProducto } from "../acciones";
 
 export const metadata: Metadata = { title: "Producto", robots: { index: false } };
 
@@ -20,12 +22,16 @@ export default async function EditarProducto({
   const { id } = await params;
   const { nuevo } = await searchParams;
 
+  // El vendedor consulta el inventario, pero no edita fichas ni ve costos.
+  const usuario = await usuarioActual();
+  if (!usuario || usuario.rol === "vendedor") redirect("/panel/inventario");
+
   const db = await baseDeDatos();
   if (!db) notFound();
 
   const producto = await db
     .prepare(
-      `SELECT p.*, (SELECT clave_r2_web FROM foto WHERE producto_id = p.id ORDER BY orden LIMIT 1) AS foto
+      `SELECT p.*, (SELECT clave_r2_web FROM foto WHERE producto_id = p.id ORDER BY orden, id DESC LIMIT 1) AS foto
        FROM producto p WHERE p.id = ?`,
     )
     .bind(Number(id))
@@ -35,12 +41,14 @@ export default async function EditarProducto({
       nombre_es: string;
       nombre_en: string | null;
       descripcion_es: string | null;
+      descripcion_en: string | null;
       sku: string | null;
       codigo_barras: string | null;
       costo: number;
       precio: number;
       stock: number;
       publicado: number;
+      destacado: number;
       categoria_id: number | null;
       foto: string | null;
     }>();
@@ -49,8 +57,8 @@ export default async function EditarProducto({
 
   const categorias = (
     await db
-      .prepare("SELECT id, nombre_es FROM categoria WHERE visible = 1 ORDER BY orden")
-      .all<{ id: number; nombre_es: string }>()
+      .prepare("SELECT id, nombre_es, visible FROM categoria ORDER BY visible DESC, orden")
+      .all<{ id: number; nombre_es: string; visible: number }>()
   ).results;
 
   const variantes = (
@@ -109,6 +117,16 @@ export default async function EditarProducto({
         <h1 className="min-w-0 flex-1 truncate text-lg font-black tracking-tight">
           {producto.nombre_es}
         </h1>
+        {usuario.rol === "dueno" && (
+          <MenuTresPuntos
+            etiqueta="Eliminar producto"
+            pregunta="¿Eliminar este producto?"
+            detalle="Sale de la tienda y del inventario. Las ventas que ya tuvo se conservan en el balance."
+            confirmar="Sí, eliminar"
+            accion={eliminarProducto}
+            campos={{ id: producto.id }}
+          />
+        )}
       </div>
 
       {nuevo && (
@@ -150,13 +168,17 @@ export default async function EditarProducto({
       <div className="rounded-2xl bg-white p-4 shadow-sm">
         <FormularioProducto
           accion={actualizarProducto}
-          categorias={categorias.map((c) => ({ id: c.id, nombre: c.nombre_es }))}
+          categorias={categorias.map((c) => ({
+            id: c.id,
+            nombre: c.visible ? c.nombre_es : `${c.nombre_es} (oculta)`,
+          }))}
           boton="Guardar cambios"
           producto={{
             id: producto.id,
             nombre: producto.nombre_es,
             nombreIngles: producto.nombre_en ?? "",
             descripcion: producto.descripcion_es ?? "",
+            descripcionIngles: producto.descripcion_en ?? "",
             sku: producto.sku ?? "",
             codigoBarras: producto.codigo_barras ?? "",
             costo: producto.costo,
@@ -164,6 +186,7 @@ export default async function EditarProducto({
             stock: producto.stock,
             categoriaId: producto.categoria_id,
             publicado: producto.publicado === 1,
+            destacado: producto.destacado === 1,
             foto: producto.foto,
           }}
         />

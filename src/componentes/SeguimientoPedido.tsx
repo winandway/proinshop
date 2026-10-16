@@ -73,7 +73,7 @@ export function SeguimientoPedido({
                   indice < actual
                     ? "bg-verde"
                     : indice === actual
-                      ? "bg-rojo ring-4 ring-rojo-suave"
+                      ? "bg-verde ring-4 ring-verde-suave"
                       : "bg-linea"
                 }`}
               />

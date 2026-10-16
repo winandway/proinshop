@@ -50,14 +50,14 @@ async function armarProductos(filas: FilaProducto[]): Promise<Producto[]> {
       .all(),
     db
       .prepare(
-        `SELECT * FROM especificacion WHERE producto_id IN (${marcas}) ORDER BY producto_id, orden`,
+        `SELECT * FROM especificacion WHERE producto_id IN (${marcas}) ORDER BY producto_id, orden, id`,
       )
       .bind(...ids)
       .all(),
     db
       .prepare(
         `SELECT producto_id, clave_r2_web, clave_r2 FROM foto
-         WHERE producto_id IN (${marcas}) ORDER BY producto_id, orden`,
+         WHERE producto_id IN (${marcas}) ORDER BY producto_id, orden, id DESC`,
       )
       .bind(...ids)
       .all(),
@@ -151,6 +151,19 @@ export async function obtenerCategorias(): Promise<Categoria[]> {
     orden: c.orden,
     visible: true,
   }));
+}
+
+/**
+ * Las categorías que se muestran en los menús de la tienda: solo las que
+ * tienen algo publicado. Una categoría vacía en el menú es un callejón sin
+ * salida para el cliente.
+ */
+export async function obtenerCategoriasConProductos(): Promise<Categoria[]> {
+  const [categorias, conteo] = await Promise.all([
+    obtenerCategorias(),
+    contarProductosPorCategoria(),
+  ]);
+  return categorias.filter((categoria) => (conteo[categoria.slug] ?? 0) > 0);
 }
 
 export async function obtenerCategoria(slug: string): Promise<Categoria | null> {

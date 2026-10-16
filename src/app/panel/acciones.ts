@@ -12,6 +12,7 @@ import {
   verificarContrasena,
 } from "@/lib/contrasenas";
 import { cerrarSesion, crearSesion, hayUsuarios } from "@/lib/sesion";
+import { AVISO_DEMASIADOS, anotarFallo, estaBloqueado, limpiarFallos } from "@/lib/intentos";
 
 export type Resultado = { error?: string };
 
@@ -80,6 +81,13 @@ export async function entrar(_previo: Resultado, datos: FormData): Promise<Resul
 
   if (!correo || !contrasena) return { error: "Escribe tu correo y tu contraseña" };
 
+  const cabeceras = await headers();
+  const conexion =
+    cabeceras.get("cf-connecting-ip") ?? cabeceras.get("x-forwarded-for")?.split(",")[0] ?? "local";
+
+  // El freno va antes de mirar la contraseña: pasado el límite, ni se prueba.
+  if (await estaBloqueado(db, correo, conexion)) return { error: AVISO_DEMASIADOS };
+
   const usuario = await db
     .prepare(
       `SELECT id, contrasena_hash, sal, activo FROM usuario
@@ -91,18 +99,26 @@ export async function entrar(_previo: Resultado, datos: FormData): Promise<Resul
   // Mismo mensaje exista o no el correo: decir cuál de los dos falló le
   // regalaría a un atacante la lista de correos registrados.
   const generico = { error: "Correo o contraseña incorrectos" };
-  if (!usuario) return generico;
+  if (!usuario) {
+    await anotarFallo(db, correo, conexion);
+    return generico;
+  }
 
   const correcta = await verificarContrasena(contrasena, usuario.sal, usuario.contrasena_hash);
-  if (!correcta) return generico;
+  if (!correcta) {
+    await anotarFallo(db, correo, conexion);
+    return generico;
+  }
   if (usuario.activo !== 1) return { error: "Esta cuenta está desactivada" };
+
+  await limpiarFallos(db, correo);
 
   await db
     .prepare("UPDATE usuario SET ultimo_acceso = datetime('now') WHERE id = ?")
     .bind(usuario.id)
     .run();
 
-  const agente = (await headers()).get("user-agent") ?? undefined;
+  const agente = cabeceras.get("user-agent") ?? undefined;
   await crearSesion(usuario.id, agente);
 
   redirect("/panel");

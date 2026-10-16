@@ -81,7 +81,10 @@ export default async function InicioPanel() {
           </div>
           <div className="flex-1 rounded-xl bg-white/20 px-3 py-2">
             <span className="block text-[10.5px] font-semibold opacity-90">↙ Egresos</span>
-            <b className="text-[15px] font-extrabold">-{formatearPrecio(gastos)}</b>
+            <b className="text-[15px] font-extrabold">
+              {gastos > 0 ? "-" : ""}
+              {formatearPrecio(gastos)}
+            </b>
           </div>
         </div>
         <Link href="/panel/balance" className="mt-3 block text-[12.5px] font-bold">

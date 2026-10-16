@@ -3,9 +3,16 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
-import { cambiarEstadoPedido, confirmarPedido } from "../acciones";
+import { MenuTresPuntos } from "@/componentes/panel/MenuTresPuntos";
+import { cambiarEstadoPedido, cancelarPedido, confirmarPedido } from "../acciones";
 
 export const metadata: Metadata = { title: "Pedido", robots: { index: false } };
+
+const METODOS: Record<string, string> = {
+  transferencia: "Transferencia",
+  tarjeta: "Tarjeta",
+  contraentrega: "Paga al recibir",
+};
 
 const PASOS = [
   { estado: "nuevo", texto: "Pedido recibido" },
@@ -59,8 +66,28 @@ export default async function DetallePedido({ params }: { params: Promise<{ id: 
         >
           ←
         </Link>
-        <h1 className="text-lg font-black tracking-tight">Pedido #{pedido.numero}</h1>
+        <h1 className="flex-1 text-lg font-black tracking-tight">Pedido #{pedido.numero}</h1>
+        {pedido.estado !== "cancelado" && (
+          <MenuTresPuntos
+            etiqueta="Cancelar pedido"
+            pregunta="¿Cancelar este pedido?"
+            detalle={
+              pedido.venta_id
+                ? "La mercancía vuelve al inventario y la venta sale del balance."
+                : "El pedido queda anulado y no se registra ninguna venta."
+            }
+            confirmar="Sí, cancelar"
+            accion={cancelarPedido}
+            campos={{ id: pedido.id }}
+          />
+        )}
       </div>
+
+      {pedido.estado === "cancelado" && (
+        <p className="mb-3 rounded-xl border border-rojo bg-rojo-suave px-3.5 py-2.5 text-[12.5px] font-bold text-rojo-oscuro">
+          Este pedido está cancelado.
+        </p>
+      )}
 
       <ol className="mb-3 rounded-2xl bg-white p-4 shadow-sm">
         {PASOS.map((paso, indice) => (
@@ -74,7 +101,7 @@ export default async function DetallePedido({ params }: { params: Promise<{ id: 
                 indice < indiceActual
                   ? "bg-verde"
                   : indice === indiceActual
-                    ? "bg-rojo ring-4 ring-rojo-suave"
+                    ? "bg-verde ring-4 ring-verde-suave"
                     : "bg-linea"
               }`}
             />
@@ -121,11 +148,11 @@ export default async function DetallePedido({ params }: { params: Promise<{ id: 
         {pedido.direccion && <p className="text-gris">📍 {pedido.direccion}</p>}
         <p className="mt-1 text-gris">
           {pedido.entrega === "domicilio" ? "🚚 Envío a domicilio" : "🏪 Recoge en el local"} ·{" "}
-          {pedido.metodo_pago}
+          {METODOS[pedido.metodo_pago] ?? pedido.metodo_pago}
         </p>
       </div>
 
-      {pedido.estado === "nuevo" ? (
+      {pedido.estado === "cancelado" ? null : pedido.estado === "nuevo" ? (
         <form action={confirmarPedido}>
           <input type="hidden" name="id" value={pedido.id} />
           <button

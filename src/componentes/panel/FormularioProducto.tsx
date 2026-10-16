@@ -10,6 +10,7 @@ export type ProductoFormulario = {
   nombre: string;
   nombreIngles: string;
   descripcion: string;
+  descripcionIngles: string;
   sku: string;
   codigoBarras: string;
   costo: number;
@@ -17,6 +18,7 @@ export type ProductoFormulario = {
   stock: number;
   categoriaId: number | null;
   publicado: boolean;
+  destacado: boolean;
   foto: string | null;
 };
 
@@ -219,6 +221,23 @@ export function FormularioProducto({
         />
       </div>
 
+      <div>
+        <label htmlFor="descripcion_en" className="mb-1.5 block text-[12.5px] font-bold text-gris">
+          Descripción en inglés
+        </label>
+        <textarea
+          id="descripcion_en"
+          name="descripcion_en"
+          rows={3}
+          defaultValue={producto?.descripcionIngles}
+          placeholder="What it is for, what it is made of, what it includes…"
+          className={`${CAMPO} resize-y`}
+        />
+        <p className="mt-1.5 text-[11.5px] text-gris2">
+          Si la dejas vacía, en la tienda en inglés se muestra la de español.
+        </p>
+      </div>
+
       <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-[1.5px] border-verde bg-verde-suave p-3.5">
         <span aria-hidden="true" className="text-lg">
           🏪
@@ -234,6 +253,24 @@ export function FormularioProducto({
           name="publicado"
           defaultChecked={producto ? producto.publicado : true}
           className="h-5 w-5 accent-verde"
+        />
+      </label>
+
+      <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-[1.5px] border-linea p-3.5">
+        <span aria-hidden="true" className="text-lg">
+          ⭐
+        </span>
+        <span className="flex-1">
+          <span className="block text-[13px] font-extrabold">Destacar en la portada</span>
+          <span className="block text-[11px] leading-snug text-gris">
+            Sale primero, en la sección de lo más vendido
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          name="destacado"
+          defaultChecked={producto?.destacado ?? false}
+          className="h-5 w-5 accent-rojo"
         />
       </label>
 

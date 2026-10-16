@@ -66,6 +66,14 @@ ver `revisarNombreDeSoporte` en `src/lib/contrasenas.ts`.
 - `db/schema.sql` es la fuente de verdad del modelo de datos; las migraciones
   aplicadas están en `db/migraciones/`.
 
+## Documentos de trabajo
+
+- [PENDIENTES.md](PENDIENTES.md): la fila de trabajo y lo que espera por Richard (👤).
+- [CANDADOS.md](CANDADOS.md): lo que se arregló, cómo se comprueba y qué no tocar.
+  Se lee antes de cualquier rollback o actualización grande.
+- [docs/LANZAMIENTO-MVP.md](docs/LANZAMIENTO-MVP.md): cómo entra el dueño, cómo
+  está conectado todo y qué falta.
+
 ## Antes de dar algo por terminado
 
 1. `npm run lint` y `npx tsc --noEmit` sin errores.

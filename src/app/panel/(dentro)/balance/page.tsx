@@ -91,7 +91,10 @@ export default async function Balance({
           </div>
           <div className="flex justify-between">
             <dt className="text-gris">↙ Egresos</dt>
-            <dd className="text-[17px] font-black text-rojo">-{formatearPrecio(egresos)}</dd>
+            <dd className="text-[17px] font-black text-rojo">
+              {egresos > 0 ? "-" : ""}
+              {formatearPrecio(egresos)}
+            </dd>
           </div>
           <div className="flex justify-between border-t border-dashed border-linea pt-2.5">
             <dt className="font-black">Utilidad</dt>

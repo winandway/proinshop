@@ -68,7 +68,6 @@ export function FormularioCheckout({
       },
       entrega,
       pago,
-      envio: costoEnvioTienda,
       lineas: lineas.map((l) => ({
         productoSlug: l.productoSlug,
         varianteId: l.varianteId,

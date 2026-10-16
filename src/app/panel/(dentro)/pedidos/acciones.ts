@@ -37,10 +37,13 @@ export async function confirmarPedido(datos: FormData): Promise<void> {
   if (!pedido) return;
 
   const { results: items } = await db
-    .prepare("SELECT producto_id, descripcion, cantidad, precio_unit FROM pedido_item WHERE pedido_id = ?")
+    .prepare(
+      "SELECT producto_id, variante_id, descripcion, cantidad, precio_unit FROM pedido_item WHERE pedido_id = ?",
+    )
     .bind(id)
     .all<{
       producto_id: number | null;
+      variante_id: number | null;
       descripcion: string;
       cantidad: number;
       precio_unit: number;
@@ -77,11 +80,28 @@ export async function confirmarPedido(datos: FormData): Promise<void> {
   for (const item of items) {
     await db
       .prepare(
-        `INSERT INTO venta_item (venta_id, producto_id, descripcion, cantidad, precio_unit, costo_unit)
-         VALUES (?, ?, ?, ?, ?, COALESCE((SELECT costo FROM producto WHERE id = ?), 0))`,
+        `INSERT INTO venta_item (venta_id, producto_id, variante_id, descripcion, cantidad, precio_unit, costo_unit)
+         VALUES (?, ?, ?, ?, ?, ?, COALESCE((SELECT costo FROM producto WHERE id = ?), 0))`,
       )
-      .bind(ventaId, item.producto_id, item.descripcion, item.cantidad, item.precio_unit, item.producto_id)
+      .bind(
+        ventaId,
+        item.producto_id,
+        item.variante_id,
+        item.descripcion,
+        item.cantidad,
+        item.precio_unit,
+        item.producto_id,
+      )
       .run();
+
+    // La variante tiene su propio stock: si no se descuenta, la tienda sigue
+    // ofreciendo un color que ya se vendió.
+    if (item.variante_id) {
+      await db
+        .prepare("UPDATE variante SET stock = MAX(0, stock - ?) WHERE id = ?")
+        .bind(item.cantidad, item.variante_id)
+        .run();
+    }
 
     if (item.producto_id) {
       const producto = await db
@@ -98,10 +118,17 @@ export async function confirmarPedido(datos: FormData): Promise<void> {
       await db
         .prepare(
           `INSERT INTO movimiento_inventario
-             (producto_id, motivo, cantidad, stock_final, usuario_id, referencia)
-           VALUES (?, 'pedido', ?, ?, ?, ?)`,
+             (producto_id, variante_id, motivo, cantidad, stock_final, usuario_id, referencia)
+           VALUES (?, ?, 'pedido', ?, ?, ?, ?)`,
         )
-        .bind(item.producto_id, -item.cantidad, stockFinal, usuario.id, `Pedido #${pedido.numero}`)
+        .bind(
+          item.producto_id,
+          item.variante_id,
+          -item.cantidad,
+          stockFinal,
+          usuario.id,
+          `Pedido #${pedido.numero}`,
+        )
         .run();
     }
   }
@@ -125,11 +152,92 @@ export async function cambiarEstadoPedido(datos: FormData): Promise<void> {
 
   const id = Number(datos.get("id"));
   const estado = String(datos.get("estado") ?? "");
-  const permitidos = ["nuevo", "preparando", "enviado", "entregado", "cancelado"];
+  // "nuevo" no se permite: volver atrás dejaría confirmar dos veces el mismo
+  // pedido y descontar el stock doble. Cancelar tiene su propia acción porque
+  // tiene que devolver la mercancía.
+  const permitidos = ["preparando", "enviado", "entregado"];
   if (!id || !permitidos.includes(estado)) return;
 
-  await db.prepare("UPDATE pedido SET estado = ? WHERE id = ?").bind(estado, id).run();
+  await db
+    .prepare("UPDATE pedido SET estado = ? WHERE id = ? AND estado NOT IN ('nuevo', 'cancelado')")
+    .bind(estado, id)
+    .run();
 
   revalidatePath("/panel/pedidos");
   revalidatePath(`/panel/pedidos/${id}`);
+}
+
+/**
+ * Cancela el pedido. Si ya se había confirmado, deshace la venta: la
+ * mercancía vuelve al inventario y el dinero sale del balance. Sin esto, un
+ * pedido cancelado seguía contando como vendido.
+ */
+export async function cancelarPedido(datos: FormData): Promise<void> {
+  const usuario = await usuarioActual();
+  if (!usuario) return;
+
+  const db = await baseDeDatos();
+  if (!db) return;
+
+  const id = Number(datos.get("id"));
+  if (!id) return;
+
+  const pedido = await db
+    .prepare("SELECT id, numero, venta_id FROM pedido WHERE id = ? AND estado != 'cancelado'")
+    .bind(id)
+    .first<{ id: number; numero: string; venta_id: number | null }>();
+  if (!pedido) return;
+
+  if (pedido.venta_id) {
+    const { results: items } = await db
+      .prepare("SELECT producto_id, variante_id, cantidad FROM pedido_item WHERE pedido_id = ?")
+      .bind(id)
+      .all<{ producto_id: number | null; variante_id: number | null; cantidad: number }>();
+
+    for (const item of items) {
+      if (!item.producto_id) continue;
+
+      if (item.variante_id) {
+        await db
+          .prepare("UPDATE variante SET stock = stock + ? WHERE id = ?")
+          .bind(item.cantidad, item.variante_id)
+          .run();
+      }
+
+      const producto = await db
+        .prepare("UPDATE producto SET stock = stock + ? WHERE id = ? RETURNING stock")
+        .bind(item.cantidad, item.producto_id)
+        .first<{ stock: number }>();
+      if (!producto) continue;
+
+      await db
+        .prepare(
+          `INSERT INTO movimiento_inventario
+             (producto_id, variante_id, motivo, cantidad, stock_final, usuario_id, referencia)
+           VALUES (?, ?, 'devolucion', ?, ?, ?, ?)`,
+        )
+        .bind(
+          item.producto_id,
+          item.variante_id,
+          item.cantidad,
+          producto.stock,
+          usuario.id,
+          `Pedido #${pedido.numero} cancelado`,
+        )
+        .run();
+    }
+
+    await db.prepare("DELETE FROM venta_item WHERE venta_id = ?").bind(pedido.venta_id).run();
+    await db.prepare("DELETE FROM venta WHERE id = ?").bind(pedido.venta_id).run();
+  }
+
+  await db
+    .prepare("UPDATE pedido SET estado = 'cancelado', venta_id = NULL WHERE id = ?")
+    .bind(id)
+    .run();
+
+  revalidatePath("/panel/pedidos");
+  revalidatePath(`/panel/pedidos/${id}`);
+  revalidatePath("/panel");
+  revalidatePath("/panel/inventario");
 }
