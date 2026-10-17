@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
 import { invitar, type ResultadoEquipo } from "@/app/panel/(dentro)/equipo/acciones";
 
 const ROLES = [
@@ -23,7 +24,7 @@ export function FormularioInvitar({ dominio }: { dominio: string }) {
         contraseña — tú nunca la conoces.
       </p>
 
-      <form action={enviar} className="space-y-3">
+      <form onSubmit={enviarSinBorrar(enviar)} className="space-y-3">
         {estado.error && (
           <p
             role="alert"

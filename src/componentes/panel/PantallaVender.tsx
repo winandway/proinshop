@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useMemo, useState } from "react";
+import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
 import { registrarVenta, type ResultadoVenta } from "@/app/panel/(dentro)/vender/acciones";
 import { formatearPrecio } from "@/lib/i18n";
 import type { ClienteSimple, ProductoVenta } from "@/lib/negocio";
@@ -44,7 +45,7 @@ export function PantallaVender({
   }
 
   return (
-    <form action={enviar} className="pb-44">
+    <form onSubmit={enviarSinBorrar(enviar)} className="pb-44">
       <input
         type="hidden"
         name="lineas"

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { revalidatePath } from "next/cache";
+import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos } from "@/lib/d1";
 import { datosNegocio } from "@/lib/negocio";
 import { usuarioActual } from "@/lib/sesion";
@@ -21,7 +22,7 @@ async function guardarTienda(datos: FormData) {
 
   // Solo dígitos: es lo que espera el enlace de WhatsApp.
   const whatsapp = String(datos.get("whatsapp") ?? "").replace(/\D/g, "");
-  const envio = Number(String(datos.get("costo_envio") ?? "0").replace(",", ".")) || 0;
+  const envio = Math.max(0, leerMonto(datos.get("costo_envio")));
 
   await db
     .prepare(

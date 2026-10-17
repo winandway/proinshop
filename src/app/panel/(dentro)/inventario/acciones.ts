@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos, bucket } from "@/lib/d1";
 import { usuarioActual, type UsuarioSesion } from "@/lib/sesion";
 
@@ -31,11 +32,6 @@ function aSlug(texto: string): string {
     .slice(0, 80);
 }
 
-function aNumero(valor: FormDataEntryValue | null): number {
-  const limpio = String(valor ?? "").replace(/[^0-9.,-]/g, "").replace(",", ".");
-  const numero = Number.parseFloat(limpio);
-  return Number.isFinite(numero) ? numero : 0;
-}
 
 /** Guarda la foto en el bucket y devuelve su clave. */
 async function guardarFoto(archivo: File, slug: string): Promise<string | null> {
@@ -70,12 +66,12 @@ export async function crearProducto(
   const nombre = String(datos.get("nombre") ?? "").trim();
   if (nombre.length < 2) return { error: "Escribe el nombre del producto" };
 
-  const precio = aNumero(datos.get("precio"));
+  const precio = leerMonto(datos.get("precio"));
   if (precio <= 0) return { error: "El precio debe ser mayor que cero" };
 
   const nombreIngles = String(datos.get("nombre_en") ?? "").trim();
-  const costo = aNumero(datos.get("costo"));
-  const stock = Math.max(0, Math.round(aNumero(datos.get("stock"))));
+  const costo = leerMonto(datos.get("costo"));
+  const stock = Math.max(0, Math.round(leerMonto(datos.get("stock"))));
   const categoriaId = Number(datos.get("categoria_id")) || null;
   const codigoBarras = String(datos.get("codigo_barras") ?? "").trim() || null;
   const descripcion = String(datos.get("descripcion") ?? "").trim() || null;
@@ -173,10 +169,10 @@ export async function actualizarProducto(
   const nombre = String(datos.get("nombre") ?? "").trim();
   if (nombre.length < 2) return { error: "Escribe el nombre del producto" };
 
-  const precio = aNumero(datos.get("precio"));
+  const precio = leerMonto(datos.get("precio"));
   if (precio <= 0) return { error: "El precio debe ser mayor que cero" };
 
-  const stock = Math.max(0, Math.round(aNumero(datos.get("stock"))));
+  const stock = Math.max(0, Math.round(leerMonto(datos.get("stock"))));
 
   let claveFoto: string | null = null;
   try {
@@ -200,7 +196,7 @@ export async function actualizarProducto(
       String(datos.get("descripcion_en") ?? "").trim() || null,
       String(datos.get("sku") ?? "").trim() || null,
       String(datos.get("codigo_barras") ?? "").trim() || null,
-      aNumero(datos.get("costo")),
+      leerMonto(datos.get("costo")),
       precio,
       stock,
       datos.get("publicado") === "on" ? 1 : 0,

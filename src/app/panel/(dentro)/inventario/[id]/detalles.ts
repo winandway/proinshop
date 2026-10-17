@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos } from "@/lib/d1";
 import { usuarioActual } from "@/lib/sesion";
 
@@ -18,11 +19,6 @@ async function puedeEditar(): Promise<boolean> {
   return usuario?.rol === "dueno" || usuario?.rol === "bodega";
 }
 
-function aNumero(valor: FormDataEntryValue | null): number {
-  const limpio = String(valor ?? "").replace(/[^0-9.,-]/g, "").replace(",", ".");
-  const numero = Number.parseFloat(limpio);
-  return Number.isFinite(numero) ? numero : 0;
-}
 
 export async function agregarVariante(datos: FormData): Promise<void> {
   if (!(await puedeEditar())) return;
@@ -44,8 +40,8 @@ export async function agregarVariante(datos: FormData): Promise<void> {
       nombre,
       String(datos.get("nombre_en") ?? "").trim() || null,
       String(datos.get("sku") ?? "").trim() || null,
-      Math.max(0, Math.round(aNumero(datos.get("stock")))),
-      aNumero(datos.get("precio_extra")),
+      Math.max(0, Math.round(leerMonto(datos.get("stock")))),
+      leerMonto(datos.get("precio_extra")),
     )
     .run();
 

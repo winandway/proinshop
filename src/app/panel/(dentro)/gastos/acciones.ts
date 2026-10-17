@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos, bucket } from "@/lib/d1";
 import { usuarioActual } from "@/lib/sesion";
 
@@ -17,7 +18,7 @@ export async function registrarGasto(
   const db = await baseDeDatos();
   if (!db) return { error: "La base de datos no está disponible" };
 
-  const monto = Number(String(datos.get("monto") ?? "").replace(",", "."));
+  const monto = leerMonto(datos.get("monto"));
   if (!Number.isFinite(monto) || monto <= 0) {
     return { error: "Escribe cuánto gastaste" };
   }

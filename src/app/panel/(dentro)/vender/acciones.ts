@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos } from "@/lib/d1";
 import { usuarioActual } from "@/lib/sesion";
 
@@ -38,7 +39,7 @@ export async function registrarVenta(
 
   const metodoPago = String(datos.get("metodo_pago") ?? "efectivo");
   const clienteId = Number(datos.get("cliente_id")) || null;
-  const descuento = Math.max(0, Number(datos.get("descuento")) || 0);
+  const descuento = Math.max(0, leerMonto(datos.get("descuento")));
 
   if (metodoPago === "fiado" && !clienteId) {
     return { error: "Para vender fiado tienes que elegir el cliente" };

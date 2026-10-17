@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
 import {
   crearCotizacion,
   type ResultadoCotizacion,
@@ -30,7 +31,7 @@ export function CrearCotizacion({
   const enlace = estado.token ? `${dominio}/cotizacion/${estado.token}` : null;
 
   return (
-    <form action={enviar} className="rounded-2xl bg-white p-4 shadow-sm">
+    <form onSubmit={enviarSinBorrar(enviar)} className="rounded-2xl bg-white p-4 shadow-sm">
       <input
         type="hidden"
         name="lineas"

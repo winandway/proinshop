@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
+import { achicarEnCampo } from "@/lib/achicar-foto";
 import { registrarGasto, type ResultadoGasto } from "@/app/panel/(dentro)/gastos/acciones";
 import { CATEGORIAS_GASTO, METODOS_PAGO, type ClienteSimple } from "@/lib/negocio";
 
@@ -14,7 +16,7 @@ export function FormularioGasto({ proveedores }: { proveedores: ClienteSimple[] 
   const [recibo, setRecibo] = useState<string | null>(null);
 
   return (
-    <form action={enviar} className="space-y-4">
+    <form onSubmit={enviarSinBorrar(enviar)} className="space-y-4">
       <input type="hidden" name="categoria" value={categoria} />
       <input type="hidden" name="metodo_pago" value={metodoPago} />
 
@@ -109,9 +111,12 @@ export function FormularioGasto({ proveedores }: { proveedores: ClienteSimple[] 
           type="file"
           name="recibo"
           accept="image/*"
-          capture="environment"
           className="hidden"
-          onChange={(evento) => setRecibo(evento.target.files?.[0]?.name ?? null)}
+          onChange={(evento) => {
+            const campo = evento.currentTarget;
+            setRecibo(campo.files?.[0]?.name ?? null);
+            void achicarEnCampo(campo);
+          }}
         />
         <span aria-hidden="true" className="block text-2xl">
           📷

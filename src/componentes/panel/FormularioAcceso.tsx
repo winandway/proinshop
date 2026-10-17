@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
 import type { Resultado } from "@/app/panel/acciones";
 import { CampoClave } from "@/componentes/CampoClave";
 
@@ -33,7 +34,7 @@ export function FormularioAcceso({
   const [estado, enviar, enviando] = useActionState(accion, {});
 
   return (
-    <form action={enviar} className="space-y-4">
+    <form onSubmit={enviarSinBorrar(enviar)} className="space-y-4">
       {estado.error && (
         <p
           role="alert"

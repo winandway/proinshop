@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos } from "@/lib/d1";
 import { usuarioActual } from "@/lib/sesion";
 
@@ -13,7 +14,7 @@ export async function registrarAbono(datos: FormData): Promise<void> {
   if (!db) return;
 
   const deudaId = Number(datos.get("deuda_id"));
-  const monto = Number(String(datos.get("monto") ?? "").replace(",", "."));
+  const monto = leerMonto(datos.get("monto"));
   if (!deudaId || !Number.isFinite(monto) || monto <= 0) return;
 
   const deuda = await db

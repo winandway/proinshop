@@ -1,6 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
+import { achicarEnCampo } from "@/lib/achicar-foto";
 import type { ResultadoProducto } from "@/app/panel/(dentro)/inventario/acciones";
 
 export type CategoriaSimple = { id: number; nombre: string };
@@ -46,7 +48,7 @@ export function FormularioProducto({
   );
 
   return (
-    <form action={enviar} className="space-y-4">
+    <form onSubmit={enviarSinBorrar(enviar)} className="space-y-4">
       {producto && <input type="hidden" name="id" value={producto.id} />}
 
       {estado.error && (
@@ -65,11 +67,14 @@ export function FormularioProducto({
             type="file"
             name="foto"
             accept="image/*"
-            capture="environment"
             className="hidden"
             onChange={(evento) => {
-              const archivo = evento.target.files?.[0];
+              const campo = evento.currentTarget;
+              const archivo = campo.files?.[0];
               if (archivo) setVistaPrevia(URL.createObjectURL(archivo));
+              // Se achica en el celular antes de enviarla: sube rápido aunque
+              // la señal sea mala.
+              void achicarEnCampo(campo);
             }}
           />
           <span
@@ -92,7 +97,7 @@ export function FormularioProducto({
         </label>
 
         <p className="flex-1 rounded-xl bg-crema p-3 text-[11.5px] leading-relaxed text-gris">
-          Toma la foto con la cámara del celular. Se sube sola y aparece en la
+          Toma la foto o elígela de tu galería. Se sube sola y aparece en la
           tienda al guardar.
         </p>
       </div>
