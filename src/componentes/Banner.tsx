@@ -12,7 +12,10 @@ import { Diana } from "./Logo";
  * pantalla, se traducen al inglés y se corrigen sin volver a diseñar nada.
  * Una foto con el texto pegado sale cortada en el celular y no se traduce.
  *
- * Cada foto vive en public/banners/<nombre>-1600.webp y <nombre>-900.webp.
+ * Cada foto vive en public/banners/<nombre>.webp (computadora: la foto con el
+ * fondo oscuro alargado a la izquierda, 4600 × 1024, para que en una pantalla
+ * ancha el producto se vea entero) y <nombre>-movil.webp (celular: recorte de
+ * 900 px con el producto). docs/BANNERS.md explica cómo se preparan.
  * Mientras un mensaje no tenga foto, se ve con su fondo de color y su ícono.
  */
 type Mensaje = {
@@ -37,6 +40,7 @@ const MENSAJES: Mensaje[] = [
     },
     boton: { es: "Ver plantas", en: "Shop generators" },
     enlace: "/categoria/plantas-electricas",
+    imagen: "plantas",
     emoji: "⚡",
     fondo: "bg-linear-115 from-[#ff3b3b] to-[#a50d0d]",
   },
@@ -49,6 +53,7 @@ const MENSAJES: Mensaje[] = [
     },
     boton: { es: "Ver modelos", en: "See models" },
     enlace: "/categoria/motos",
+    imagen: "motos",
     emoji: "🏍️",
     fondo: "bg-linear-115 from-[#14161a] to-[#3c414b]",
   },
@@ -61,6 +66,7 @@ const MENSAJES: Mensaje[] = [
     },
     boton: { es: "Ver herramientas", en: "Shop tools" },
     enlace: "/categoria/herramientas",
+    imagen: "herramientas",
     emoji: "🔧",
     fondo: "bg-linear-115 from-[#2a2d33] to-[#14161a]",
   },
@@ -73,6 +79,7 @@ const MENSAJES: Mensaje[] = [
     },
     boton: { es: "Ver catálogo", en: "Browse catalog" },
     enlace: "/catalogo",
+    imagen: "mayor",
     emoji: "🚢",
     fondo: "bg-linear-115 from-[#d91414] to-[#4a0606]",
   },
@@ -92,16 +99,21 @@ export function Banner({ idioma, whatsapp }: { idioma: Idioma; whatsapp?: string
         >
           {mensaje.imagen ? (
             <>
-              {/* eslint-disable-next-line @next/next/no-img-element -- fotos ya optimizadas en public/banners */}
-              <img
-                src={`/banners/${mensaje.imagen}-1600.webp`}
-                srcSet={`/banners/${mensaje.imagen}-900.webp 900w, /banners/${mensaje.imagen}-1600.webp 1600w`}
-                sizes="100vw"
-                alt=""
-                loading={indice === 0 ? "eager" : "lazy"}
-                fetchPriority={indice === 0 ? "high" : "auto"}
-                className="absolute inset-0 h-full w-full object-cover object-[78%_top] sm:object-[72%_center]"
-              />
+              {/* En el celular va un recorte con el producto grande; en pantallas
+                  grandes, la foto alargada, pegada a la derecha. */}
+              <picture>
+                <source media="(max-width: 639px)" srcSet={`/banners/${mensaje.imagen}-movil.webp`} />
+                {/* eslint-disable-next-line @next/next/no-img-element -- fotos ya optimizadas en public/banners */}
+                <img
+                  src={`/banners/${mensaje.imagen}.webp`}
+                  alt=""
+                  width={4600}
+                  height={1024}
+                  loading={indice === 0 ? "eager" : "lazy"}
+                  fetchPriority={indice === 0 ? "high" : "auto"}
+                  className="absolute inset-0 h-full w-full object-cover object-top sm:object-right"
+                />
+              </picture>
               {/* Velo para que el texto se lea sobre cualquier foto: desde abajo en
                   el celular, desde la izquierda en la computadora. */}
               <span

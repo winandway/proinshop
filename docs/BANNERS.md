@@ -43,8 +43,8 @@ número en Mi tienda, y los cuatro puntitos que dicen cuál se está viendo.
    (o en el orden 1, 2, 3, 4).
 
 **Las medidas:** ChatGPT las entrega en 1536 × 1024. Es la medida correcta
-para esto: Claude las recorta, hace la versión para computadora (1600 px) y la
-del celular (900 px), las comprime y las publica. No hay que ajustar nada.
+para esto: Claude prepara la versión para computadora y la del celular, las
+comprime y las publica. No hay que ajustar nada.
 
 ## Los prompts
 
@@ -85,10 +85,25 @@ Realista, nítido, alta resolución.
 
 ## Cómo se conectan (lo hace Claude)
 
-1. Guarda cada foto en `public/banners/<nombre>-1600.webp` y
-   `<nombre>-900.webp` (nombres: `plantas`, `motos`, `herramientas`, `mayor`).
-2. Pone `imagen: "<nombre>"` en ese mensaje de `src/componentes/Banner.tsx`.
-3. Lo prueba a 375 px y en computadora, y lo publica.
+Cada foto se convierte en dos archivos en `public/banners/`:
+
+| Archivo | Para qué | Cómo se hace |
+|---|---|---|
+| `<nombre>.webp` | Computadora | La foto con el fondo oscuro **alargado hacia la izquierda** hasta 4600 × 1024. Se toma el promedio de las primeras columnas de la foto, fila por fila, y se estira; un fundido de 160 px tapa la unión. Así, en una pantalla ancha (el banner mide hasta 2000 × 440) el producto se ve entero y pegado a la derecha, en vez de salir cortado arriba y abajo. |
+| `<nombre>-movil.webp` | Celular | Recorte desde el 32 % del ancho hasta el borde derecho (la parte del producto), a 900 px. En el celular el producto va arriba y el texto abajo. |
+
+Los nombres son `plantas`, `motos`, `herramientas` y `mayor`. Después se pone
+`imagen: "<nombre>"` en ese mensaje de `src/componentes/Banner.tsx`, se prueba a
+375 px, a 1440 px y a 2000 px, y se publica.
+
+### Las fotos de hoy (17 oct 2026)
+
+| Mensaje | Foto | Computadora | Celular |
+|---|---|---|---|
+| Plantas eléctricas | Planta eléctrica negra con rojo | 84 KB | 60 KB |
+| Motos | Moto doble propósito negro mate | 112 KB | 79 KB |
+| Herramientas | Soldadora y compresor rojos | 90 KB | 61 KB |
+| Al por mayor | Contenedor rojo con cajas | 68 KB | 47 KB |
 
 Mientras un mensaje no tiene foto, se ve con su fondo de color y su ícono.
 Más adelante, el banner se podrá cambiar desde Mi tienda sin pasar por Claude
