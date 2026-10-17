@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Banner } from "@/componentes/Banner";
+import { CintaMovimiento } from "@/componentes/CintaMovimiento";
+import { VitrinaNovedades } from "@/componentes/VitrinaNovedades";
 import { TarjetaProducto } from "@/componentes/TarjetaProducto";
 import { contarProductosPorCategoria, obtenerCategoriasConProductos, obtenerProductos } from "@/lib/catalogo";
 import { texto, textos } from "@/lib/i18n";
@@ -33,6 +35,10 @@ export default async function Portada() {
         <Banner idioma={idioma} whatsapp={config.whatsapp} />
       </div>
 
+      <div className="mt-4 lg:mt-0">
+        <CintaMovimiento idioma={idioma} />
+      </div>
+
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">
         <div className="mb-5 flex items-baseline justify-between">
           <h2 className="text-xl font-black tracking-tight sm:text-2xl">{t.compraPorCategoria}</h2>
@@ -61,6 +67,8 @@ export default async function Portada() {
           ))}
         </div>
       </section>
+
+      <VitrinaNovedades idioma={idioma} whatsapp={config.whatsapp} />
 
       <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6">
         <div className="mb-5 flex items-baseline justify-between">

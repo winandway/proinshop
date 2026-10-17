@@ -103,7 +103,6 @@ export function Banner({ idioma, whatsapp }: { idioma: Idioma; whatsapp?: string
                   grandes, la foto alargada, pegada a la derecha. */}
               <picture>
                 <source media="(max-width: 639px)" srcSet={`/banners/${mensaje.imagen}-movil.webp`} />
-                {/* eslint-disable-next-line @next/next/no-img-element -- fotos ya optimizadas en public/banners */}
                 <img
                   src={`/banners/${mensaje.imagen}.webp`}
                   alt=""

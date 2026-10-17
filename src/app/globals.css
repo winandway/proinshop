@@ -136,3 +136,45 @@ body {
     animation: none;
   }
 }
+
+/* Cinta de letras en movimiento: la pista lleva el renglón dos veces y se
+   corre la mitad de su ancho, así el regreso al inicio no se nota. */
+@keyframes cinta-corre {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.cinta-pista {
+  animation: cinta-corre 38s linear infinite;
+}
+.cinta:hover .cinta-pista {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cinta-pista {
+    animation: none;
+  }
+}
+
+/* Vitrina de novedades: el texto de cada producto entra suave. */
+@keyframes aparece {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.aparece {
+  animation: aparece 0.5s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .aparece {
+    animation: none;
+  }
+}

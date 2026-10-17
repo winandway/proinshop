@@ -108,3 +108,33 @@ Los nombres son `plantas`, `motos`, `herramientas` y `mayor`. Después se pone
 Mientras un mensaje no tiene foto, se ve con su fondo de color y su ícono.
 Más adelante, el banner se podrá cambiar desde Mi tienda sin pasar por Claude
 (punto 3 de PENDIENTES.md).
+
+## La cinta y la vitrina (17 oct 2026)
+
+Debajo del banner hay dos piezas más:
+
+1. **La cinta.** Una franja roja con letras blancas que corren solas:
+   importación directa, envíos, precios al por mayor y las categorías, en
+   español o en inglés. Se detiene al pasar el mouse. Está en
+   `src/componentes/CintaMovimiento.tsx`; las frases se cambian ahí.
+2. **La vitrina de novedades.** Después de las categorías: una sola foto
+   grande a la vez, que pasa cada 5 segundos, con el nombre del producto, una
+   línea que dice lo que se ve en la foto y el botón «Pregunta por WhatsApp»
+   (o «Ver catálogo» mientras no haya número). Está en
+   `src/componentes/VitrinaNovedades.tsx`.
+
+Las fotos de la vitrina vienen **recortadas, con fondo transparente**. Se
+preparan así: se quita el borde vacío, se centran en un cuadro de 1000 × 1000
+apoyadas un poco abajo y se guardan en `public/vitrina/<nombre>.webp`. Van sobre
+el gris claro de la tienda con un círculo rojo suave detrás, que recuerda la
+diana del logo.
+
+| Producto | Archivo | Estado |
+|---|---|---|
+| Estación de energía portátil | `estacion-energia.webp` | Publicada |
+| Bicicleta de equilibrio | `bicicleta-equilibrio.webp` | Publicada |
+| Coche de paseo compacto | `coche-paseo.webp` | Publicada |
+| Contenedor (importación) | — | **Retenida:** el contenedor dice «PROVINCHO» y no «PROINSHOP». Se agrega cuando llegue corregida. |
+
+Cuando estos productos estén cargados en el inventario, el botón de cada uno
+puede llevar a su ficha en vez del catálogo.
