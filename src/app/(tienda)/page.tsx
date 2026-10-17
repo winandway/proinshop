@@ -30,7 +30,7 @@ export default async function Portada() {
   return (
     <>
       <div className="px-4 pt-4 lg:px-0 lg:pt-0">
-        <Banner idioma={idioma} />
+        <Banner idioma={idioma} whatsapp={config.whatsapp} />
       </div>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:py-14">

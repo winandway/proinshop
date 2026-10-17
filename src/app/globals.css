@@ -38,32 +38,40 @@ body {
   }
 }
 
-/* Carrusel del banner: los mensajes se turnan solos. */
+/* Carrusel del banner: los cuatro mensajes se turnan solos, 6 segundos cada
+   uno. El mensaje que no se ve queda "hidden" y no solo transparente: si no,
+   el de encima se queda con los toques y el botón lleva a otro lado. Por lo
+   mismo arrancan invisibles mientras esperan su turno (clase `invisible`). */
 @keyframes banner-entra {
   0% {
     opacity: 0;
+    visibility: hidden;
     transform: translateX(24px);
   }
-  4% {
+  3% {
     opacity: 1;
+    visibility: visible;
     transform: translateX(0);
   }
-  30% {
+  23% {
     opacity: 1;
+    visibility: visible;
     transform: translateX(0);
   }
-  36% {
+  27% {
     opacity: 0;
+    visibility: hidden;
     transform: translateX(-24px);
   }
   100% {
     opacity: 0;
+    visibility: hidden;
     transform: translateX(-24px);
   }
 }
 
 .banner-slide {
-  animation: banner-entra 18s infinite;
+  animation: banner-entra 24s infinite;
 }
 
 @keyframes flota {
@@ -87,9 +95,11 @@ body {
   }
   .banner-slide {
     opacity: 0;
+    visibility: hidden;
   }
   .banner-slide:first-child {
     opacity: 1;
+    visibility: visible;
   }
 }
 
