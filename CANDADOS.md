@@ -84,7 +84,73 @@
 - **Cómo se comprueba:** con una cuenta de vendedor, abrir la ficha de un
   producto devuelve al inventario y no aparecen los botones de crear.
 
+## C-FOTO-CELULAR — Las fotos de celular suben
+
+- **Cómo se veía:** crear un producto con una foto de celular fallaba.
+- **Causa:** Next acepta 1 MB por envío a una acción del servidor y una foto
+  de cámara pesa de 2 a 6 MB.
+- **Qué se hizo:** `experimental.serverActions.bodySizeLimit: "20mb"` en
+  `next.config.ts`, y `src/lib/achicar-foto.ts` achica la foto en el celular
+  (1600 px, JPEG 0,82) antes de enviarla. Si no puede, sube la original. El
+  campo ya no lleva `capture`: deja elegir de la galería.
+- **Cómo se comprueba:** una foto de 11,7 MB sube como 0,67 MB; una de 5 MB
+  sin achicar también se guarda.
+- **No tocar:** el límite de 20 MB ni el respaldo a la original.
+
+## C-MONTOS — "1.890" es mil ochocientos noventa
+
+- **Cómo se veía:** "1.890" se guardaba como 1,89 dólares.
+- **Qué se hizo:** `src/lib/numeros.ts` → `leerMonto`. Separador seguido de
+  grupos de tres cifras = miles; con punto y coma, el último es el decimal.
+  Se usa en productos, variantes, gastos, abonos, descuento y envío.
+- **Cómo se comprueba:** "1.890" → 1890, "1.240,50" → 1240,5, "25,5" → 25,5,
+  "0.500" → 0,5.
+
+## C-FORM-NO-SE-VACIA — El formulario no se borra al dar un aviso
+
+- **Cómo se veía:** si faltaba el precio, el aviso salía y el formulario
+  quedaba vacío, foto incluida.
+- **Causa:** React vacía todo `<form action={...}>` al terminar el envío,
+  aunque el servidor haya respondido con un error.
+- **Qué se hizo:** `src/componentes/enviar-sin-borrar.ts`. Los formularios
+  con aviso envían con `onSubmit` + `startTransition`.
+- **Cómo se comprueba:** crear producto sin precio → el aviso sale y el
+  nombre, la cantidad y la foto siguen ahí.
+- **No tocar:** no volver a `action={enviar}` en esos formularios.
+
+## C-BORRADORES — Ningún formulario pierde lo escrito
+
+- **Qué se hizo:** una sola pieza, `src/componentes/GuardaBorrador.tsx`, puesta
+  en todos los formularios (panel y tienda). Guarda con medio segundo de
+  respiro, devuelve al volver con «Recuperamos lo que estabas escribiendo ·
+  Empezar de nuevo», no guarda contraseñas, códigos ni archivos, y la llave
+  lleva la cuenta y el formulario. Se borra al guardar bien (evento reset,
+  `limpiarCon` o `LimpiarBorrador` en la pantalla de destino) y al salir. El
+  carrito de Vender se guarda aparte con las mismas llaves.
+- **Cómo se comprueba:** escribir en Crear producto, recargar → todo vuelve con
+  el aviso; guardar → el borrador desaparece. Igual en Vender (el carrito) y
+  en la compra de la tienda.
+
+## C-ZONA-HORARIA — El "hoy" cierra a medianoche del negocio
+
+- **Cómo se veía:** a las 8 de la noche en América el "Hoy vendiste" se
+  reiniciaba y las horas salían cuatro o cinco horas corridas.
+- **Qué se hizo:** `ZonaHoraria` pone la cookie `proinshop_zona` con la
+  diferencia horaria del navegador; `src/lib/zona.ts` la usa para cortar día,
+  mes y año en las consultas y para mostrar las horas.
+- **Cómo se comprueba:** una venta a las 20:10 sale en "Hoy vendiste" y el
+  comprobante dice 20:10.
+
+## C-PANTALLA-ERROR — Un fallo nunca deja la pantalla técnica
+
+- **Qué se hizo:** `error.tsx` en panel, acceso y tienda, y `global-error.tsx`,
+  con `PantallaError`: recarga completa (arregla el caso de una versión nueva
+  publicada con la página abierta) y el código del error. Además,
+  `deploymentId` por publicación en `next.config.ts`.
+
 ---
 
-Todos estos quedaron funcionando en el commit que acompaña a este documento
-(16 de octubre de 2026). Ver `git log -- CANDADOS.md`.
+Los primeros ocho quedaron en el commit 11daa71; C-FOTO-CELULAR, C-MONTOS,
+C-FORM-NO-SE-VACIA y C-PANTALLA-ERROR en a320c21; C-BORRADORES y
+C-ZONA-HORARIA en el commit siguiente (16 de octubre de 2026). Ver
+`git log -- CANDADOS.md`.

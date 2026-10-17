@@ -5,6 +5,7 @@ import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
 import { achicarEnCampo } from "@/lib/achicar-foto";
 import { registrarGasto, type ResultadoGasto } from "@/app/panel/(dentro)/gastos/acciones";
 import { CATEGORIAS_GASTO, METODOS_PAGO, type ClienteSimple } from "@/lib/negocio";
+import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 const CAMPO =
   "w-full rounded-xl border-[1.5px] border-linea px-4 py-3 text-[13.5px] font-semibold outline-none transition placeholder:font-normal placeholder:text-gris2 focus:border-rojo";
@@ -17,6 +18,7 @@ export function FormularioGasto({ proveedores }: { proveedores: ClienteSimple[] 
 
   return (
     <form onSubmit={enviarSinBorrar(enviar)} className="space-y-4">
+      <GuardaBorrador clave="gasto-nuevo" />
       <input type="hidden" name="categoria" value={categoria} />
       <input type="hidden" name="metodo_pago" value={metodoPago} />
 

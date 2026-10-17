@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
+import { horaLocal, minutosZona } from "@/lib/zona";
 
 export const metadata: Metadata = { title: "Pedidos", robots: { index: false } };
 
@@ -27,6 +28,7 @@ export default async function Pedidos({
 }) {
   const { estado } = await searchParams;
   const db = await baseDeDatos();
+  const minutos = await minutosZona();
 
   const pedidos = db
     ? (
@@ -105,7 +107,7 @@ export default async function Pedidos({
                   <div className="min-w-0">
                     <p className="text-[13.5px] font-extrabold">Pedido #{pedido.numero}</p>
                     <p className="mt-0.5 text-[11.5px] text-gris">
-                      {pedido.fecha.slice(0, 16).replace("T", " ")} · 🌐 Tienda virtual
+                      {horaLocal(pedido.fecha, minutos)} · 🌐 Tienda virtual
                     </p>
                   </div>
                   <span

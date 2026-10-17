@@ -5,6 +5,8 @@ import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos } from "@/lib/d1";
 import { datosNegocio } from "@/lib/negocio";
 import { usuarioActual } from "@/lib/sesion";
+import { GuardaBorrador, LimpiarBorrador } from "@/componentes/GuardaBorrador";
+import { modificadorZona } from "@/lib/zona";
 
 export const metadata: Metadata = { title: "Mi tienda", robots: { index: false } };
 
@@ -62,12 +64,13 @@ export default async function MiTienda({
   const { guardado } = await searchParams;
   const negocio = await datosNegocio();
   const db = await baseDeDatos();
+  const zona = await modificadorZona();
 
   const cifras = db
     ? await db
         .prepare(
           `SELECT (SELECT COUNT(*) FROM producto WHERE publicado = 1) AS publicados,
-                  (SELECT COUNT(*) FROM pedido WHERE date(fecha) = date('now')) AS pedidos_hoy`,
+                  (SELECT COUNT(*) FROM pedido WHERE date(fecha, ${zona}) = date('now', ${zona})) AS pedidos_hoy`,
         )
         .first<{ publicados: number; pedidos_hoy: number }>()
     : null;
@@ -76,6 +79,7 @@ export default async function MiTienda({
     <>
       <h1 className="mb-4 text-xl font-black tracking-tight">Mi tienda</h1>
 
+      {guardado && <LimpiarBorrador claves={["mi-tienda"]} />}
       {guardado && (
         <p
           role="status"
@@ -106,6 +110,7 @@ export default async function MiTienda({
       </div>
 
       <form action={guardarTienda} className="rounded-2xl bg-white p-4 shadow-sm">
+        <GuardaBorrador clave="mi-tienda" />
         <h2 className="mb-3 text-[13px] font-extrabold">Datos del negocio</h2>
         <div className="space-y-2.5">
           <div>

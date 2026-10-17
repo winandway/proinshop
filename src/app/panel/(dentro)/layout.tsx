@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 import { BarraInferior, MenuLateral } from "@/componentes/panel/BarraInferior";
 import { FranjaTrabajo } from "@/componentes/panel/FranjaTrabajo";
+import { BotonSalir } from "@/componentes/panel/BotonSalir";
+import { ZonaHoraria } from "@/componentes/panel/ZonaHoraria";
+import { ProveedorBorrador } from "@/componentes/GuardaBorrador";
 import { NOMBRE_ROL, usuarioActual } from "@/lib/sesion";
 import { salir } from "../acciones";
 
@@ -27,22 +30,20 @@ export default async function DisenoPanel({ children }: { children: React.ReactN
             <p className="text-[11.5px] text-white/80">{NOMBRE_ROL[usuario.rol]}</p>
           </div>
 
-          <form action={salir} className="ml-auto">
-            <button
-              type="submit"
-              className="rounded-xl bg-white/20 px-3.5 py-2 text-[12px] font-bold transition hover:bg-white/30"
-            >
-              Salir
-            </button>
-          </form>
+          <BotonSalir salir={salir} dueno={String(usuario.id)} />
         </div>
       </header>
 
+      <ZonaHoraria />
       <FranjaTrabajo />
 
       <div className="mx-auto flex max-w-5xl">
         <MenuLateral esDueno={usuario.rol === "dueno"} />
-        <main className="min-w-0 flex-1 p-4">{children}</main>
+        <main className="min-w-0 flex-1 p-4">
+          {/* Cada borrador lleva la cuenta: en una computadora compartida
+              nadie ve lo que dejó escrito otro. */}
+          <ProveedorBorrador dueno={String(usuario.id)}>{children}</ProveedorBorrador>
+        </main>
       </div>
 
       <BarraInferior esDueno={usuario.rol === "dueno"} />

@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { datosNegocio } from "@/lib/negocio";
+import { LimpiarBorrador } from "@/componentes/GuardaBorrador";
+import { horaLocal, minutosZona } from "@/lib/zona";
 
 export const metadata: Metadata = { title: "Venta registrada", robots: { index: false } };
 
@@ -39,10 +41,11 @@ export default async function VentaRegistrada({ params }: { params: Promise<{ id
     .all<{ descripcion: string; cantidad: number; precio_unit: number }>();
 
   const negocio = await datosNegocio();
+  const minutos = await minutosZona();
 
   const comprobante = [
     `${negocio.nombre} — Comprobante de venta #${venta.id}`,
-    venta.fecha.slice(0, 16).replace("T", " "),
+    horaLocal(venta.fecha, minutos),
     "",
     ...items.map(
       (i) => `${i.cantidad} × ${i.descripcion} — ${formatearPrecio(i.precio_unit * i.cantidad)}`,
@@ -54,6 +57,8 @@ export default async function VentaRegistrada({ params }: { params: Promise<{ id
 
   return (
     <div className="mx-auto max-w-md text-center">
+      {/* La venta ya quedó: el carrito a medias ya no hace falta. */}
+      <LimpiarBorrador claves={["venta"]} />
       <span
         aria-hidden="true"
         className="mx-auto mt-4 grid h-20 w-20 place-items-center rounded-full bg-verde-suave text-4xl"

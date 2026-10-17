@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { crearCliente } from "../vender/acciones";
+import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 export const metadata: Metadata = { title: "Clientes", robots: { index: false } };
 
@@ -69,6 +70,7 @@ export default async function Clientes() {
       )}
 
       <form action={crearCliente} className="rounded-2xl bg-white p-4 shadow-sm">
+        <GuardaBorrador clave="cliente-nuevo" />
         <h2 className="mb-3 text-[13px] font-extrabold">Agregar cliente</h2>
         <div className="space-y-2.5">
           <input name="nombre" required placeholder="Nombre del cliente" className={CAMPO} />

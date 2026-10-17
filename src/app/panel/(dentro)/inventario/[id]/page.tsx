@@ -8,7 +8,9 @@ import { baseDeDatos } from "@/lib/d1";
 import { NEGOCIO } from "@/lib/config";
 import { usuarioActual } from "@/lib/sesion";
 import { MenuTresPuntos } from "@/componentes/panel/MenuTresPuntos";
+import { LimpiarBorrador } from "@/componentes/GuardaBorrador";
 import { actualizarProducto, eliminarProducto } from "../acciones";
+import { horaLocal, minutosZona } from "@/lib/zona";
 
 export const metadata: Metadata = { title: "Producto", robots: { index: false } };
 
@@ -103,6 +105,7 @@ export default async function EditarProducto({
   ).results;
 
   const enlace = `${NEGOCIO.url}/producto/${producto.slug}`;
+  const minutos = await minutosZona();
 
   return (
     <>
@@ -129,6 +132,7 @@ export default async function EditarProducto({
         )}
       </div>
 
+      {nuevo && <LimpiarBorrador claves={["producto-nuevo"]} />}
       {nuevo && (
         <div className="mb-3 rounded-2xl border border-verde bg-verde-suave p-4">
           <p className="text-[14px] font-extrabold text-[#0b6e3a]">🎉 ¡Producto creado!</p>
@@ -218,7 +222,7 @@ export default async function EditarProducto({
                 <span className="flex-1">
                   <span className="block font-bold capitalize">{movimiento.motivo}</span>
                   <span className="block text-[11px] text-gris">
-                    {movimiento.fecha.slice(0, 16).replace("T", " ")}
+                    {horaLocal(movimiento.fecha, minutos)}
                     {movimiento.nota ? ` · ${movimiento.nota}` : ""}
                   </span>
                 </span>

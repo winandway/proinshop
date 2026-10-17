@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
 import { invitar, type ResultadoEquipo } from "@/app/panel/(dentro)/equipo/acciones";
+import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 const ROLES = [
   { valor: "dueno", texto: "Propietario", detalle: "Todo: ventas, ganancias, equipo y tienda" },
@@ -25,6 +26,7 @@ export function FormularioInvitar({ dominio }: { dominio: string }) {
       </p>
 
       <form onSubmit={enviarSinBorrar(enviar)} className="space-y-3">
+        <GuardaBorrador clave="invitar" limpiarCon={estado.codigo ? estado : undefined} />
         {estado.error && (
           <p
             role="alert"

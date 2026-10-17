@@ -130,6 +130,12 @@ Probado hoy en el mismo motor de la nube, con una base limpia.
 - ✅ Balance y estadísticas solo para el propietario
 - ✅ Recibos de gastos privados *(arreglado hoy: antes se podían abrir sin entrar)*
 - ✅ Franja de estado arriba del panel: «Estamos trabajando en…» *(nuevo hoy)*
+- ✅ Fotos de celular: se achican solas antes de subir y se pueden elegir de la galería *(arreglado hoy: antes fallaban)*
+- ✅ Precios con punto de miles: «1.890» es mil ochocientos noventa *(arreglado hoy)*
+- ✅ Ningún formulario pierde lo escrito: si se cierra la ventana o se va el internet, al volver está todo *(nuevo hoy)*
+- ✅ Un aviso de error ya no vacía el formulario *(arreglado hoy)*
+- ✅ El «hoy» cierra a medianoche del negocio y las horas salen en su hora *(arreglado hoy)*
+- ✅ Si algo falla, sale una pantalla clara con botón para recargar *(nuevo hoy)*
 
 ---
 
@@ -148,12 +154,11 @@ Probado hoy en el mismo motor de la nube, con una base limpia.
 | 7 | Comprobante y cotización en **PDF con logo**; reportes en **Excel y PDF** | Está en el alcance | Nadie |
 | 8 | **Escáner** de código de barras con la cámara | Está en el alcance | Nadie |
 | 9 | **Funcionar sin señal** (hoy se instala, pero necesita internet) | PWA 100% se prometió | Nadie |
-| 10 | **Formularios que no pierden lo escrito** | Regla nuestra | Nadie |
-| 11 | **Selector de idioma estilo Amazon** (hoy son dos banderitas) | Regla nuestra | Nadie |
-| 12 | **Docs** estilo Wikipedia con el panel real (hoy el manual es el prototipo) | Regla nuestra | Nadie |
-| 13 | **Escudo anti-robots** en entrar y crear cuenta | Regla nuestra | Las claves de Turnstile |
-| 14 | **Blindaje**: pruebas automáticas, cabeceras de seguridad, escaneo de secretos | Regla nuestra | Nadie |
-| 15 | Favicon y tarjeta social con el **logo original** | Está en el alcance | El archivo del logo |
+| 10 | **Selector de idioma estilo Amazon** (hoy son dos banderitas) | Regla nuestra | Nadie |
+| 11 | **Docs** estilo Wikipedia con el panel real (hoy el manual es el prototipo) | Regla nuestra | Nadie |
+| 12 | **Escudo anti-robots** en entrar y crear cuenta | Regla nuestra | Las claves de Turnstile |
+| 13 | **Blindaje**: pruebas automáticas, cabeceras de seguridad, escaneo de secretos | Regla nuestra | Nadie |
+| 14 | Favicon y tarjeta social con el **logo original** | Está en el alcance | El archivo del logo |
 
 ### SE COBRA (no existía y le agrega capacidad al negocio)
 

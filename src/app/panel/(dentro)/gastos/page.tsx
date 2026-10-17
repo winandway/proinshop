@@ -2,11 +2,20 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
+import { LimpiarBorrador } from "@/componentes/GuardaBorrador";
+import { horaLocal, minutosZona, modificadorZona } from "@/lib/zona";
 
 export const metadata: Metadata = { title: "Gastos", robots: { index: false } };
 
-export default async function Gastos() {
+export default async function Gastos({
+  searchParams,
+}: {
+  searchParams: Promise<{ registrado?: string }>;
+}) {
+  const { registrado } = await searchParams;
   const db = await baseDeDatos();
+  const zona = await modificadorZona();
+  const minutos = await minutosZona();
 
   const gastos = db
     ? (
@@ -34,13 +43,22 @@ export default async function Gastos() {
     ? await db
         .prepare(
           `SELECT COALESCE(SUM(monto), 0) AS total FROM gasto
-           WHERE strftime('%Y-%m', fecha) = strftime('%Y-%m', 'now')`,
+           WHERE strftime('%Y-%m', fecha, ${zona}) = strftime('%Y-%m', 'now', ${zona})`,
         )
         .first<{ total: number }>()
     : null;
 
   return (
     <div className="pb-24">
+      {registrado && <LimpiarBorrador claves={["gasto-nuevo"]} />}
+      {registrado && (
+        <p
+          role="status"
+          className="mb-3 rounded-xl border border-verde bg-verde-suave px-3.5 py-2.5 text-[12.5px] font-bold text-verde"
+        >
+          Gasto registrado. Ya se restó en el balance.
+        </p>
+      )}
       <div className="mb-4 flex items-center gap-3">
         <Link
           href="/panel"
@@ -73,7 +91,7 @@ export default async function Gastos() {
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-[13px] font-extrabold">{gasto.categoria}</span>
                 <span className="block truncate text-[11.5px] text-gris">
-                  {gasto.fecha.slice(0, 16).replace("T", " ")}
+                  {horaLocal(gasto.fecha, minutos)}
                   {gasto.proveedor ? ` · ${gasto.proveedor}` : ""}
                   {gasto.nota ? ` · ${gasto.nota}` : ""}
                 </span>

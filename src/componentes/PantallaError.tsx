@@ -28,13 +28,15 @@ export function PantallaError({
     idioma === "en"
       ? {
           titulo: "Something didn't work",
-          detalle: "Reload the page to continue. If it happens again, contact us.",
+          detalle:
+            "What you were typing is saved: reload the page and pick up where you left off. If it happens again, contact us.",
           recargar: "Reload the page",
           volver: "Go to the start",
         }
       : {
           titulo: "Algo no salió bien",
-          detalle: "Recarga la página para seguir. Si vuelve a pasar, escríbenos.",
+          detalle:
+            "Lo que estabas escribiendo quedó guardado: recarga la página y sigue donde ibas. Si vuelve a pasar, escríbenos.",
           recargar: "Recargar la página",
           volver: "Ir al inicio",
         };

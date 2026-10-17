@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
 import { achicarEnCampo } from "@/lib/achicar-foto";
 import type { ResultadoProducto } from "@/app/panel/(dentro)/inventario/acciones";
+import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 export type CategoriaSimple = { id: number; nombre: string };
 
@@ -49,7 +50,17 @@ export function FormularioProducto({
 
   return (
     <form onSubmit={enviarSinBorrar(enviar)} className="space-y-4">
+      <GuardaBorrador clave={producto ? `producto-${producto.id}` : "producto-nuevo"} limpiarCon={estado.guardado ? estado : undefined} />
       {producto && <input type="hidden" name="id" value={producto.id} />}
+
+      {estado.guardado && (
+        <p
+          role="status"
+          className="rounded-xl border border-verde bg-verde-suave px-3.5 py-2.5 text-[12.5px] font-bold text-verde"
+        >
+          Cambios guardados. Ya se ven en la tienda.
+        </p>
+      )}
 
       {estado.error && (
         <p

@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
 import type { Resultado } from "@/app/panel/acciones";
 import { CampoClave } from "@/componentes/CampoClave";
+import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 type Campo = {
   nombre: string;
@@ -25,16 +26,20 @@ export function FormularioAcceso({
   campos,
   boton,
   botonEnviando,
+  clave,
 }: {
   accion: (previo: Resultado, datos: FormData) => Promise<Resultado>;
   campos: Campo[];
   boton: string;
   botonEnviando: string;
+  /** Nombre del borrador: lo escrito se recupera si se cierra la ventana. */
+  clave: string;
 }) {
   const [estado, enviar, enviando] = useActionState(accion, {});
 
   return (
     <form onSubmit={enviarSinBorrar(enviar)} className="space-y-4">
+      <GuardaBorrador clave={clave} />
       {estado.error && (
         <p
           role="alert"

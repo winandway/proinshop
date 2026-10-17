@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { crearProveedor } from "../gastos/acciones";
+import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 export const metadata: Metadata = { title: "Proveedores", robots: { index: false } };
 
@@ -63,6 +64,7 @@ export default async function Proveedores() {
       )}
 
       <form action={crearProveedor} className="rounded-2xl bg-white p-4 shadow-sm">
+        <GuardaBorrador clave="proveedor-nuevo" />
         <h2 className="mb-3 text-[13px] font-extrabold">Agregar proveedor</h2>
         <div className="space-y-2.5">
           <input name="nombre" required placeholder="Nombre del proveedor" className={CAMPO} />

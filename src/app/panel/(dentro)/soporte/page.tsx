@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { esCuentaDeSoporte } from "@/lib/contrasenas";
 import { franjaActiva, guardarFranja } from "@/lib/franja";
 import { usuarioActual } from "@/lib/sesion";
+import { GuardaBorrador, LimpiarBorrador } from "@/componentes/GuardaBorrador";
 
 export const metadata: Metadata = { title: "Soporte", robots: { index: false } };
 
@@ -50,6 +51,7 @@ export default async function Soporte({
         Solo la ven las cuentas de soporte. El propietario no tiene acceso.
       </p>
 
+      {guardado && <LimpiarBorrador claves={["franja"]} />}
       {guardado && (
         <p
           role="status"
@@ -60,6 +62,7 @@ export default async function Soporte({
       )}
 
       <form action={guardar} className="rounded-2xl bg-white p-4 shadow-sm">
+        <GuardaBorrador clave="franja" />
         <h2 className="mb-1 text-[13px] font-extrabold">Franja de estado del trabajo</h2>
         <p className="mb-3 text-[11.5px] leading-snug text-gris">
           Pasa a «terminado» solo cuando quien paga el trabajo ya lo probó y lo autoriza. Al

@@ -6,7 +6,7 @@ import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos, bucket } from "@/lib/d1";
 import { usuarioActual, type UsuarioSesion } from "@/lib/sesion";
 
-export type ResultadoProducto = { error?: string };
+export type ResultadoProducto = { error?: string; guardado?: boolean };
 
 /**
  * Quién puede tocar el catálogo: el propietario y bodega. El vendedor solo lo
@@ -233,7 +233,7 @@ export async function actualizarProducto(
   revalidatePath("/panel/inventario");
   revalidatePath(`/panel/inventario/${id}`);
   revalidatePath("/");
-  return {};
+  return { guardado: true };
 }
 
 export async function alternarPublicado(datos: FormData): Promise<void> {

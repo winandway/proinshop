@@ -9,6 +9,7 @@ import {
 import { formatearPrecio } from "@/lib/i18n";
 import type { ClienteSimple, ProductoVenta } from "@/lib/negocio";
 import { BotonCopiar } from "./BotonCopiar";
+import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 export function CrearCotizacion({
   productos,
@@ -32,6 +33,7 @@ export function CrearCotizacion({
 
   return (
     <form onSubmit={enviarSinBorrar(enviar)} className="rounded-2xl bg-white p-4 shadow-sm">
+      <GuardaBorrador clave="cotizacion-nueva" limpiarCon={estado.token ? estado : undefined} />
       <input
         type="hidden"
         name="lineas"

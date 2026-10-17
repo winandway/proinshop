@@ -1,6 +1,13 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useRef, useState } from "react";
+import {
+  borrarBorradorDe,
+  guardarBorradorDe,
+  leerBorradorDe,
+  useDuenoBorrador,
+} from "@/componentes/GuardaBorrador";
+import { leerMonto } from "@/lib/numeros";
 import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
 import { registrarVenta, type ResultadoVenta } from "@/app/panel/(dentro)/vender/acciones";
 import { formatearPrecio } from "@/lib/i18n";
@@ -20,6 +27,59 @@ export function PantallaVender({
   const [metodoPago, setMetodoPago] = useState<string>("efectivo");
   const [clienteId, setClienteId] = useState("");
   const [descuento, setDescuento] = useState("");
+  const [recuperada, setRecuperada] = useState(false);
+  const dueno = useDuenoBorrador();
+  const primeraVez = useRef(true);
+
+  // Si se cerró la ventana o se fue el internet a mitad de una venta, al
+  // volver está el carrito tal como quedó.
+  useEffect(() => {
+    const espera = window.setTimeout(() => {
+      const guardada = leerBorradorDe<{
+        lineas: Record<number, number>;
+        metodoPago: string;
+        clienteId: string;
+        descuento: string;
+      }>("venta", dueno);
+      if (!guardada) return;
+
+      const validas = Object.fromEntries(
+        Object.entries(guardada.lineas ?? {}).filter(
+          ([id, cantidad]) => Number(cantidad) > 0 && productos.some((p) => p.id === Number(id)),
+        ),
+      ) as Record<number, number>;
+      if (Object.keys(validas).length === 0 && !guardada.descuento && !guardada.clienteId) return;
+
+      setLineas(validas);
+      setMetodoPago(guardada.metodoPago || "efectivo");
+      setClienteId(guardada.clienteId || "");
+      setDescuento(guardada.descuento || "");
+      setRecuperada(true);
+    }, 0);
+    return () => window.clearTimeout(espera);
+  }, [dueno, productos]);
+
+  useEffect(() => {
+    if (primeraVez.current) {
+      primeraVez.current = false;
+      return;
+    }
+    const espera = window.setTimeout(() => {
+      const vacia = Object.keys(lineas).length === 0 && !descuento && !clienteId;
+      if (vacia) borrarBorradorDe("venta", dueno);
+      else guardarBorradorDe("venta", dueno, { lineas, metodoPago, clienteId, descuento });
+    }, 500);
+    return () => window.clearTimeout(espera);
+  }, [lineas, metodoPago, clienteId, descuento, dueno]);
+
+  function empezarDeNuevo() {
+    borrarBorradorDe("venta", dueno);
+    setLineas({});
+    setMetodoPago("efectivo");
+    setClienteId("");
+    setDescuento("");
+    setRecuperada(false);
+  }
 
   const encontrados = useMemo(() => {
     const q = busqueda.trim().toLowerCase();
@@ -31,7 +91,7 @@ export function PantallaVender({
 
   const seleccionados = productos.filter((p) => (lineas[p.id] ?? 0) > 0);
   const subtotal = seleccionados.reduce((suma, p) => suma + p.precio * lineas[p.id], 0);
-  const rebaja = Math.max(0, Number(descuento.replace(",", ".")) || 0);
+  const rebaja = Math.max(0, leerMonto(descuento));
   const total = Math.max(0, subtotal - rebaja);
 
   function cambiar(id: number, delta: number, tope: number) {
@@ -56,6 +116,22 @@ export function PantallaVender({
       <input type="hidden" name="metodo_pago" value={metodoPago} />
       <input type="hidden" name="cliente_id" value={clienteId} />
       <input type="hidden" name="descuento" value={rebaja} />
+
+      {recuperada && (
+        <p
+          role="status"
+          className="mb-3 flex items-center gap-2 rounded-xl bg-crema px-3.5 py-2.5 text-[12px] text-gris"
+        >
+          <span className="flex-1">Recuperamos la venta que estabas haciendo.</span>
+          <button
+            type="button"
+            onClick={empezarDeNuevo}
+            className="shrink-0 font-bold text-rojo hover:underline"
+          >
+            Empezar de nuevo
+          </button>
+        </p>
+      )}
 
       {estado.error && (
         <p

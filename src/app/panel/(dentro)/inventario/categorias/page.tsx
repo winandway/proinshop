@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { usuarioActual } from "@/lib/sesion";
 import { alternarCategoria, crearCategoria, editarCategoria } from "../acciones";
+import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 export const metadata: Metadata = { title: "Categorías", robots: { index: false } };
 
@@ -76,6 +77,7 @@ export default async function Categorias() {
 
               <div className="space-y-2.5 px-4 pb-4">
                 <form action={editarCategoria} className="space-y-2.5">
+                  <GuardaBorrador clave={`categoria-${categoria.id}`} />
                   <input type="hidden" name="id" value={categoria.id} />
                   <div className="flex gap-2.5">
                     <div className="w-20">
@@ -147,6 +149,7 @@ export default async function Categorias() {
       </ul>
 
       <form action={crearCategoria} className="rounded-2xl bg-white p-4 shadow-sm">
+        <GuardaBorrador clave="categoria-nueva" />
         <h2 className="mb-3 text-[13px] font-extrabold">Crear nueva categoría</h2>
         <div className="space-y-2.5">
           <input name="nombre" required placeholder="Nombre de la categoría" className={CAMPO} />

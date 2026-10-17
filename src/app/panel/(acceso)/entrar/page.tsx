@@ -22,6 +22,7 @@ export default async function Entrar() {
       </p>
 
       <FormularioAcceso
+        clave="acceso-entrar"
         accion={entrar}
         boton="Entrar"
         botonEnviando="Entrando…"

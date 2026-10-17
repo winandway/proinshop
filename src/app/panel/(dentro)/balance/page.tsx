@@ -4,13 +4,14 @@ import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { usuarioActual } from "@/lib/sesion";
+import { modificadorZona } from "@/lib/zona";
 
 export const metadata: Metadata = { title: "Balance", robots: { index: false } };
 
 const RANGOS = {
-  dia: { texto: "Día", filtro: "date(fecha) = date('now')" },
-  mes: { texto: "Mes", filtro: "strftime('%Y-%m', fecha) = strftime('%Y-%m', 'now')" },
-  ano: { texto: "Año", filtro: "strftime('%Y', fecha) = strftime('%Y', 'now')" },
+  dia: { texto: "Día", formato: "%Y-%m-%d" },
+  mes: { texto: "Mes", formato: "%Y-%m" },
+  ano: { texto: "Año", formato: "%Y" },
 } as const;
 
 type Rango = keyof typeof RANGOS;
@@ -27,7 +28,10 @@ export default async function Balance({
 
   const { rango } = await searchParams;
   const elegido: Rango = rango === "dia" || rango === "ano" ? rango : "mes";
-  const filtro = RANGOS[elegido].filtro;
+  // El día, el mes y el año se cortan con la hora del negocio, no la universal.
+  const zona = await modificadorZona();
+  const formato = RANGOS[elegido].formato;
+  const filtro = `strftime('${formato}', fecha, ${zona}) = strftime('${formato}', 'now', ${zona})`;
 
   const db = await baseDeDatos();
 

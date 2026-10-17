@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { registrarAbono } from "./acciones";
+import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 export const metadata: Metadata = { title: "Cuentas por cobrar", robots: { index: false } };
 
@@ -87,6 +88,7 @@ export default async function Deudas() {
                 </div>
 
                 <form action={registrarAbono} className="mt-3 flex gap-2">
+                  <GuardaBorrador clave={`abono-${deuda.id}`} />
                   <input type="hidden" name="deuda_id" value={deuda.id} />
                   <input
                     name="monto"

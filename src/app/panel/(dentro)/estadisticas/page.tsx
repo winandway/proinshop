@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { usuarioActual } from "@/lib/sesion";
+import { modificadorZona } from "@/lib/zona";
 
 export const metadata: Metadata = { title: "Estadísticas", robots: { index: false } };
 
@@ -27,11 +28,12 @@ export default async function Estadisticas() {
         .first<{ ventas: number; ventas_previas: number; gastos: number; pedidos: number }>()
     : null;
 
+  const zona = await modificadorZona();
   const porDia = db
     ? (
         await db
           .prepare(
-            `SELECT date(fecha) AS dia, SUM(total) AS total FROM venta
+            `SELECT date(fecha, ${zona}) AS dia, SUM(total) AS total FROM venta
              WHERE fecha >= datetime('now', '-7 days')
              GROUP BY dia ORDER BY dia`,
           )

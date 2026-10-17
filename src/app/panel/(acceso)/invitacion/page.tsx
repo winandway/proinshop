@@ -23,6 +23,7 @@ export default async function Invitacion({
       </p>
 
       <FormularioAcceso
+        clave="acceso-invitacion"
         accion={aceptarInvitacion}
         boton="Crear mi cuenta"
         botonEnviando="Creando…"

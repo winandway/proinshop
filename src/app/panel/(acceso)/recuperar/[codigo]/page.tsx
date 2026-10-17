@@ -49,6 +49,7 @@ export default async function Recuperar({ params }: { params: Promise<{ codigo: 
       </p>
 
       <FormularioAcceso
+        clave="acceso-recuperar"
         accion={restablecerContrasena}
         boton="Guardar y entrar"
         botonEnviando="Guardando…"

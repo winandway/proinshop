@@ -26,6 +26,7 @@ export default async function CrearCuenta() {
       </p>
 
       <FormularioAcceso
+        clave="acceso-crear-cuenta"
         accion={crearCuenta}
         boton="Crear mi cuenta"
         botonEnviando="Creando…"

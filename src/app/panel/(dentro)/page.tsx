@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { usuarioActual } from "@/lib/sesion";
+import { modificadorZona } from "@/lib/zona";
 
 export const metadata: Metadata = { title: "Inicio", robots: { index: false } };
 
@@ -26,13 +27,14 @@ const MODULOS = [
 export default async function InicioPanel() {
   const usuario = await usuarioActual();
   const db = await baseDeDatos();
+  const zona = await modificadorZona();
 
   const resumen = db
     ? await db
         .prepare(
           `SELECT
-             (SELECT COALESCE(SUM(total), 0) FROM venta WHERE date(fecha) = date('now')) AS ventas,
-             (SELECT COALESCE(SUM(monto), 0) FROM gasto WHERE date(fecha) = date('now')) AS gastos,
+             (SELECT COALESCE(SUM(total), 0) FROM venta WHERE date(fecha, ${zona}) = date('now', ${zona})) AS ventas,
+             (SELECT COALESCE(SUM(monto), 0) FROM gasto WHERE date(fecha, ${zona}) = date('now', ${zona})) AS gastos,
              (SELECT COUNT(*) FROM pedido WHERE estado = 'nuevo') AS pedidos,
              (SELECT COUNT(*) FROM producto WHERE publicado = 1) AS productos`,
         )

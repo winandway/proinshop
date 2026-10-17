@@ -8,6 +8,7 @@ import { useCarrito } from "./carrito";
 import { formatearPrecio, texto, textos } from "@/lib/i18n";
 import type { Idioma, MetodoEntrega, MetodoPago, Producto } from "@/lib/tipos";
 import { guardarPedido } from "@/app/(tienda)/checkout/acciones";
+import { GuardaBorrador, borrarBorrador } from "@/componentes/GuardaBorrador";
 
 export function FormularioCheckout({
   productos,
@@ -83,6 +84,7 @@ export function FormularioCheckout({
 
     const numero = guardado.numero;
 
+    borrarBorrador("checkout");
     vaciar();
     router.push(`/pedido/${numero}`);
   }
@@ -92,6 +94,7 @@ export function FormularioCheckout({
 
   return (
     <form onSubmit={enviar} className="grid gap-8 lg:grid-cols-[1fr_360px]">
+      <GuardaBorrador clave="checkout" />
       <div>
         {fallo && (
           <p

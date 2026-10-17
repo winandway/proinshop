@@ -19,20 +19,19 @@
 
 ## Fila de la IA (gratis, en este orden)
 
-1. [ ] Formularios que no pierden lo escrito (pieza única `useBorrador`), empezando por crear producto
-2. [ ] Selector de idioma estilo Amazon (`SelectorIdioma`)
-3. [ ] Compras a proveedor (entrada de mercancía que actualiza costo y stock)
-4. [ ] Banner de la portada editable desde Mi tienda
-5. [ ] Elegir color o talla en Vender
-6. [ ] Cotización aceptada → venta con un toque
-7. [ ] Aviso de pedido nuevo al celular del dueño
-8. [ ] Docs estilo Wikipedia en `/docs` con el panel real (redirigir `/guia`)
-9. [ ] Blindaje: vitest + playwright + prueba de humo + cabeceras de seguridad + gitleaks + `npm run verify`; pruebas de los candados de CANDADOS.md
-10. [ ] Comprobante y cotización en PDF; reportes en Excel y PDF
-11. [ ] Escáner de código de barras con la cámara
-12. [ ] Funcionar sin señal (service worker)
-13. [ ] Turnstile en entrar y crear cuenta (cuando lleguen las claves)
-14. [ ] Carga por foto con IA (cuando llegue la clave)
+1. [ ] Selector de idioma estilo Amazon (`SelectorIdioma`)
+2. [ ] Compras a proveedor (entrada de mercancía que actualiza costo y stock)
+3. [ ] Banner de la portada editable desde Mi tienda
+4. [ ] Elegir color o talla en Vender
+5. [ ] Cotización aceptada → venta con un toque
+6. [ ] Aviso de pedido nuevo al celular del dueño
+7. [ ] Docs estilo Wikipedia en `/docs` con el panel real (redirigir `/guia`)
+8. [ ] Blindaje: vitest + playwright + prueba de humo + cabeceras de seguridad + gitleaks + `npm run verify`; pruebas de los candados de CANDADOS.md
+9. [ ] Comprobante y cotización en PDF; reportes en Excel y PDF
+10. [ ] Escáner de código de barras con la cámara
+11. [ ] Funcionar sin señal (service worker)
+12. [ ] Turnstile en entrar y crear cuenta (cuando lleguen las claves)
+13. [ ] Carga por foto con IA (cuando llegue la clave)
 
 ## Hecho
 
@@ -44,3 +43,9 @@
 - [x] 16 oct 2026 — Vendedor sin edición de catálogo ni costos
 - [x] 16 oct 2026 — Freno de intentos en la entrada
 - [x] 16 oct 2026 — Franja de estado del trabajo + pantalla de Soporte
+- [x] 16 oct 2026 — Fotos de celular: límite de 20 MB, foto achicada en el celular, cámara o galería
+- [x] 16 oct 2026 — Montos con punto de miles ("1.890" = 1890)
+- [x] 16 oct 2026 — Los formularios ya no se vacían al dar un aviso
+- [x] 16 oct 2026 — Ningún formulario pierde lo escrito (`GuardaBorrador`), carrito de Vender incluido
+- [x] 16 oct 2026 — El "hoy" y las horas con la hora del negocio
+- [x] 16 oct 2026 — Pantallas de error amables y recarga sola al publicar versión nueva

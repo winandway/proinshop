@@ -5,6 +5,7 @@ import {
   quitarEspecificacion,
   quitarVariante,
 } from "@/app/panel/(dentro)/inventario/[id]/detalles";
+import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 const CAMPO =
   "w-full rounded-xl border-[1.5px] border-linea px-3 py-2.5 text-[12.5px] font-semibold outline-none transition placeholder:font-normal placeholder:text-gris2 focus:border-rojo";
@@ -73,6 +74,7 @@ export function DetallesProducto({
         )}
 
         <form action={agregarVariante} className="space-y-2">
+          <GuardaBorrador clave={`variante-${productoId}`} />
           <input type="hidden" name="producto_id" value={productoId} />
           <div className="flex gap-2">
             <input name="nombre" required placeholder="Rojo, Talla M, 5 kW…" className={CAMPO} />
@@ -135,6 +137,7 @@ export function DetallesProducto({
         )}
 
         <form action={agregarEspecificacion} className="space-y-2">
+          <GuardaBorrador clave={`especificacion-${productoId}`} />
           <input type="hidden" name="producto_id" value={productoId} />
           <div className="flex gap-2">
             <input name="etiqueta" required placeholder="Potencia" className={CAMPO} />

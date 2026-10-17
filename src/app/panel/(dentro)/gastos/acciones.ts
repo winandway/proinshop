@@ -56,7 +56,7 @@ export async function registrarGasto(
 
   revalidatePath("/panel");
   revalidatePath("/panel/gastos");
-  redirect("/panel/gastos");
+  redirect("/panel/gastos?registrado=1");
 }
 
 export async function crearProveedor(datos: FormData): Promise<void> {
