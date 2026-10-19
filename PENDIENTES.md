@@ -5,6 +5,7 @@
 > IA sin esperar. Al terminar un punto se marca aquí mismo.
 >
 > Detalle y análisis completo: [docs/LANZAMIENTO-MVP.md](docs/LANZAMIENTO-MVP.md).
+> Comparación con Treinta (qué falta, gratis y cobrable): [docs/COMPARATIVA-TREINTA.md](docs/COMPARATIVA-TREINTA.md).
 
 ## 👤 Esperando por Richard o por el dueño
 
@@ -16,22 +17,35 @@
 - [ ] 👤 **Clave de la IA** para la carga por foto.
 - [ ] 👤 **Claves de Turnstile** (escudo anti-robots).
 - [ ] 👤 **Logo original** en vector o PNG grande.
+- [ ] 👤 **Foto del contenedor con «PROINSHOP» bien escrito** (la que llegó dice «PROVINCHO»). Va como cuarto producto de la vitrina.
+- [ ] 👤 **Qué mejoras cobrables se le cotizan al cliente** y a qué precio (lista en COMPARATIVA-TREINTA, sección 4).
 
 ## Fila de la IA (gratis, en este orden)
 
-1. [ ] Selector de idioma estilo Amazon (`SelectorIdioma`)
-2. [ ] Compras a proveedor (entrada de mercancía que actualiza costo y stock)
-3. [ ] Banner de la portada editable desde Mi tienda
+1. [ ] Compras a proveedor, con costo ponderado (entrada de mercancía que actualiza costo y stock)
+2. [ ] Alertas de stock bajo (usar el mínimo que ya existe en la base)
+3. [ ] Pago mixto en Vender (dividir una venta en dos o más métodos)
 4. [ ] Elegir color o talla en Vender
-5. [ ] Cotización aceptada → venta con un toque
-6. [ ] Aviso de pedido nuevo al celular del dueño
-7. [ ] Docs estilo Wikipedia en `/docs` con el panel real (redirigir `/guia`)
-8. [ ] Blindaje: vitest + playwright + prueba de humo + cabeceras de seguridad + gitleaks + `npm run verify`; pruebas de los candados de CANDADOS.md
-9. [ ] Comprobante y cotización en PDF; reportes en Excel y PDF
-10. [ ] Escáner de código de barras con la cámara
-11. [ ] Funcionar sin señal (service worker)
-12. [ ] Turnstile en entrar y crear cuenta (cuando lleguen las claves)
-13. [ ] Carga por foto con IA (cuando llegue la clave)
+5. [ ] Escáner de código de barras con la cámara
+6. [ ] Comprobante y cotización en PDF con logo, con nota personalizada; reportes en Excel y PDF
+7. [ ] Cotización aceptada → venta con un toque
+8. [ ] Historial de compras por cliente
+9. [ ] Aviso de pedido nuevo al celular del dueño
+10. [ ] Banner de la portada editable desde Mi tienda
+11. [ ] Selector de idioma estilo Amazon (`SelectorIdioma`)
+12. [ ] Funcionar sin señal (service worker)
+13. [ ] Docs estilo Wikipedia en `/docs` con el panel real (redirigir `/guia`) y recorrido de bienvenida
+14. [ ] Blindaje: vitest + playwright + prueba de humo + cabeceras de seguridad + gitleaks + `npm run verify`; pruebas de los candados de CANDADOS.md
+15. [ ] Turnstile en entrar y crear cuenta (cuando lleguen las claves)
+16. [ ] Carga por foto con IA, con fondo recortado (cuando llegue la clave)
+
+## Cobrable (espera el visto bueno y el precio de Richard)
+
+Caja, conteo de inventario, edición masiva y carga por Excel, filtros de
+reportes, permisos por módulo, avisos de empleados, recordatorios automáticos,
+dólares y moneda local, varias tiendas, factura electrónica, asistente con IA,
+entrar con huella, app en Google Play, app en la App Store. Más los cuatro del
+documento de lanzamiento. Rangos en COMPARATIVA-TREINTA, sección 4.
 
 ## Hecho
 
