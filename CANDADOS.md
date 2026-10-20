@@ -173,6 +173,23 @@
 - **No tocar:** no bajar de versión. Al subir a 16.4 o más, subir también
   `@opennextjs/cloudflare` (la 1.20.12 pide Next 16.4.1 o más).
 
+## C-ESBUILD — El empaquetador de la nube necesita esbuild declarado
+
+- **Cómo se veía:** la publicación del 19 oct falló en la nube con «Cannot
+  find package 'esbuild'» justo después de pasar todas las pruebas. En la
+  computadora compilaba bien.
+- **Causa real:** `@opennextjs/cloudflare` usa `esbuild` sin declararlo. Antes
+  quedaba suelto en `node_modules` de rebote; al instalar vitest 5 dejó de
+  estarlo. En la computadora se encontraba uno en la carpeta personal, fuera
+  del proyecto, y eso escondía el problema.
+- **Qué se hizo:** `esbuild` 0.27.1 declarado en `devDependencies` (la misma
+  versión con la que se hicieron todas las pruebas locales; compatible con
+  vite 8, que pide 0.27 o 0.28).
+- **Cómo se comprueba:** compilar en una carpeta limpia fuera del usuario
+  (rsync del proyecto sin `node_modules` + `npm ci` +
+  `npx opennextjs-cloudflare build`), no en la carpeta del proyecto.
+- **No tocar:** no quitar `esbuild` de `package.json` aunque «nadie lo use».
+
 ## C-PAGO-MIXTO — Los pagos tienen que cuadrar al centavo
 
 - **Qué se hizo:** `src/lib/ventas.ts` → `repartirPagos`. Un solo método cubre
