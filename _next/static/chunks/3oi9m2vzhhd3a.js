@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,27183,e=>{"use strict";var t=e.i(71645),r=e.i(18566);e.s(["RefrescoAutomatico",0,function({segundos:e=30}){let o=(0,r.useRouter)();return(0,t.useEffect)(()=>{let t=window.setInterval(()=>o.refresh(),1e3*e);return()=>window.clearInterval(t)},[o,e]),null}])}]);

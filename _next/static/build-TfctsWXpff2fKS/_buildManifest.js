@@ -1,15 +1,6 @@
 self.__BUILD_MANIFEST = {
   "__rewrites": {
-    "afterFiles": [
-      {
-        "source": "/guia",
-        "destination": "/guia/index.html"
-      },
-      {
-        "source": "/manual",
-        "destination": "/guia/index.html"
-      }
-    ],
+    "afterFiles": [],
     "beforeFiles": [],
     "fallback": []
   },
