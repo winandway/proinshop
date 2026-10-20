@@ -49,7 +49,7 @@ varias tiendas, app en la App Store. Rangos en COMPARATIVA-TREINTA, sección 4.
 - [x] 19 oct 2026 — Selector de idioma estilo Amazon, con su prueba
 - [x] 19 oct 2026 — Entrar con huella o cara (llaves de acceso)
 - [x] 19 oct 2026 — Abrir y vender sin señal, con la cola que se envía sola
-- [x] 19 oct 2026 — Docs en /docs, 21 guías en español e inglés con capturas; /guia y /manual redirigen
+- [x] 19 oct 2026 — Docs en /docs, 20 guías en español e inglés con capturas; /guia y /manual redirigen
 - [x] 19 oct 2026 — Pruebas automáticas (56), compuerta antes de publicar, piso de cobertura, `npm run verify`
 - [x] 19 oct 2026 — Next 16.3.8 por fallos de seguridad críticos; mapa del sitio y robots.txt
 

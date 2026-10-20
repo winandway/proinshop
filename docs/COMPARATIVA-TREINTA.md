@@ -259,7 +259,7 @@ como igual. Se hizo de corrido y se publicó. Ya está en Proinshop:
 | Dos monedas con la tasa del día | Sí |
 | Entrar con huella o cara | Sí |
 | Funcionar sin señal | Sí: abre y vende; las ventas se envían solas al volver la señal |
-| Ayuda dentro de la app | Sí: Docs con 21 guías en español e inglés |
+| Ayuda dentro de la app | Sí: Docs con 20 guías en español e inglés |
 
 Lo que sigue faltando y por qué: aviso al celular con el panel cerrado (va
 primero en la fila), factura electrónica, asistente con IA, recordatorios
