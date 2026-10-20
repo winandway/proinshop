@@ -3,6 +3,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { NEGOCIO } from "@/lib/config";
 import { idiomaActual } from "@/lib/idioma-servidor";
+import { ServicioSinSenal } from "@/componentes/ServicioSinSenal";
 
 const geist = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
@@ -53,7 +54,10 @@ export default async function RootLayout({
 
   return (
     <html lang={idioma} className={`${geist.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col bg-white">{children}</body>
+      <body className="flex min-h-full flex-col bg-white">
+        {children}
+        <ServicioSinSenal />
+      </body>
     </html>
   );
 }

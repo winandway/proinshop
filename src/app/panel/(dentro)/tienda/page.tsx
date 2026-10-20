@@ -26,15 +26,26 @@ async function guardarTienda(datos: FormData) {
   const whatsapp = String(datos.get("whatsapp") ?? "").replace(/\D/g, "");
   const envio = Math.max(0, leerMonto(datos.get("costo_envio")));
 
+  // Segunda moneda: código de tres letras (COP, VES, MXN…) y cuántas unidades
+  // de esa moneda vale un dólar hoy. Vacío = no se muestra.
+  const moneda2 = String(datos.get("moneda2") ?? "")
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z]/g, "")
+    .slice(0, 3);
+  const tasa2 = Math.max(0, leerMonto(datos.get("tasa2")));
+  const umbral = Math.max(0, Math.round(leerMonto(datos.get("umbral_stock")))) || 3;
+
   await db
     .prepare(
       `INSERT INTO negocio (id, nombre, dominio, whatsapp, correo, direccion, costo_envio,
-                            mostrar_stock, ocultar_agotados)
-       VALUES (1, ?, 'proinshop.com', ?, ?, ?, ?, ?, ?)
+                            mostrar_stock, ocultar_agotados, umbral_stock, moneda2, tasa2)
+       VALUES (1, ?, 'proinshop.com', ?, ?, ?, ?, ?, ?, ?, ?, ?)
        ON CONFLICT(id) DO UPDATE SET
          nombre = excluded.nombre, whatsapp = excluded.whatsapp, correo = excluded.correo,
          direccion = excluded.direccion, costo_envio = excluded.costo_envio,
-         mostrar_stock = excluded.mostrar_stock, ocultar_agotados = excluded.ocultar_agotados`,
+         mostrar_stock = excluded.mostrar_stock, ocultar_agotados = excluded.ocultar_agotados,
+         umbral_stock = excluded.umbral_stock, moneda2 = excluded.moneda2, tasa2 = excluded.tasa2`,
     )
     .bind(
       String(datos.get("nombre") ?? "Proinshop").trim(),
@@ -44,6 +55,9 @@ async function guardarTienda(datos: FormData) {
       envio,
       datos.get("mostrar_stock") === "on" ? 1 : 0,
       datos.get("ocultar_agotados") === "on" ? 1 : 0,
+      umbral,
+      moneda2 && tasa2 > 0 ? moneda2 : null,
+      moneda2 && tasa2 > 0 ? tasa2 : null,
     )
     .run();
 
@@ -173,6 +187,57 @@ export default async function MiTienda({
               name="costo_envio"
               inputMode="decimal"
               defaultValue={negocio.costoEnvio}
+              className={CAMPO}
+            />
+          </div>
+        </div>
+
+        <h2 className="mb-2 mt-5 text-[13px] font-extrabold">Inventario</h2>
+        <div>
+          <label htmlFor="umbral_stock" className="mb-1.5 block text-[12.5px] font-bold text-gris">
+            Avisarme cuando un producto tenga esta cantidad o menos
+          </label>
+          <input
+            id="umbral_stock"
+            name="umbral_stock"
+            inputMode="numeric"
+            defaultValue={negocio.umbralStock}
+            className={CAMPO}
+          />
+          <p className="mt-1.5 text-[11.5px] text-gris2">
+            Cada producto puede tener su propio mínimo en su ficha; si no lo tiene, se usa este.
+          </p>
+        </div>
+
+        <h2 className="mb-2 mt-5 text-[13px] font-extrabold">Segunda moneda</h2>
+        <p className="mb-2 text-[11.5px] text-gris">
+          Los precios siguen en dólares; el panel muestra al lado el valor en tu moneda local con
+          la tasa del día.
+        </p>
+        <div className="flex gap-2.5">
+          <div className="w-28">
+            <label htmlFor="moneda2" className="mb-1.5 block text-[12.5px] font-bold text-gris">
+              Moneda
+            </label>
+            <input
+              id="moneda2"
+              name="moneda2"
+              defaultValue={negocio.moneda2}
+              placeholder="COP"
+              maxLength={3}
+              className={`${CAMPO} uppercase`}
+            />
+          </div>
+          <div className="flex-1">
+            <label htmlFor="tasa2" className="mb-1.5 block text-[12.5px] font-bold text-gris">
+              ¿Cuánto vale 1 dólar hoy?
+            </label>
+            <input
+              id="tasa2"
+              name="tasa2"
+              inputMode="decimal"
+              defaultValue={negocio.tasa2 || ""}
+              placeholder="Tasa del día"
               className={CAMPO}
             />
           </div>

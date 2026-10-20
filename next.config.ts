@@ -11,6 +11,10 @@ const nextConfig: NextConfig = {
   // sola en vez de fallar con un botón que ya no existe.
   deploymentId: process.env.GITHUB_SHA?.slice(0, 12),
 
+  // La misma huella llega al navegador: con ella el modo sin señal sabe
+  // cuándo borrar las copias de la versión anterior.
+  env: { NEXT_PUBLIC_VERSION: process.env.GITHUB_SHA?.slice(0, 12) ?? "local" },
+
   experimental: {
     serverActions: {
       // Por defecto Next solo acepta 1 MB por envío y una foto de celular
@@ -20,12 +24,13 @@ const nextConfig: NextConfig = {
     },
   },
 
-  async rewrites() {
+  async redirects() {
     return [
-      // El manual vive en public/guia/index.html. Con esto el enlace que se
-      // comparte es limpio: proinshop.com/guia#crear-producto
-      { source: "/guia", destination: "/guia/index.html" },
-      { source: "/manual", destination: "/guia/index.html" },
+      // El manual de una sola página se reemplazó por Docs (una guía por
+      // página). Los enlaces viejos que ya circularon llegan a Docs.
+      { source: "/guia", destination: "/docs", permanent: true },
+      { source: "/guia/:resto*", destination: "/docs", permanent: true },
+      { source: "/manual", destination: "/docs", permanent: true },
     ];
   },
 };

@@ -21,6 +21,12 @@ jobs:
 
       - run: npm ci
 
+      # Compuerta: si los tipos, el lint o una prueba están en rojo, no se
+      # publica nada. Se arregla el cambio, no se apaga la prueba.
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+
       # Convierte el build de Next.js en un Worker de Cloudflare.
       - run: npx opennextjs-cloudflare build
 

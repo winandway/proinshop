@@ -25,6 +25,7 @@ type FilaProducto = {
   precio: number;
   precio_anterior: number | null;
   stock: number;
+  es_servicio: number | null;
   publicado: number;
   destacado: number;
   etiqueta_es: string | null;
@@ -103,7 +104,10 @@ async function armarProductos(filas: FilaProducto[]): Promise<Producto[]> {
     precio: f.precio,
     precioAnterior: f.precio_anterior ?? undefined,
     costo: f.costo,
-    stock: f.stock,
+    // Un servicio siempre está disponible: el número solo sirve para que el
+    // carrito no lo frene; la pantalla dice «Disponible» sin mostrar cantidad.
+    stock: f.es_servicio === 1 ? 999 : f.stock,
+    esServicio: f.es_servicio === 1,
     sku: f.sku ?? "",
     publicado: f.publicado === 1,
     destacado: f.destacado === 1,
@@ -194,7 +198,7 @@ export async function obtenerProductos(opciones?: {
   // el ajuste del panel no sirve de nada.
   const config = await obtenerConfigTienda();
   if (config.ocultarAgotados) {
-    condiciones.push("p.stock > 0");
+    condiciones.push("(p.stock > 0 OR COALESCE(p.es_servicio, 0) = 1)");
   }
   if (opciones?.buscar) {
     condiciones.push("(lower(p.nombre_es) LIKE ? OR lower(p.nombre_en) LIKE ? OR lower(p.sku) LIKE ?)");

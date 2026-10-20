@@ -44,6 +44,8 @@ export type Producto = {
   /** Costo de importación. Nunca se muestra al público. */
   costo: number;
   stock: number;
+  /** Un servicio (instalación, envío) no lleva existencias: siempre se puede pedir. */
+  esServicio?: boolean;
   sku: string;
   publicado: boolean;
   destacado: boolean;

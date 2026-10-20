@@ -3,20 +3,19 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { leerMonto } from "@/lib/numeros";
+import { anotarActividad } from "@/lib/actividad";
 import { baseDeDatos, bucket } from "@/lib/d1";
-import { usuarioActual, type UsuarioSesion } from "@/lib/sesion";
+import { puede, usuarioActual, usuarioQuePuede, type UsuarioSesion } from "@/lib/sesion";
 
 export type ResultadoProducto = { error?: string; guardado?: boolean };
 
 /**
- * Quién puede tocar el catálogo: el propietario y bodega. El vendedor solo lo
- * consulta. La regla vive aquí, en el servidor: esconder el botón no basta,
- * porque la acción se puede llamar igual.
+ * Quién puede tocar el catálogo: quien tenga el módulo de inventario (por
+ * defecto, propietario y bodega). La regla vive aquí, en el servidor:
+ * esconder el botón no basta, porque la acción se puede llamar igual.
  */
 async function editorDeCatalogo(): Promise<UsuarioSesion | null> {
-  const usuario = await usuarioActual();
-  if (!usuario || (usuario.rol !== "dueno" && usuario.rol !== "bodega")) return null;
-  return usuario;
+  return usuarioQuePuede("inventario");
 }
 
 const TAMANO_MAXIMO_FOTO = 15 * 1024 * 1024;
@@ -70,7 +69,7 @@ export async function crearProducto(
   if (precio <= 0) return { error: "El precio debe ser mayor que cero" };
 
   const nombreIngles = String(datos.get("nombre_en") ?? "").trim();
-  const costo = leerMonto(datos.get("costo"));
+  const costo = puede(usuario, "costos") ? leerMonto(datos.get("costo")) : 0;
   const stock = Math.max(0, Math.round(leerMonto(datos.get("stock"))));
   const categoriaId = Number(datos.get("categoria_id")) || null;
   const codigoBarras = String(datos.get("codigo_barras") ?? "").trim() || null;
@@ -78,6 +77,8 @@ export async function crearProducto(
   const descripcionIngles = String(datos.get("descripcion_en") ?? "").trim() || null;
   const publicado = datos.get("publicado") === "on" ? 1 : 0;
   const destacado = datos.get("destacado") === "on" ? 1 : 0;
+  const esServicio = datos.get("es_servicio") === "on" ? 1 : 0;
+  const stockMinimo = Math.max(0, Math.round(leerMonto(datos.get("stock_minimo"))));
 
   // Slug único: si ya existe uno igual, se le añade un número.
   const base = aSlug(nombre) || "producto";
@@ -102,8 +103,8 @@ export async function crearProducto(
     .prepare(
       `INSERT INTO producto
          (categoria_id, slug, nombre_es, nombre_en, descripcion_es, descripcion_en, sku,
-          codigo_barras, costo, precio, stock, publicado, destacado, emoji)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '📦')`,
+          codigo_barras, costo, precio, stock, publicado, destacado, emoji, es_servicio, stock_minimo)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, '📦', ?, ?)`,
     )
     .bind(
       categoriaId,
@@ -116,9 +117,11 @@ export async function crearProducto(
       codigoBarras,
       costo,
       precio,
-      stock,
+      esServicio ? 0 : stock,
       publicado,
       destacado,
+      esServicio,
+      stockMinimo,
     )
     .run();
 
@@ -131,7 +134,7 @@ export async function crearProducto(
       .run();
   }
 
-  if (stock > 0) {
+  if (stock > 0 && !esServicio) {
     await db
       .prepare(
         `INSERT INTO movimiento_inventario
@@ -161,9 +164,9 @@ export async function actualizarProducto(
   if (!id) return { error: "Producto no encontrado" };
 
   const actual = await db
-    .prepare("SELECT slug, stock FROM producto WHERE id = ?")
+    .prepare("SELECT slug, stock, costo FROM producto WHERE id = ?")
     .bind(id)
-    .first<{ slug: string; stock: number }>();
+    .first<{ slug: string; stock: number; costo: number }>();
   if (!actual) return { error: "Producto no encontrado" };
 
   const nombre = String(datos.get("nombre") ?? "").trim();
@@ -185,7 +188,8 @@ export async function actualizarProducto(
     .prepare(
       `UPDATE producto SET
          categoria_id = ?, nombre_es = ?, nombre_en = ?, descripcion_es = ?, descripcion_en = ?,
-         sku = ?, codigo_barras = ?, costo = ?, precio = ?, stock = ?, publicado = ?, destacado = ?
+         sku = ?, codigo_barras = ?, costo = ?, precio = ?, stock = ?, publicado = ?, destacado = ?,
+         es_servicio = ?, stock_minimo = ?
        WHERE id = ?`,
     )
     .bind(
@@ -196,11 +200,14 @@ export async function actualizarProducto(
       String(datos.get("descripcion_en") ?? "").trim() || null,
       String(datos.get("sku") ?? "").trim() || null,
       String(datos.get("codigo_barras") ?? "").trim() || null,
-      leerMonto(datos.get("costo")),
+      // Quien no ve costos no los puede cambiar: el campo ni siquiera le sale.
+      puede(usuario, "costos") ? leerMonto(datos.get("costo")) : actual.costo,
       precio,
       stock,
       datos.get("publicado") === "on" ? 1 : 0,
       datos.get("destacado") === "on" ? 1 : 0,
+      datos.get("es_servicio") === "on" ? 1 : 0,
+      Math.max(0, Math.round(leerMonto(datos.get("stock_minimo")))),
       id,
     )
     .run();
@@ -219,7 +226,7 @@ export async function actualizarProducto(
 
   // El ajuste manual de stock queda anotado igual que una venta o una compra.
   const diferencia = stock - actual.stock;
-  if (diferencia !== 0) {
+  if (diferencia !== 0 && datos.get("es_servicio") !== "on") {
     await db
       .prepare(
         `INSERT INTO movimiento_inventario
@@ -228,6 +235,15 @@ export async function actualizarProducto(
       )
       .bind(id, diferencia, stock, usuario.id)
       .run();
+  }
+
+  if (diferencia !== 0) {
+    await anotarActividad({
+      usuarioId: usuario.id,
+      tipo: "ajuste",
+      detalle: `Ajustó el stock de ${nombre}: ${diferencia > 0 ? "+" : ""}${diferencia} (quedó en ${stock})`,
+      enlace: `/panel/inventario/${id}`,
+    });
   }
 
   revalidatePath("/panel/inventario");

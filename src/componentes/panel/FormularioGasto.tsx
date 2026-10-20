@@ -4,7 +4,8 @@ import { useActionState, useState } from "react";
 import { enviarSinBorrar } from "@/componentes/enviar-sin-borrar";
 import { achicarEnCampo } from "@/lib/achicar-foto";
 import { registrarGasto, type ResultadoGasto } from "@/app/panel/(dentro)/gastos/acciones";
-import { CATEGORIAS_GASTO, METODOS_PAGO, type ClienteSimple } from "@/lib/negocio";
+import { CATEGORIAS_GASTO, METODOS_PAGO } from "@/lib/metodos";
+import type { ClienteSimple } from "@/lib/negocio";
 import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
 const CAMPO =

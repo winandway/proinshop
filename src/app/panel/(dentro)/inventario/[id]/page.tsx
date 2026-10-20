@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { FormularioProducto } from "@/componentes/panel/FormularioProducto";
 import { BotonCopiar } from "@/componentes/panel/BotonCopiar";
 import { DetallesProducto } from "@/componentes/panel/DetallesProducto";
 import { baseDeDatos } from "@/lib/d1";
 import { NEGOCIO } from "@/lib/config";
-import { usuarioActual } from "@/lib/sesion";
+import { exigir, puede } from "@/lib/sesion";
 import { MenuTresPuntos } from "@/componentes/panel/MenuTresPuntos";
 import { LimpiarBorrador } from "@/componentes/GuardaBorrador";
 import { actualizarProducto, eliminarProducto } from "../acciones";
@@ -25,8 +25,7 @@ export default async function EditarProducto({
   const { nuevo } = await searchParams;
 
   // El vendedor consulta el inventario, pero no edita fichas ni ve costos.
-  const usuario = await usuarioActual();
-  if (!usuario || usuario.rol === "vendedor") redirect("/panel/inventario");
+  const usuario = await exigir("inventario");
 
   const db = await baseDeDatos();
   if (!db) notFound();
@@ -51,6 +50,8 @@ export default async function EditarProducto({
       stock: number;
       publicado: number;
       destacado: number;
+      es_servicio: number | null;
+      stock_minimo: number | null;
       categoria_id: number | null;
       foto: string | null;
     }>();
@@ -177,6 +178,7 @@ export default async function EditarProducto({
             nombre: c.visible ? c.nombre_es : `${c.nombre_es} (oculta)`,
           }))}
           boton="Guardar cambios"
+          mostrarCosto={puede(usuario, "costos")}
           producto={{
             id: producto.id,
             nombre: producto.nombre_es,
@@ -191,6 +193,8 @@ export default async function EditarProducto({
             categoriaId: producto.categoria_id,
             publicado: producto.publicado === 1,
             destacado: producto.destacado === 1,
+            esServicio: producto.es_servicio === 1,
+            stockMinimo: producto.stock_minimo ?? 0,
             foto: producto.foto,
           }}
         />

@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos } from "@/lib/d1";
-import { usuarioActual } from "@/lib/sesion";
+import { usuarioQuePuede } from "@/lib/sesion";
 
 /**
  * Variantes y especificaciones del producto.
@@ -15,8 +15,7 @@ import { usuarioActual } from "@/lib/sesion";
 
 /** Igual que el resto del catálogo: propietario y bodega; el vendedor solo mira. */
 async function puedeEditar(): Promise<boolean> {
-  const usuario = await usuarioActual();
-  return usuario?.rol === "dueno" || usuario?.rol === "bodega";
+  return Boolean(await usuarioQuePuede("inventario"));
 }
 
 

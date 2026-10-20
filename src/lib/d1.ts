@@ -8,6 +8,7 @@
  */
 
 import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
+import { asegurarEsquema } from "./esquema";
 
 type Entorno = {
   DB?: D1Database;
@@ -27,7 +28,12 @@ async function entorno(): Promise<Entorno | null> {
 
 export async function baseDeDatos(): Promise<D1Database | null> {
   const env = await entorno();
-  return env?.DB ?? null;
+  const db = env?.DB ?? null;
+  // La primera vez de cada proceso, la base se pone al día sola. Durante la
+  // compilación no: varios procesos a la vez escribiendo en la base local de
+  // pruebas se bloquean entre sí, y ahí no hace falta.
+  if (db && process.env.NEXT_PHASE !== "phase-production-build") await asegurarEsquema(db);
+  return db;
 }
 
 export async function bucket(): Promise<R2Bucket | null> {

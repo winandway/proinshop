@@ -15,7 +15,7 @@ export function TarjetaProducto({
   const t = textos(idioma);
   const nombre = texto(producto.nombre, idioma);
   const agotado = producto.stock <= 0;
-  const pocas = producto.stock > 0 && producto.stock <= 2;
+  const pocas = !producto.esServicio && producto.stock > 0 && producto.stock <= 2;
 
   return (
     <Link
@@ -64,7 +64,7 @@ export function TarjetaProducto({
         >
           {agotado
             ? t.agotado
-            : mostrarStock
+            : mostrarStock && !producto.esServicio
               ? pocas
                 ? `● ${t.ultimasUnidades} · ${producto.stock}`
                 : `● ${producto.stock} ${t.disponibles}`

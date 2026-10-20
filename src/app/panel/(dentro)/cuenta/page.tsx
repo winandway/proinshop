@@ -1,6 +1,10 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { FormularioContrasena } from "@/componentes/panel/FormularioContrasena";
+import { ActivarHuella } from "@/componentes/panel/BotonesHuella";
+import { MenuTresPuntos } from "@/componentes/panel/MenuTresPuntos";
+import { quitarLlave } from "../../llaves";
+import { horaLocal, minutosZona } from "@/lib/zona";
 import { baseDeDatos } from "@/lib/d1";
 import { NOMBRE_ROL, usuarioActual } from "@/lib/sesion";
 import { cerrarOtrasSesiones } from "./acciones";
@@ -21,6 +25,19 @@ export default async function Cuenta() {
 
   const otras = Math.max(0, (sesiones?.total ?? 1) - 1);
 
+  const llaves = db
+    ? (
+        await db
+          .prepare(
+            `SELECT id, nombre, creada, ultimo_uso FROM llave_acceso
+             WHERE usuario_id = ? ORDER BY creada DESC`,
+          )
+          .bind(usuario.id)
+          .all<{ id: string; nombre: string; creada: string; ultimo_uso: string | null }>()
+      ).results
+    : [];
+  const minutos = await minutosZona();
+
   return (
     <>
       <h1 className="mb-4 text-xl font-black tracking-tight">Mi cuenta</h1>
@@ -40,6 +57,45 @@ export default async function Cuenta() {
             <dd className="font-bold">{NOMBRE_ROL[usuario.rol]}</dd>
           </div>
         </dl>
+      </div>
+
+      <div className="mb-3 rounded-2xl border border-linea bg-white p-4">
+        <h2 className="text-[13px] font-extrabold">Entrar con huella o cara</h2>
+        <p className="mb-3 mt-1 text-[12.5px] text-gris">
+          Actívala en cada celular o computadora que uses. Después entras sin escribir la
+          contraseña: más rápido y nadie te la puede robar.
+        </p>
+        {llaves.length > 0 && (
+          <ul className="mb-3 overflow-visible rounded-xl border border-linea">
+            {llaves.map((llave) => (
+              <li
+                key={llave.id}
+                className="flex items-center gap-3 border-b border-linea px-3 py-2.5 last:border-0"
+              >
+                <span aria-hidden="true" className="text-lg">
+                  🔐
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-[13px] font-bold">{llave.nombre}</span>
+                  <span className="block text-[11px] text-gris">
+                    {llave.ultimo_uso
+                      ? `Último uso: ${horaLocal(llave.ultimo_uso, minutos)}`
+                      : `Activada: ${horaLocal(llave.creada, minutos)}`}
+                  </span>
+                </span>
+                <MenuTresPuntos
+                  etiqueta="Quitar esta huella"
+                  pregunta="¿Quitar la huella de este dispositivo?"
+                  detalle="Desde ese dispositivo tendrás que entrar con tu contraseña hasta que la vuelvas a activar."
+                  confirmar="Sí, quitar"
+                  accion={quitarLlave}
+                  campos={{ id: llave.id }}
+                />
+              </li>
+            ))}
+          </ul>
+        )}
+        <ActivarHuella />
       </div>
 
       <div className="mb-3 rounded-2xl border border-linea bg-white p-4">

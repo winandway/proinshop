@@ -13,7 +13,7 @@ export async function PieDePagina() {
   const anio = new Date().getFullYear();
 
   return (
-    <footer className="mt-16 bg-[#0e0f12] text-white">
+    <footer className="mt-16 bg-[#0e0f12] text-white print:hidden">
       <div className="mx-auto max-w-7xl px-6 py-12">
         <div className="grid gap-10 border-b border-[#23262c] pb-9 sm:grid-cols-2 lg:grid-cols-4">
           <div className="lg:pr-8">
@@ -44,6 +44,11 @@ export async function PieDePagina() {
               <li>{t.garantia}</li>
               <li>{t.preguntas}</li>
               <li>{t.nosotros}</li>
+              <li>
+                <Link href="/docs" className="transition hover:text-white">
+                  Docs
+                </Link>
+              </li>
             </ul>
           </div>
 

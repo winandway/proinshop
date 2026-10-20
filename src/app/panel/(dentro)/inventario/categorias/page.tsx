@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
-import { usuarioActual } from "@/lib/sesion";
+import { exigir } from "@/lib/sesion";
 import { alternarCategoria, crearCategoria, editarCategoria } from "../acciones";
 import { GuardaBorrador } from "@/componentes/GuardaBorrador";
 
@@ -12,8 +11,7 @@ const CAMPO =
   "w-full rounded-xl border-[1.5px] border-linea px-4 py-3 text-[13.5px] font-semibold outline-none transition placeholder:font-normal placeholder:text-gris2 focus:border-rojo";
 
 export default async function Categorias() {
-  const usuario = await usuarioActual();
-  if (!usuario || usuario.rol === "vendedor") redirect("/panel/inventario");
+  await exigir("inventario");
 
   const db = await baseDeDatos();
   // Se listan también las ocultas: si no, una categoría escondida no se puede

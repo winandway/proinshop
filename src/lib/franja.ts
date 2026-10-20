@@ -18,9 +18,18 @@ export type Franja = {
   estado: EstadoFranja;
 };
 
-/** Lo que se está construyendo al entregar esta primera versión. */
-const TRABAJO_INICIAL =
-  "la carga de productos con una foto, las compras a proveedores, el banner de la portada y el manual de uso";
+/** Lo que se está construyendo ahora. Lo ve el dueño en la franja de su panel. */
+const TRABAJO_ACTUAL =
+  "las herramientas iguales a Treinta: pago mixto, caja, compras, conteo de inventario, Excel, reportes, permisos por persona, entrar con huella, vender sin señal y las guías de ayuda";
+
+/**
+ * Textos que puso el sistema en publicaciones anteriores. Si la franja activa
+ * todavía dice uno de estos, se pone al día con el trabajo actual; si alguien
+ * de soporte la cambió a mano, no se toca.
+ */
+const TEXTOS_AUTOMATICOS_ANTERIORES = [
+  "la carga de productos con una foto, las compras a proveedores, el banner de la portada y el manual de uso",
+];
 
 async function asegurarTabla() {
   const db = await baseDeDatos();
@@ -44,7 +53,14 @@ async function asegurarTabla() {
         `INSERT INTO trabajo_en_proceso (trabajo)
          SELECT ? WHERE NOT EXISTS (SELECT 1 FROM trabajo_en_proceso)`,
       )
-      .bind(TRABAJO_INICIAL),
+      .bind(TRABAJO_ACTUAL),
+    db
+      .prepare(
+        `UPDATE trabajo_en_proceso SET trabajo = ?, actualizado_en = datetime('now')
+         WHERE activo = 1 AND estado = 'en_proceso'
+           AND trabajo IN (${TEXTOS_AUTOMATICOS_ANTERIORES.map(() => "?").join(",")})`,
+      )
+      .bind(TRABAJO_ACTUAL, ...TEXTOS_AUTOMATICOS_ANTERIORES),
   ]);
 
   return db;

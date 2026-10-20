@@ -68,7 +68,7 @@ export default async function PaginaProducto({
     .slice(0, 4);
 
   const nombre = texto(producto.nombre, idioma);
-  const pocas = producto.stock > 0 && producto.stock <= 2;
+  const pocas = !producto.esServicio && producto.stock > 0 && producto.stock <= 2;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-10">
@@ -106,7 +106,7 @@ export default async function PaginaProducto({
           >
             {producto.stock <= 0
               ? t.agotado
-              : config.mostrarStock
+              : config.mostrarStock && !producto.esServicio
                 ? pocas
                   ? `● ${t.ultimasUnidades} · ${producto.stock}`
                   : `● ${producto.stock} ${t.disponibles}`

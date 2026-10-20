@@ -18,36 +18,40 @@
 - [ ] 👤 **Claves de Turnstile** (escudo anti-robots).
 - [ ] 👤 **Logo original** en vector o PNG grande.
 - [ ] 👤 **Foto del contenedor con «PROINSHOP» bien escrito** (la que llegó dice «PROVINCHO»). Va como cuarto producto de la vitrina.
-- [ ] 👤 **Qué mejoras cobrables se le cotizan al cliente** y a qué precio (lista en COMPARATIVA-TREINTA, sección 4).
+- [ ] 👤 **Qué mejoras cobrables se le cotizan al cliente** y a qué precio. Ya NO entran ahí las herramientas de Treinta: Richard ordenó igualarlas el 19 oct porque al cliente se le vendió Proinshop como igual a Treinta (van como garantía). Quedan: factura electrónica, IA, recordatorios automáticos por WhatsApp, varias tiendas y apps en las tiendas.
+- [ ] 👤 **Cuenta de Google Play del negocio** (25 dólares, una sola vez) para publicar la app de Android.
 
 ## Fila de la IA (gratis, en este orden)
 
-1. [ ] Compras a proveedor, con costo ponderado (entrada de mercancía que actualiza costo y stock)
-2. [ ] Alertas de stock bajo (usar el mínimo que ya existe en la base)
-3. [ ] Pago mixto en Vender (dividir una venta en dos o más métodos)
-4. [ ] Elegir color o talla en Vender
-5. [ ] Escáner de código de barras con la cámara
-6. [ ] Comprobante y cotización en PDF con logo, con nota personalizada; reportes en Excel y PDF
-7. [ ] Cotización aceptada → venta con un toque
-8. [ ] Historial de compras por cliente
-9. [ ] Aviso de pedido nuevo al celular del dueño
-10. [ ] Banner de la portada editable desde Mi tienda
-11. [ ] Selector de idioma estilo Amazon (`SelectorIdioma`)
-12. [ ] Funcionar sin señal (service worker)
-13. [ ] Docs estilo Wikipedia en `/docs` con el panel real (redirigir `/guia`) y recorrido de bienvenida
-14. [ ] Blindaje: vitest + playwright + prueba de humo + cabeceras de seguridad + gitleaks + `npm run verify`; pruebas de los candados de CANDADOS.md
-15. [ ] Turnstile en entrar y crear cuenta (cuando lleguen las claves)
-16. [ ] Carga por foto con IA, con fondo recortado (cuando llegue la clave)
+1. [ ] Aviso de pedido nuevo al celular con el panel cerrado (notificaciones push; hoy avisa con el panel abierto)
+2. [ ] Blindaje que falta: cabeceras de seguridad (CSP y compañía), gitleaks y husky, pruebas de punta a punta en la nube
+3. [ ] Banner de la portada editable desde Mi tienda
+4. [ ] Recorrido de bienvenida la primera vez que entra el dueño
+5. [ ] Panel también en inglés (hoy el panel es solo en español; la tienda y Docs ya son bilingües)
+6. [ ] App de Android con la tienda y el panel (cuando llegue la cuenta de Google Play)
+7. [ ] Turnstile en entrar y crear cuenta (cuando lleguen las claves)
+8. [ ] Carga por foto con IA, con fondo recortado (cuando llegue la clave)
 
 ## Cobrable (espera el visto bueno y el precio de Richard)
 
-Caja, conteo de inventario, edición masiva y carga por Excel, filtros de
-reportes, permisos por módulo, avisos de empleados, recordatorios automáticos,
-dólares y moneda local, varias tiendas, factura electrónica, asistente con IA,
-entrar con huella, app en Google Play, app en la App Store. Más los cuatro del
-documento de lanzamiento. Rangos en COMPARATIVA-TREINTA, sección 4.
+Factura electrónica, asistente con IA, recordatorios automáticos por WhatsApp,
+varias tiendas, app en la App Store. Rangos en COMPARATIVA-TREINTA, sección 4.
 
 ## Hecho
+
+- [x] 19 oct 2026 — Igualar a Treinta, de corrido (plan en docs/PLAN-IGUALAR-TREINTA.md):
+  pago mixto y fiado parcial, escáner, colores y tallas, servicios, nota,
+  comprobante para imprimir y compartir, anular venta, caja, compras con costo
+  promedio, alertas de stock bajo, conteo de inventario, edición masiva, Excel
+  de ida y vuelta, ficha del cliente, cotización → venta, reportes con filtros
+  y descargas, actividad del equipo, avisos en vivo, segunda moneda, permisos
+  por persona y por módulo
+- [x] 19 oct 2026 — Selector de idioma estilo Amazon, con su prueba
+- [x] 19 oct 2026 — Entrar con huella o cara (llaves de acceso)
+- [x] 19 oct 2026 — Abrir y vender sin señal, con la cola que se envía sola
+- [x] 19 oct 2026 — Docs en /docs, 21 guías en español e inglés con capturas; /guia y /manual redirigen
+- [x] 19 oct 2026 — Pruebas automáticas (56), compuerta antes de publicar, piso de cobertura, `npm run verify`
+- [x] 19 oct 2026 — Next 16.3.8 por fallos de seguridad críticos; mapa del sitio y robots.txt
 
 - [x] 16 oct 2026 — Pedido con variante, envío del lado del servidor, solo productos publicados
 - [x] 16 oct 2026 — Cancelar pedido con devolución de mercancía y salida del balance

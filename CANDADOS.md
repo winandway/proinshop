@@ -4,9 +4,12 @@
 > la causa real, qué se hizo, en qué commit quedó, cómo se comprueba y qué no
 > hay que tocar. Antes de un rollback o de actualizar paquetes, se lee esto.
 >
-> **Deuda:** el proyecto todavía no tiene pruebas automáticas (punto 9 de
-> PENDIENTES.md). Mientras tanto, cada candado se comprueba a mano con lo que
-> dice «Cómo se comprueba», contra el worker local de workerd.
+> **Pruebas automáticas (desde el 19 oct 2026):** `npm test` corre las de la
+> carpeta `pruebas/`, y la publicación se frena sola si una falla (ver
+> C-COMPUERTA). Lo que necesita navegador de verdad (huella, sin señal) está en
+> `pruebas/navegador/` y se corre a mano contra la copia local; cómo, en
+> `pruebas/navegador/comun.mjs`. Lo demás se comprueba con lo que dice «Cómo se
+> comprueba», contra el worker local (`herramientas/probar-local.sh`).
 
 ---
 
@@ -104,7 +107,8 @@
   grupos de tres cifras = miles; con punto y coma, el último es el decimal.
   Se usa en productos, variantes, gastos, abonos, descuento y envío.
 - **Cómo se comprueba:** "1.890" → 1890, "1.240,50" → 1240,5, "25,5" → 25,5,
-  "0.500" → 0,5.
+  "0.500" → 0,5. Prueba automática: `pruebas/numeros.test.ts` (comprobada en
+  rojo: con el error metido otra vez, falla).
 
 ## C-FORM-NO-SE-VACIA — El formulario no se borra al dar un aviso
 
@@ -148,9 +152,109 @@
   publicada con la página abierta) y el código del error. Además,
   `deploymentId` por publicación en `next.config.ts`.
 
+## C-COMPUERTA — Nada se publica con una prueba en rojo
+
+- **Qué se hizo:** `.github/workflows/build.yml` corre `typecheck`, `lint` y
+  `npm test` antes de compilar. Si algo falla, no se arma el `_worker.js` y el
+  sitio sigue con la versión anterior. `npm run verify` hace lo mismo más la
+  cobertura y la auditoría de seguridad; `verify.yml` lo corre en las ramas.
+- **Cobertura:** piso fijado en `vitest.config.mts` (líneas 33 %, funciones
+  29 %, ramas 35 %, sentencias 34 %). Solo puede subir.
+- **No tocar:** jamás quitar un paso de la compuerta ni bajar el piso para que
+  pase un cambio. Se arregla el cambio.
+
+## C-NEXT-SEGURO — Next 16.3.8 o más nuevo
+
+- **Cómo se veía:** la auditoría marcaba fallos críticos de Next hasta la
+  16.3.7 (ejecución remota en la optimización de imágenes, envenenamiento de
+  caché, entre otros).
+- **Qué se hizo:** `next` y `eslint-config-next` fijos en 16.3.8, que trae
+  postcss y sharp corregidos. `npm audit --omit=dev` da cero.
+- **No tocar:** no bajar de versión. Al subir a 16.4 o más, subir también
+  `@opennextjs/cloudflare` (la 1.20.12 pide Next 16.4.1 o más).
+
+## C-PAGO-MIXTO — Los pagos tienen que cuadrar al centavo
+
+- **Qué se hizo:** `src/lib/ventas.ts` → `repartirPagos`. Un solo método cubre
+  el total; varios tienen que sumar exacto, en centavos. El fiado de un pago
+  mixto crea la deuda solo por esa parte.
+- **Cómo se comprueba:** `pruebas/ventas.test.ts` (comprobada en rojo).
+
+## C-VENTA-UNICA — Una venta reenviada no se guarda dos veces
+
+- **Causa que se evita:** la cola de ventas sin señal reintenta, y una venta
+  que llegó al servidor pero cuya respuesta se perdió se reenviaría.
+- **Qué se hizo:** cada venta lleva una llave (`clave`) que genera el
+  navegador; `venta.clave` tiene índice único (`src/lib/esquema.ts`). Si ya
+  existe, `guardarVenta` (`src/lib/registrar-venta.ts`) devuelve la que hay. Si
+  el lote de la venta falla, la venta se borra para que el reintento la guarde
+  completa.
+- **Cómo se comprueba:** `pruebas/navegador/sin-senal.mjs` reenvía la misma
+  venta y el servidor responde `repetida: true`.
+
+## C-SIN-SENAL — El panel abre y vende sin internet
+
+- **Qué se hizo:** `public/sw.js` (páginas: primero internet, si no la última
+  copia; archivos de la app y fotos: primero la copia). `ServicioSinSenal` lo
+  registra con la versión de la publicación. `EstadoConexion` muestra la
+  franja, precarga Inicio, Vender e Inventario, y manda la cola
+  (`cola-ventas.ts`) a `/panel/cola-ventas` al volver la señal.
+- **Trampas que ya mordieron:**
+  1. La página de aviso es `/sin-conexion`, **sin `.html`**: la nube redirige
+     la de `.html`, y una respuesta que vino de una redirección no sirve para
+     abrir una página (el navegador la rechaza).
+  2. El aviso verde de «se enviaron» no salía: el efecto se cancelaba porque la
+     lista cambia justo al enviar. El envío que ya arrancó no se cancela.
+  3. La cola va a una dirección fija y no a una acción del servidor: las
+     acciones cambian de nombre en cada publicación y la página guardada podía
+     ser de la versión anterior.
+- **Privacidad:** las copias del panel se borran al tocar Salir y al llegar a
+  la pantalla de entrar. La cola NO se borra al salir (son ventas reales).
+- **Cómo se comprueba:** `pruebas/navegador/sin-senal.mjs` (todo en ✓).
+
+## C-HUELLA — Entrar con huella o cara
+
+- **Qué se hizo:** `@simplewebauthn/server` 14.0.3 y `@simplewebauthn/browser`
+  14.0.0. Acciones en `src/app/panel/llaves.ts`; botones en `BotonesHuella.tsx`.
+  El dominio de la llave sale de una lista cerrada (`src/lib/llaves.ts`:
+  proinshop.com, www, proinshop.sitios.dev y localhost). El reto vive en la
+  base (`reto_llave`), sirve una vez y vence a los 5 minutos. Se exige la
+  verificación del usuario (huella, cara o PIN).
+- **Cómo se comprueba:** `pruebas/llaves-y-docs.test.ts` y
+  `pruebas/navegador/huella.mjs` (con un lector virtual: activa, repite,
+  sale y vuelve a entrar con la huella).
+- **No tocar:** no sacar el dominio de la petición: una copia del sitio en
+  otro dominio podría pedir llaves. Si el sitio cambia de dominio, se agrega a
+  la lista.
+
+## C-ESQUEMA-SOLO — La base se pone al día sola
+
+- **Por qué:** no hay token de la base para aplicar migraciones a mano.
+- **Qué se hizo:** `src/lib/esquema.ts` crea tablas y columnas que falten
+  (una vez por proceso, idempotente) desde `baseDeDatos()`. Durante el `build`
+  no se toca la base (`NEXT_PHASE`). La copia escrita está en
+  `db/migraciones/005-igualar-treinta.sql`.
+
+## C-SELECTOR-IDIOMA — Estilo Amazon, bandera de España
+
+- **Cómo se comprueba:** `pruebas/selector-idioma.test.tsx` (bandera de España
+  y nunca la de México, ventanita con «Cambiar idioma», círculos, se cierra al
+  elegir, con Escape y al tocar fuera).
+
+## C-DOCS — Cada guía completa y con sus capturas
+
+- **Qué se hizo:** `src/lib/docs.ts` (contenido), `src/app/(tienda)/docs`
+  (páginas). Direcciones en inglés, textos en español e inglés, capturas en
+  `public/capturas/` (originales en `docs/capturas/`). `/guia` y `/manual`
+  redirigen a `/docs`; el manual viejo quedó en `docs/manual-viejo/`.
+- **Cómo se comprueba:** `pruebas/llaves-y-docs.test.ts` exige direcciones
+  únicas en inglés, los dos idiomas y que cada captura nombrada exista.
+
 ---
 
 Los primeros ocho quedaron en el commit 11daa71; C-FOTO-CELULAR, C-MONTOS,
 C-FORM-NO-SE-VACIA y C-PANTALLA-ERROR en a320c21; C-BORRADORES y
 C-ZONA-HORARIA en el commit siguiente (16 de octubre de 2026). Ver
 `git log -- CANDADOS.md`.
+Los de la igualación con Treinta (C-COMPUERTA en adelante) quedaron en la
+publicación del 19 de octubre de 2026.

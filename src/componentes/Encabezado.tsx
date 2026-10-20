@@ -14,7 +14,7 @@ export async function Encabezado() {
   const categorias = await obtenerCategoriasConProductos();
 
   return (
-    <header className="sticky top-0 z-40 bg-white">
+    <header className="print:hidden sticky top-0 z-40 bg-white">
       <div className="bg-tinta px-4 py-2 text-center text-[11px] font-bold text-white sm:text-xs">
         <span className="sm:hidden">🚢 {t.envioCorto}</span>
         <span className="hidden sm:inline">🚢 {t.envioGratis}</span>

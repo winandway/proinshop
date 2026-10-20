@@ -2,10 +2,12 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { FormularioGasto } from "@/componentes/panel/FormularioGasto";
 import { listaProveedores } from "@/lib/negocio";
+import { exigir } from "@/lib/sesion";
 
 export const metadata: Metadata = { title: "Registrar gasto", robots: { index: false } };
 
 export default async function NuevoGasto() {
+  await exigir("gastos");
   const proveedores = await listaProveedores();
 
   return (

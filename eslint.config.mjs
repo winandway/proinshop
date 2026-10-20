@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // El informe de cobertura de las pruebas es generado, no es código nuestro.
+    "coverage/**",
     // Resultados del empaquetado para YaDominios Cloud: son generados.
     ".open-next/**",
     ".dist-worker/**",

@@ -43,6 +43,13 @@ que ser Propietario y no Vendedor.
 
 ---
 
+### Ayuda para el dueño y su equipo
+
+Desde el 19 de octubre de 2026 la ayuda está en **proinshop.com/docs**: una
+guía por herramienta, en español e inglés, con capturas. Desde el panel se
+llega por Explorar → Docs. El manual viejo de una sola página
+(proinshop.com/guia) ahora lleva a Docs.
+
 ## 2. Cómo está conectado todo
 
 ```

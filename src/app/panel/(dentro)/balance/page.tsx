@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
-import { usuarioActual } from "@/lib/sesion";
+import { exigir } from "@/lib/sesion";
 import { modificadorZona } from "@/lib/zona";
 
 export const metadata: Metadata = { title: "Balance", robots: { index: false } };
@@ -23,8 +22,7 @@ export default async function Balance({
 }) {
   // La utilidad y el costo de la mercancía son del dueño: un empleado no
   // tiene por qué saber cuánto gana el negocio.
-  const usuario = await usuarioActual();
-  if (usuario?.rol !== "dueno") redirect("/panel");
+  await exigir("reportes");
 
   const { rango } = await searchParams;
   const elegido: Rango = rango === "dia" || rango === "ano" ? rango : "mes";
@@ -39,12 +37,12 @@ export default async function Balance({
     ? await db
         .prepare(
           `SELECT
-             (SELECT COALESCE(SUM(total), 0) FROM venta WHERE ${filtro}) AS ingresos,
+             (SELECT COALESCE(SUM(total), 0) FROM venta WHERE ${filtro} AND COALESCE(anulada, 0) = 0) AS ingresos,
              (SELECT COALESCE(SUM(monto), 0) FROM gasto WHERE ${filtro}) AS egresos,
              (SELECT COALESCE(SUM(vi.costo_unit * vi.cantidad), 0)
                 FROM venta_item vi JOIN venta v ON v.id = vi.venta_id
-                WHERE ${filtro.replace(/fecha/g, "v.fecha")}) AS costo_vendido,
-             (SELECT COUNT(*) FROM venta WHERE ${filtro}) AS ventas`,
+                WHERE ${filtro.replace(/fecha/g, "v.fecha")} AND COALESCE(v.anulada, 0) = 0) AS costo_vendido,
+             (SELECT COUNT(*) FROM venta WHERE ${filtro} AND COALESCE(anulada, 0) = 0) AS ventas`,
         )
         .first<{ ingresos: number; egresos: number; costo_vendido: number; ventas: number }>()
     : null;
@@ -69,7 +67,12 @@ export default async function Balance({
 
   return (
     <>
-      <h1 className="mb-4 text-xl font-black tracking-tight">Balance</h1>
+      <div className="mb-4 flex items-center justify-between gap-3">
+        <h1 className="text-xl font-black tracking-tight">Balance</h1>
+        <Link href="/panel/reportes" className="text-[12.5px] font-bold text-rojo">
+          Reportes con filtros →
+        </Link>
+      </div>
 
       <div className="sin-barra mb-3 flex gap-2 overflow-x-auto">
         {(Object.keys(RANGOS) as Rango[]).map((clave) => (

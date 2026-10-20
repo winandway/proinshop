@@ -22,6 +22,8 @@ export type ProductoFormulario = {
   categoriaId: number | null;
   publicado: boolean;
   destacado: boolean;
+  esServicio: boolean;
+  stockMinimo: number;
   foto: string | null;
 };
 
@@ -37,11 +39,14 @@ export function FormularioProducto({
   categorias,
   producto,
   boton,
+  mostrarCosto = true,
 }: {
   accion: (previo: ResultadoProducto, datos: FormData) => Promise<ResultadoProducto>;
   categorias: CategoriaSimple[];
   producto?: ProductoFormulario;
   boton: string;
+  /** Quien no tiene permiso de ver costos no ve el campo. */
+  mostrarCosto?: boolean;
 }) {
   const [estado, enviar, enviando] = useActionState(accion, {});
   const [vistaPrevia, setVistaPrevia] = useState<string | null>(
@@ -156,19 +161,36 @@ export function FormularioProducto({
         </p>
       </div>
 
-      <div>
-        <label htmlFor="stock" className="mb-1.5 block text-[12.5px] font-bold text-gris">
-          Cantidad disponible
-        </label>
-        <input
-          id="stock"
-          name="stock"
-          type="number"
-          min="0"
-          inputMode="numeric"
-          defaultValue={producto?.stock ?? 0}
-          className={CAMPO}
-        />
+      <div className="flex gap-3">
+        <div className="flex-1">
+          <label htmlFor="stock" className="mb-1.5 block text-[12.5px] font-bold text-gris">
+            Cantidad disponible
+          </label>
+          <input
+            id="stock"
+            name="stock"
+            type="number"
+            min="0"
+            inputMode="numeric"
+            defaultValue={producto?.stock ?? 0}
+            className={CAMPO}
+          />
+        </div>
+        <div className="flex-1">
+          <label htmlFor="stock_minimo" className="mb-1.5 block text-[12.5px] font-bold text-gris">
+            Avisarme cuando queden
+          </label>
+          <input
+            id="stock_minimo"
+            name="stock_minimo"
+            type="number"
+            min="0"
+            inputMode="numeric"
+            defaultValue={producto?.stockMinimo || ""}
+            placeholder="Lo general"
+            className={CAMPO}
+          />
+        </div>
       </div>
 
       <div className="flex gap-3">
@@ -186,23 +208,27 @@ export function FormularioProducto({
             className={CAMPO}
           />
         </div>
-        <div className="flex-1">
-          <label htmlFor="costo" className="mb-1.5 block text-[12.5px] font-bold text-gris">
-            Costo
-          </label>
-          <input
-            id="costo"
-            name="costo"
-            inputMode="decimal"
-            defaultValue={producto?.costo || ""}
-            placeholder="$ 0"
-            className={CAMPO}
-          />
-        </div>
+        {mostrarCosto && (
+          <div className="flex-1">
+            <label htmlFor="costo" className="mb-1.5 block text-[12.5px] font-bold text-gris">
+              Costo
+            </label>
+            <input
+              id="costo"
+              name="costo"
+              inputMode="decimal"
+              defaultValue={producto?.costo || ""}
+              placeholder="$ 0"
+              className={CAMPO}
+            />
+          </div>
+        )}
       </div>
-      <p className="-mt-2 text-[11.5px] text-gris2">
-        El costo no se muestra al público: sirve para saber tu ganancia real.
-      </p>
+      {mostrarCosto && (
+        <p className="-mt-2 text-[11.5px] text-gris2">
+          El costo no se muestra al público: sirve para saber tu ganancia real.
+        </p>
+      )}
 
       <div>
         <label htmlFor="categoria_id" className="mb-1.5 block text-[12.5px] font-bold text-gris">
@@ -269,6 +295,24 @@ export function FormularioProducto({
           name="publicado"
           defaultChecked={producto ? producto.publicado : true}
           className="h-5 w-5 accent-verde"
+        />
+      </label>
+
+      <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-[1.5px] border-linea p-3.5">
+        <span aria-hidden="true" className="text-lg">
+          🛠
+        </span>
+        <span className="flex-1">
+          <span className="block text-[13px] font-extrabold">Es un servicio</span>
+          <span className="block text-[11px] leading-snug text-gris">
+            Instalación, mantenimiento, envío: se vende sin llevar existencias
+          </span>
+        </span>
+        <input
+          type="checkbox"
+          name="es_servicio"
+          defaultChecked={producto?.esServicio ?? false}
+          className="h-5 w-5 accent-rojo"
         />
       </label>
 

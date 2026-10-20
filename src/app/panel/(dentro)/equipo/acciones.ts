@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { baseDeDatos } from "@/lib/d1";
 import { valorAleatorio } from "@/lib/contrasenas";
 import { usuarioActual, type Rol } from "@/lib/sesion";
+import { MODULOS } from "@/lib/permisos";
 
 export type ResultadoEquipo = { error?: string; codigo?: string; recuperacion?: string };
 
@@ -126,4 +127,49 @@ export async function generarRecuperacion(
 
   revalidatePath("/panel/equipo");
   return { recuperacion: codigo };
+}
+
+/**
+ * Permisos a la medida: el propietario prende o apaga cada módulo para cada
+ * persona. Se guardan todos los módulos, así lo que se ve en Equipo es
+ * exactamente lo que la persona puede hacer.
+ */
+export async function guardarPermisos(datos: FormData): Promise<void> {
+  const usuario = await usuarioActual();
+  if (!usuario || usuario.rol !== "dueno") return;
+  const db = await baseDeDatos();
+  if (!db) return;
+
+  const id = Number(datos.get("id"));
+  if (!id || id === usuario.id) return;
+
+  const permisos: Record<string, boolean> = {};
+  for (const { clave } of MODULOS) permisos[clave] = datos.get(`permiso_${clave}`) === "on";
+
+  await db
+    .prepare("UPDATE usuario SET permisos = ? WHERE id = ? AND negocio_id = ? AND rol != 'dueno'")
+    .bind(JSON.stringify(permisos), id, usuario.negocioId)
+    .run();
+
+  revalidatePath("/panel/equipo");
+}
+
+/** Cambia el rol. Al cambiarlo, los permisos vuelven a los del rol nuevo. */
+export async function cambiarRol(datos: FormData): Promise<void> {
+  const usuario = await usuarioActual();
+  if (!usuario || usuario.rol !== "dueno") return;
+  const db = await baseDeDatos();
+  if (!db) return;
+
+  const id = Number(datos.get("id"));
+  const rol = String(datos.get("rol") ?? "") as Rol;
+  // Nadie se quita su propio rol de propietario: dejaría el negocio sin dueño.
+  if (!id || id === usuario.id || !ROLES.includes(rol)) return;
+
+  await db
+    .prepare("UPDATE usuario SET rol = ?, permisos = NULL WHERE id = ? AND negocio_id = ?")
+    .bind(rol, id, usuario.negocioId)
+    .run();
+
+  revalidatePath("/panel/equipo");
 }

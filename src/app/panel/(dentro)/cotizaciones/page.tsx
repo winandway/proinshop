@@ -4,7 +4,8 @@ import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { NEGOCIO } from "@/lib/config";
 import { listaClientes, productosParaVender } from "@/lib/negocio";
-import { cambiarEstadoCotizacion } from "./acciones";
+import { exigir } from "@/lib/sesion";
+import { cambiarEstadoCotizacion, convertirEnVenta } from "./acciones";
 
 export const metadata: Metadata = { title: "Cotizaciones", robots: { index: false } };
 
@@ -15,7 +16,13 @@ const COLOR: Record<string, string> = {
   borrador: "bg-crema text-gris",
 };
 
-export default async function Cotizaciones() {
+export default async function Cotizaciones({
+  searchParams,
+}: {
+  searchParams: Promise<{ sin_stock?: string; sin_cliente?: string }>;
+}) {
+  await exigir("cotizaciones");
+  const { sin_stock, sin_cliente } = await searchParams;
   const db = await baseDeDatos();
   const [productos, clientes] = await Promise.all([productosParaVender(), listaClientes()]);
 
@@ -23,7 +30,7 @@ export default async function Cotizaciones() {
     ? (
         await db
           .prepare(
-            `SELECT q.id, q.estado, q.total, q.vence, q.token_publico, q.creado_en,
+            `SELECT q.id, q.estado, q.total, q.vence, q.token_publico, q.creado_en, q.venta_id,
                     c.nombre AS cliente,
                     (SELECT COUNT(*) FROM cotizacion_item WHERE cotizacion_id = q.id) AS articulos
              FROM cotizacion q LEFT JOIN cliente c ON c.id = q.cliente_id
@@ -36,6 +43,7 @@ export default async function Cotizaciones() {
             vence: string | null;
             token_publico: string | null;
             creado_en: string;
+            venta_id: number | null;
             cliente: string | null;
             articulos: number;
           }>()
@@ -47,6 +55,18 @@ export default async function Cotizaciones() {
   return (
     <>
       <h1 className="mb-4 text-xl font-black tracking-tight">Cotizaciones</h1>
+
+      {sin_stock && (
+        <p role="alert" className="mb-3 rounded-xl border border-rojo bg-rojo-suave px-3.5 py-2.5 text-[12.5px] font-bold text-rojo-oscuro">
+          La cotización #{sin_stock} pide más unidades de las que hay en stock. Registra la compra o
+          ajusta el inventario antes de venderla.
+        </p>
+      )}
+      {sin_cliente && (
+        <p role="alert" className="mb-3 rounded-xl border border-rojo bg-rojo-suave px-3.5 py-2.5 text-[12.5px] font-bold text-rojo-oscuro">
+          La cotización #{sin_cliente} no tiene cliente: para venderla fiada hace falta uno.
+        </p>
+      )}
 
       <div className="mb-3 flex gap-2.5">
         <div className="flex-1 rounded-2xl bg-white p-3 shadow-sm">
@@ -94,7 +114,51 @@ export default async function Cotizaciones() {
                 </span>
               </div>
 
-              {cotizacion.estado === "enviada" && (
+              <div className="mt-2.5 flex flex-wrap gap-2">
+                {cotizacion.token_publico && (
+                  <a
+                    href={`/cotizacion/${cotizacion.token_publico}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-lg border-[1.5px] border-linea px-3 py-1.5 text-[11.5px] font-bold transition hover:border-gris2"
+                  >
+                    Ver / imprimir ↗
+                  </a>
+                )}
+                {cotizacion.venta_id ? (
+                  <a
+                    href={`/panel/vender/${cotizacion.venta_id}`}
+                    className="rounded-lg bg-verde-suave px-3 py-1.5 text-[11.5px] font-bold text-verde"
+                  >
+                    Vendida · venta #{cotizacion.venta_id}
+                  </a>
+                ) : (
+                  cotizacion.estado !== "vencida" && (
+                    <form action={convertirEnVenta} className="flex gap-1.5">
+                      <input type="hidden" name="id" value={cotizacion.id} />
+                      <select
+                        name="metodo_pago"
+                        defaultValue="efectivo"
+                        aria-label="Cómo pagó"
+                        className="rounded-lg border-[1.5px] border-linea px-2 py-1.5 text-[11.5px] font-bold outline-none"
+                      >
+                        <option value="efectivo">Efectivo</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="tarjeta">Tarjeta</option>
+                        <option value="fiado">Fiado</option>
+                      </select>
+                      <button
+                        type="submit"
+                        className="rounded-lg bg-tinta px-3 py-1.5 text-[11.5px] font-bold text-white"
+                      >
+                        Convertir en venta
+                      </button>
+                    </form>
+                  )
+                )}
+              </div>
+
+              {cotizacion.estado === "enviada" && !cotizacion.venta_id && (
                 <form action={cambiarEstadoCotizacion} className="mt-2.5">
                   <input type="hidden" name="id" value={cotizacion.id} />
                   <input type="hidden" name="estado" value="aceptada" />

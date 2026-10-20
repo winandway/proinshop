@@ -2,14 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { baseDeDatos } from "@/lib/d1";
-import { usuarioActual } from "@/lib/sesion";
+import { usuarioQuePuede } from "@/lib/sesion";
+import { anotarActividad } from "@/lib/actividad";
 
 /**
  * Confirma el pedido de la tienda: lo convierte en venta, descuenta el stock
  * y lo anota en el inventario. Es el puente entre la tienda y la contabilidad.
  */
 export async function confirmarPedido(datos: FormData): Promise<void> {
-  const usuario = await usuarioActual();
+  const usuario = await usuarioQuePuede("pedidos");
   if (!usuario) return;
 
   const db = await baseDeDatos();
@@ -77,6 +78,12 @@ export async function confirmarPedido(datos: FormData): Promise<void> {
 
   const ventaId = Number(venta.meta.last_row_id);
 
+  // Cómo se pagó, para que la caja y los reportes por método lo cuenten.
+  await db
+    .prepare("INSERT INTO venta_pago (venta_id, metodo, monto) VALUES (?, ?, ?)")
+    .bind(ventaId, pedido.metodo_pago, pedido.total)
+    .run();
+
   for (const item of items) {
     await db
       .prepare(
@@ -138,13 +145,21 @@ export async function confirmarPedido(datos: FormData): Promise<void> {
     .bind(ventaId, id)
     .run();
 
+  await anotarActividad({
+    usuarioId: usuario.id,
+    tipo: "pedido",
+    detalle: `Confirmó el pedido #${pedido.numero} de la tienda`,
+    monto: pedido.total,
+    enlace: `/panel/pedidos/${id}`,
+  });
+
   revalidatePath("/panel/pedidos");
   revalidatePath("/panel");
   revalidatePath("/panel/inventario");
 }
 
 export async function cambiarEstadoPedido(datos: FormData): Promise<void> {
-  const usuario = await usuarioActual();
+  const usuario = await usuarioQuePuede("pedidos");
   if (!usuario) return;
 
   const db = await baseDeDatos();
@@ -173,7 +188,7 @@ export async function cambiarEstadoPedido(datos: FormData): Promise<void> {
  * pedido cancelado seguía contando como vendido.
  */
 export async function cancelarPedido(datos: FormData): Promise<void> {
-  const usuario = await usuarioActual();
+  const usuario = await usuarioQuePuede("pedidos");
   if (!usuario) return;
 
   const db = await baseDeDatos();
@@ -228,6 +243,7 @@ export async function cancelarPedido(datos: FormData): Promise<void> {
     }
 
     await db.prepare("DELETE FROM venta_item WHERE venta_id = ?").bind(pedido.venta_id).run();
+    await db.prepare("DELETE FROM venta_pago WHERE venta_id = ?").bind(pedido.venta_id).run();
     await db.prepare("DELETE FROM venta WHERE id = ?").bind(pedido.venta_id).run();
   }
 

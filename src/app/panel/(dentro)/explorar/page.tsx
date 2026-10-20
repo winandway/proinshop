@@ -1,35 +1,69 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { usuarioActual } from "@/lib/sesion";
+import { puede, usuarioActual, type UsuarioSesion } from "@/lib/sesion";
 import { esCuentaDeSoporte } from "@/lib/contrasenas";
 
 export const metadata: Metadata = { title: "Explorar", robots: { index: false } };
 
-const SECCIONES = [
+type Enlace = {
+  href: string;
+  icono: string;
+  texto: string;
+  /** Quién lo ve. Sin regla: todos. */
+  ver?: (usuario: UsuarioSesion) => boolean;
+};
+
+const esDueno = (u: UsuarioSesion) => u.rol === "dueno";
+
+const SECCIONES: { titulo: string; enlaces: Enlace[] }[] = [
   {
-    titulo: "Tu negocio",
+    titulo: "Vender y cobrar",
     enlaces: [
-      { href: "/panel/inventario", icono: "📦", texto: "Inventario" },
-      { href: "/panel/pedidos", icono: "🛒", texto: "Pedidos de la tienda" },
-      { href: "/panel/estadisticas", icono: "📊", texto: "Estadísticas" },
-      { href: "/panel/balance", icono: "💵", texto: "Balance y reportes" },
+      { href: "/panel/vender", icono: "📈", texto: "Registrar venta", ver: (u) => puede(u, "vender") },
+      { href: "/panel/caja", icono: "🗄", texto: "Caja: abrir y cerrar", ver: (u) => puede(u, "caja") },
+      { href: "/panel/pedidos", icono: "🛒", texto: "Pedidos de la tienda", ver: (u) => puede(u, "pedidos") },
+      { href: "/panel/cotizaciones", icono: "📄", texto: "Cotizaciones", ver: (u) => puede(u, "cotizaciones") },
+      { href: "/panel/deudas", icono: "💰", texto: "Cuentas por cobrar", ver: (u) => puede(u, "clientes") },
+    ],
+  },
+  {
+    titulo: "Inventario",
+    enlaces: [
+      { href: "/panel/inventario", icono: "📦", texto: "Productos" },
+      { href: "/panel/inventario?filtro=bajo", icono: "⚠️", texto: "Por agotarse" },
+      { href: "/panel/compras", icono: "🚚", texto: "Compras a proveedores", ver: (u) => puede(u, "compras") },
+      { href: "/panel/inventario/conteo", icono: "📋", texto: "Conteo de inventario", ver: (u) => puede(u, "conteo") },
+      { href: "/panel/inventario/masivo", icono: "✏️", texto: "Edición masiva", ver: (u) => puede(u, "inventario") },
+      { href: "/panel/inventario/importar", icono: "📥", texto: "Cargar o bajar en Excel", ver: (u) => puede(u, "inventario") },
+    ],
+  },
+  {
+    titulo: "Números",
+    enlaces: [
+      { href: "/panel/balance", icono: "💵", texto: "Balance", ver: (u) => puede(u, "reportes") },
+      { href: "/panel/reportes", icono: "📊", texto: "Reportes con filtros", ver: (u) => puede(u, "reportes") },
+      { href: "/panel/estadisticas", icono: "📈", texto: "Estadísticas", ver: (u) => puede(u, "reportes") },
+      { href: "/panel/gastos", icono: "📉", texto: "Gastos", ver: (u) => puede(u, "gastos") },
     ],
   },
   {
     titulo: "Personas",
     enlaces: [
-      { href: "/panel/clientes", icono: "👥", texto: "Clientes" },
-      { href: "/panel/deudas", icono: "💰", texto: "Cuentas por cobrar" },
-      { href: "/panel/cotizaciones", icono: "📄", texto: "Cotizaciones" },
-      { href: "/panel/proveedores", icono: "🚚", texto: "Proveedores" },
+      { href: "/panel/clientes", icono: "👥", texto: "Clientes", ver: (u) => puede(u, "clientes") },
+      {
+        href: "/panel/proveedores",
+        icono: "🏭",
+        texto: "Proveedores",
+        ver: (u) => puede(u, "compras") || puede(u, "gastos"),
+      },
+      { href: "/panel/actividad", icono: "🔔", texto: "Actividad del equipo", ver: esDueno },
     ],
   },
   {
     titulo: "Configuración",
-    soloDueno: true,
     enlaces: [
-      { href: "/panel/tienda", icono: "🏪", texto: "Mi tienda" },
-      { href: "/panel/equipo", icono: "🧑‍🤝‍🧑", texto: "Equipo" },
+      { href: "/panel/tienda", icono: "🏪", texto: "Mi tienda", ver: esDueno },
+      { href: "/panel/equipo", icono: "🧑‍🤝‍🧑", texto: "Equipo y permisos", ver: esDueno },
       { href: "/panel/cuenta", icono: "⚙️", texto: "Mi cuenta" },
     ],
   },
@@ -37,18 +71,16 @@ const SECCIONES = [
 
 export default async function Explorar() {
   const usuario = await usuarioActual();
-  const soporte = usuario ? esCuentaDeSoporte(usuario.nombre, usuario.correo) : false;
+  if (!usuario) return null;
+  const soporte = esCuentaDeSoporte(usuario.nombre, usuario.correo);
 
   return (
     <>
       <h1 className="mb-4 text-xl font-black tracking-tight">Explorar</h1>
 
       {SECCIONES.map((seccion) => {
-        const enlaces =
-          seccion.soloDueno && usuario?.rol !== "dueno"
-            ? seccion.enlaces.filter((enlace) => enlace.href === "/panel/cuenta")
-            : seccion.enlaces;
-
+        const enlaces = seccion.enlaces.filter((enlace) => !enlace.ver || enlace.ver(usuario));
+        if (enlaces.length === 0) return null;
         return (
           <section key={seccion.titulo} className="mb-4">
             <h2 className="mb-2 text-[13px] font-extrabold">{seccion.titulo}</h2>
@@ -82,14 +114,12 @@ export default async function Explorar() {
         </Link>
       )}
 
-      <a
-        href="/guia"
-        target="_blank"
-        rel="noopener noreferrer"
+      <Link
+        href="/docs"
         className="block rounded-2xl border border-linea bg-white p-4 text-center text-[13px] font-bold transition hover:bg-crema"
       >
-        📖 Ver el manual de la app
-      </a>
+        📖 Docs: cómo usar cada herramienta
+      </Link>
     </>
   );
 }

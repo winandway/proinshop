@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { horaLocal, minutosZona } from "@/lib/zona";
+import { exigir } from "@/lib/sesion";
 
 export const metadata: Metadata = { title: "Pedidos", robots: { index: false } };
 
@@ -26,6 +27,7 @@ export default async function Pedidos({
 }: {
   searchParams: Promise<{ estado?: string }>;
 }) {
+  await exigir("pedidos");
   const { estado } = await searchParams;
   const db = await baseDeDatos();
   const minutos = await minutosZona();

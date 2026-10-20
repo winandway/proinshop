@@ -3,11 +3,13 @@
 import { revalidatePath } from "next/cache";
 import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos } from "@/lib/d1";
-import { usuarioActual } from "@/lib/sesion";
+import { usuarioQuePuede } from "@/lib/sesion";
+import { anotarActividad } from "@/lib/actividad";
+import { formatearPrecio } from "@/lib/i18n";
 
 /** Registra un abono y baja el saldo de la deuda. */
 export async function registrarAbono(datos: FormData): Promise<void> {
-  const usuario = await usuarioActual();
+  const usuario = await usuarioQuePuede("clientes");
   if (!usuario) return;
 
   const db = await baseDeDatos();
@@ -38,6 +40,14 @@ export async function registrarAbono(datos: FormData): Promise<void> {
   if (saldoFinal === 0 && deuda.venta_id) {
     await db.prepare("UPDATE venta SET pagada = 1 WHERE id = ?").bind(deuda.venta_id).run();
   }
+
+  await anotarActividad({
+    usuarioId: usuario.id,
+    tipo: "abono",
+    detalle: `Registró un abono de ${formatearPrecio(aplicado)}${saldoFinal === 0 ? " y la deuda quedó saldada" : ""}`,
+    monto: aplicado,
+    enlace: "/panel/deudas",
+  });
 
   revalidatePath("/panel/deudas");
   revalidatePath("/panel");

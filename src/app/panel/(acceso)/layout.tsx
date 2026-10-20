@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { Diana } from "@/componentes/Logo";
+import { LimpiarCopias } from "@/componentes/ServicioSinSenal";
 
 /** Marco de las pantallas de acceso: sin encabezado de tienda ni carrito. */
 export default function DisenoAcceso({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-crema">
+      <LimpiarCopias />
       <div className="flex flex-1 items-center justify-center px-4 py-10">
         <div className="w-full max-w-[400px]">
           <Link href="/" className="mb-7 flex items-center justify-center gap-2.5">

@@ -4,6 +4,7 @@ import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { LimpiarBorrador } from "@/componentes/GuardaBorrador";
 import { horaLocal, minutosZona, modificadorZona } from "@/lib/zona";
+import { exigir } from "@/lib/sesion";
 
 export const metadata: Metadata = { title: "Gastos", robots: { index: false } };
 
@@ -12,6 +13,7 @@ export default async function Gastos({
 }: {
   searchParams: Promise<{ registrado?: string }>;
 }) {
+  await exigir("gastos");
   const { registrado } = await searchParams;
   const db = await baseDeDatos();
   const zona = await modificadorZona();

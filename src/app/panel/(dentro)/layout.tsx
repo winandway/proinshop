@@ -3,8 +3,10 @@ import { BarraInferior, MenuLateral } from "@/componentes/panel/BarraInferior";
 import { FranjaTrabajo } from "@/componentes/panel/FranjaTrabajo";
 import { BotonSalir } from "@/componentes/panel/BotonSalir";
 import { ZonaHoraria } from "@/componentes/panel/ZonaHoraria";
+import { AvisosEnVivo } from "@/componentes/panel/AvisosEnVivo";
+import { EstadoConexion } from "@/componentes/panel/EstadoConexion";
 import { ProveedorBorrador } from "@/componentes/GuardaBorrador";
-import { NOMBRE_ROL, usuarioActual } from "@/lib/sesion";
+import { NOMBRE_ROL, puede, usuarioActual } from "@/lib/sesion";
 import { salir } from "../acciones";
 
 /**
@@ -15,9 +17,14 @@ export default async function DisenoPanel({ children }: { children: React.ReactN
   const usuario = await usuarioActual();
   if (!usuario) redirect("/panel/entrar");
 
+  // Lo que se deja guardado para abrir sin señal, según lo que puede usar.
+  const precargar = ["/panel"];
+  if (puede(usuario, "vender")) precargar.push("/panel/vender");
+  precargar.push("/panel/inventario");
+
   return (
-    <div className="min-h-screen bg-crema pb-[74px] md:pb-0">
-      <header className="bg-rojo px-4 py-3 text-white">
+    <div className="min-h-screen bg-crema pb-[74px] md:pb-0 print:bg-white print:pb-0">
+      <header className="bg-rojo px-4 py-3 text-white print:hidden">
         <div className="mx-auto flex max-w-5xl items-center gap-3">
           <span
             aria-hidden="true"
@@ -34,11 +41,13 @@ export default async function DisenoPanel({ children }: { children: React.ReactN
         </div>
       </header>
 
+      <EstadoConexion dueno={String(usuario.id)} precargar={precargar} />
       <ZonaHoraria />
       <FranjaTrabajo />
+      <AvisosEnVivo />
 
       <div className="mx-auto flex max-w-5xl">
-        <MenuLateral esDueno={usuario.rol === "dueno"} />
+        <MenuLateral verReportes={puede(usuario, "reportes")} />
         <main className="min-w-0 flex-1 p-4">
           {/* Cada borrador lleva la cuenta: en una computadora compartida
               nadie ve lo que dejó escrito otro. */}
@@ -46,7 +55,7 @@ export default async function DisenoPanel({ children }: { children: React.ReactN
         </main>
       </div>
 
-      <BarraInferior esDueno={usuario.rol === "dueno"} />
+      <BarraInferior verReportes={puede(usuario, "reportes")} />
     </div>
   );
 }

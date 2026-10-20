@@ -5,6 +5,7 @@ import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { MenuTresPuntos } from "@/componentes/panel/MenuTresPuntos";
 import { cambiarEstadoPedido, cancelarPedido, confirmarPedido } from "../acciones";
+import { exigir } from "@/lib/sesion";
 
 export const metadata: Metadata = { title: "Pedido", robots: { index: false } };
 
@@ -22,6 +23,7 @@ const PASOS = [
 ];
 
 export default async function DetallePedido({ params }: { params: Promise<{ id: string }> }) {
+  await exigir("pedidos");
   const { id } = await params;
   const db = await baseDeDatos();
   if (!db) notFound();

@@ -12,7 +12,7 @@ export async function FranjaTrabajo() {
 
   if (franja.estado === "terminado") {
     return (
-      <div role="status" className="border-b border-verde/30 bg-verde-suave px-4 py-2">
+      <div role="status" className="border-b border-verde/30 bg-verde-suave px-4 py-2 print:hidden">
         <p className="mx-auto max-w-5xl text-[12px] font-bold text-[#0b6e3a]">
           Terminamos: {franja.trabajo}. Ahora te toca probarlo y decirnos si algo falta.
         </p>
@@ -21,7 +21,7 @@ export async function FranjaTrabajo() {
   }
 
   return (
-    <div role="status" className="border-b border-linea bg-white px-4 py-2">
+    <div role="status" className="border-b border-linea bg-white px-4 py-2 print:hidden">
       <div className="mx-auto max-w-5xl">
         <p className="text-[12px] text-gris">
           <b className="text-tinta">Estamos trabajando en:</b> {franja.trabajo}. Pronto estará

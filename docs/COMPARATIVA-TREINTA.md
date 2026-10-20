@@ -235,6 +235,37 @@ que se ve como una página web.
 
 ---
 
+## Estado al 19 de octubre de 2026: igualado
+
+Richard pidió igualar Proinshop con Treinta, porque al cliente se le vendió
+como igual. Se hizo de corrido y se publicó. Ya está en Proinshop:
+
+| De Treinta | En Proinshop |
+|---|---|
+| Vender buscando o escaneando, colores y tallas, servicios | Sí |
+| Pago mixto y fiado parcial | Sí |
+| Comprobante para imprimir, PDF, WhatsApp y correo | Sí |
+| Anular una venta devolviendo el inventario | Sí |
+| Caja: abrir, cerrar y cuadrar | Sí |
+| Compras a proveedores con costo promedio | Sí |
+| Alertas de stock bajo | Sí |
+| Conteo de inventario | Sí |
+| Edición masiva y Excel de ida y vuelta | Sí |
+| Ficha del cliente, mejores clientes, cobros vencidos | Sí |
+| Cotización que se vuelve venta | Sí |
+| Reportes con filtros y descarga | Sí |
+| Permisos por persona y por módulo | Sí |
+| Actividad del equipo y avisos en vivo | Sí |
+| Dos monedas con la tasa del día | Sí |
+| Entrar con huella o cara | Sí |
+| Funcionar sin señal | Sí: abre y vende; las ventas se envían solas al volver la señal |
+| Ayuda dentro de la app | Sí: Docs con 21 guías en español e inglés |
+
+Lo que sigue faltando y por qué: aviso al celular con el panel cerrado (va
+primero en la fila), factura electrónica, asistente con IA, recordatorios
+automáticos por WhatsApp, varias tiendas y las apps en las tiendas (falta la
+cuenta del negocio). Detalle en PENDIENTES.md.
+
 ## 6. Fuentes
 
 - Ficha de Treinta en Google Play: https://play.google.com/store/apps/details?id=com.treintaapp&hl=es_US

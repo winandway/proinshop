@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { FormularioAcceso } from "@/componentes/panel/FormularioAcceso";
+import { EntrarConHuella } from "@/componentes/panel/BotonesHuella";
 import { entrar } from "../../acciones";
 import { hayUsuarios, usuarioActual } from "@/lib/sesion";
 
@@ -36,6 +37,8 @@ export default async function Entrar() {
           { nombre: "contrasena", etiqueta: "Contraseña", tipo: "password" },
         ]}
       />
+
+      <EntrarConHuella />
 
       <p className="mt-6 text-center text-[12.5px] text-gris">
         ¿Te invitaron a trabajar aquí?{" "}

@@ -1,16 +1,14 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 import { FormularioProducto } from "@/componentes/panel/FormularioProducto";
 import { baseDeDatos } from "@/lib/d1";
-import { usuarioActual } from "@/lib/sesion";
+import { exigir, puede } from "@/lib/sesion";
 import { crearProducto } from "../acciones";
 
 export const metadata: Metadata = { title: "Crear producto", robots: { index: false } };
 
 export default async function NuevoProducto() {
-  const usuario = await usuarioActual();
-  if (!usuario || usuario.rol === "vendedor") redirect("/panel/inventario");
+  const usuario = await exigir("inventario");
 
   const db = await baseDeDatos();
   const categorias = db
@@ -42,6 +40,7 @@ export default async function NuevoProducto() {
             nombre: c.visible ? c.nombre_es : `${c.nombre_es} (oculta)`,
           }))}
           boton="Crear producto"
+          mostrarCosto={puede(usuario, "costos")}
         />
       </div>
     </>

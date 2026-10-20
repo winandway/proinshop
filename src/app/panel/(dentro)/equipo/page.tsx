@@ -6,7 +6,8 @@ import { FormularioInvitar } from "@/componentes/panel/FormularioInvitar";
 import { baseDeDatos } from "@/lib/d1";
 import { NEGOCIO } from "@/lib/config";
 import { NOMBRE_ROL, usuarioActual, type Rol } from "@/lib/sesion";
-import { anularInvitacion, cambiarActivo } from "./acciones";
+import { MODULOS, leerPermisos, puedeUsar } from "@/lib/permisos";
+import { anularInvitacion, cambiarActivo, cambiarRol, guardarPermisos } from "./acciones";
 
 export const metadata: Metadata = { title: "Equipo", robots: { index: false } };
 
@@ -21,7 +22,7 @@ export default async function Equipo() {
     ? (
         await db
           .prepare(
-            `SELECT id, nombre, correo, rol, activo, ultimo_acceso
+            `SELECT id, nombre, correo, rol, activo, ultimo_acceso, permisos
              FROM usuario WHERE negocio_id = ? ORDER BY id`,
           )
           .bind(usuario.negocioId)
@@ -32,6 +33,7 @@ export default async function Equipo() {
             rol: string;
             activo: number;
             ultimo_acceso: string | null;
+            permisos: string | null;
           }>()
       ).results
     : [];
@@ -51,13 +53,16 @@ export default async function Equipo() {
 
   return (
     <>
-      <h1 className="mb-4 text-xl font-black tracking-tight">Equipo</h1>
+      <h1 className="mb-1 text-xl font-black tracking-tight">Equipo y permisos</h1>
+      <p className="mb-4 text-[12.5px] text-gris">
+        Cada rol trae sus permisos. Toca «Rol y permisos» en una persona para darle o quitarle módulos.
+      </p>
 
       <div className="mb-4 space-y-2.5">
         {personas.map((persona) => (
           <div
             key={persona.id}
-            className="flex items-start gap-3 rounded-2xl border border-linea bg-white p-3.5"
+            className="flex flex-wrap items-start gap-3 rounded-2xl border border-linea bg-white p-3.5"
           >
             <span
               aria-hidden="true"
@@ -108,6 +113,56 @@ export default async function Equipo() {
                 dominio={NEGOCIO.url}
               />
             </div>
+            {persona.id !== usuario.id && (
+              <details className="basis-full rounded-xl bg-crema px-3 py-2">
+                <summary className="cursor-pointer text-[12px] font-extrabold">Rol y permisos</summary>
+                <form action={cambiarRol} className="mt-2 flex gap-2">
+                  <input type="hidden" name="id" value={persona.id} />
+                  <select
+                    name="rol"
+                    defaultValue={persona.rol}
+                    aria-label="Rol"
+                    className="flex-1 rounded-lg border-[1.5px] border-linea bg-white px-2 py-1.5 text-[12px] font-bold outline-none"
+                  >
+                    <option value="dueno">Propietario (todo)</option>
+                    <option value="vendedor">Vendedor</option>
+                    <option value="bodega">Bodega</option>
+                  </select>
+                  <button type="submit" className="rounded-lg bg-tinta px-3 py-1.5 text-[11.5px] font-bold text-white">
+                    Cambiar rol
+                  </button>
+                </form>
+                {persona.rol !== "dueno" && (
+                  <form action={guardarPermisos} className="mt-3">
+                    <input type="hidden" name="id" value={persona.id} />
+                    <ul className="grid gap-1.5 sm:grid-cols-2">
+                      {MODULOS.map((modulo) => (
+                        <li key={modulo.clave}>
+                          <label className="flex items-center gap-2 text-[12px] font-semibold">
+                            <input
+                              type="checkbox"
+                              name={`permiso_${modulo.clave}`}
+                              defaultChecked={puedeUsar(
+                                { rol: persona.rol as Rol, permisos: leerPermisos(persona.permisos) },
+                                modulo.clave,
+                              )}
+                              className="h-4 w-4 accent-verde"
+                            />
+                            {modulo.texto}
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      type="submit"
+                      className="mt-2.5 w-full rounded-lg bg-tinta py-2 text-[12px] font-bold text-white"
+                    >
+                      Guardar permisos
+                    </button>
+                  </form>
+                )}
+              </details>
+            )}
           </div>
         ))}
       </div>

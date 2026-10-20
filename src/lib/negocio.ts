@@ -2,6 +2,8 @@
 
 import { baseDeDatos } from "./d1";
 
+export type VarianteVenta = { id: number; nombre: string; stock: number; precioExtra: number };
+
 export type ProductoVenta = {
   id: number;
   nombre_es: string;
@@ -10,26 +12,50 @@ export type ProductoVenta = {
   stock: number;
   emoji: string | null;
   foto: string | null;
+  codigo_barras: string | null;
+  sku: string | null;
+  es_servicio: number;
+  variantes: VarianteVenta[];
 };
 
-export async function productosParaVender(buscar?: string): Promise<ProductoVenta[]> {
+/**
+ * Todo el catálogo para la pantalla de Vender, con sus variantes. Antes
+ * llegaban solo 60 productos y el buscador no encontraba el resto; un negocio
+ * de este tamaño cabe entero sin problema.
+ */
+export async function productosParaVender(): Promise<ProductoVenta[]> {
   const db = await baseDeDatos();
   if (!db) return [];
 
-  const filtro = buscar?.trim();
-  const consulta = `SELECT p.id, p.nombre_es, p.precio, p.costo, p.stock, p.emoji,
-                      (SELECT clave_r2_web FROM foto WHERE producto_id = p.id ORDER BY orden LIMIT 1) AS foto
-                    FROM producto p
-                    ${filtro ? "WHERE lower(p.nombre_es) LIKE ? OR p.sku = ? OR p.codigo_barras = ?" : ""}
-                    ORDER BY p.stock > 0 DESC, p.id DESC
-                    LIMIT 60`;
+  const [{ results: productos }, { results: variantes }] = await Promise.all([
+    db
+      .prepare(
+        `SELECT p.id, p.nombre_es, p.precio, p.costo, p.stock, p.emoji, p.codigo_barras, p.sku,
+                COALESCE(p.es_servicio, 0) AS es_servicio,
+                (SELECT clave_r2_web FROM foto WHERE producto_id = p.id ORDER BY orden, id DESC LIMIT 1) AS foto
+         FROM producto p
+         ORDER BY (p.stock > 0 OR COALESCE(p.es_servicio, 0) = 1) DESC, p.id DESC
+         LIMIT 3000`,
+      )
+      .all<Omit<ProductoVenta, "variantes">>(),
+    db
+      .prepare("SELECT id, producto_id, nombre_es, stock, precio_extra FROM variante ORDER BY id")
+      .all<{ id: number; producto_id: number; nombre_es: string; stock: number; precio_extra: number }>(),
+  ]);
 
-  const preparada = db.prepare(consulta);
-  const { results } = filtro
-    ? await preparada.bind(`%${filtro.toLowerCase()}%`, filtro, filtro).all<ProductoVenta>()
-    : await preparada.all<ProductoVenta>();
+  const porProducto = new Map<number, VarianteVenta[]>();
+  for (const variante of variantes) {
+    const lista = porProducto.get(variante.producto_id) ?? [];
+    lista.push({
+      id: variante.id,
+      nombre: variante.nombre_es,
+      stock: variante.stock,
+      precioExtra: variante.precio_extra,
+    });
+    porProducto.set(variante.producto_id, lista);
+  }
 
-  return results;
+  return productos.map((producto) => ({ ...producto, variantes: porProducto.get(producto.id) ?? [] }));
 }
 
 export type ClienteSimple = { id: number; nombre: string; telefono: string | null };
@@ -67,6 +93,9 @@ export async function datosNegocio() {
           costo_envio: number;
           mostrar_stock: number;
           ocultar_agotados: number;
+          umbral_stock: number | null;
+          moneda2: string | null;
+          tasa2: number | null;
         }>()
     : null;
 
@@ -79,22 +108,12 @@ export async function datosNegocio() {
     costoEnvio: fila?.costo_envio ?? 25,
     mostrarStock: (fila?.mostrar_stock ?? 1) === 1,
     ocultarAgotados: (fila?.ocultar_agotados ?? 0) === 1,
+    umbralStock: fila?.umbral_stock ?? 3,
+    moneda2: (fila?.moneda2 ?? "").trim().toUpperCase(),
+    tasa2: fila?.tasa2 ?? 0,
   };
 }
 
-export const METODOS_PAGO = [
-  { valor: "efectivo", texto: "💵 Efectivo" },
-  { valor: "transferencia", texto: "🏦 Transferencia" },
-  { valor: "tarjeta", texto: "💳 Tarjeta" },
-  { valor: "fiado", texto: "🕐 Fiado" },
-] as const;
-
-export const CATEGORIAS_GASTO = [
-  "Importación",
-  "Mercancía",
-  "Arriendo",
-  "Servicios",
-  "Nómina",
-  "Transporte",
-  "Otra",
-] as const;
+// Las listas fijas viven aparte para poder usarlas en el navegador sin
+// arrastrar el acceso a la base.
+export { CATEGORIAS_GASTO, METODOS_PAGO, NOMBRE_METODO, type MetodoPago } from "./metodos";

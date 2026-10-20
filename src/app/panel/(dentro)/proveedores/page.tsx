@@ -3,6 +3,8 @@ import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { crearProveedor } from "../gastos/acciones";
 import { GuardaBorrador } from "@/componentes/GuardaBorrador";
+import { redirect } from "next/navigation";
+import { puede, usuarioActual } from "@/lib/sesion";
 
 export const metadata: Metadata = { title: "Proveedores", robots: { index: false } };
 
@@ -10,6 +12,10 @@ const CAMPO =
   "w-full rounded-xl border-[1.5px] border-linea px-4 py-3 text-[13.5px] font-semibold outline-none transition placeholder:font-normal placeholder:text-gris2 focus:border-rojo";
 
 export default async function Proveedores() {
+  // Los proveedores los usan quien registra compras y quien registra gastos.
+  const usuario = await usuarioActual();
+  if (!usuario) redirect("/panel/entrar");
+  if (!puede(usuario, "compras") && !puede(usuario, "gastos")) redirect("/panel?sin_permiso=1");
   const db = await baseDeDatos();
 
   const proveedores = db
@@ -17,7 +23,8 @@ export default async function Proveedores() {
         await db
           .prepare(
             `SELECT p.id, p.nombre, p.telefono, p.notas,
-                    (SELECT COALESCE(SUM(monto), 0) FROM gasto WHERE proveedor_id = p.id) AS comprado
+                    (SELECT COALESCE(SUM(monto), 0) FROM gasto WHERE proveedor_id = p.id)
+                    + (SELECT COALESCE(SUM(total), 0) FROM compra WHERE proveedor_id = p.id) AS comprado
              FROM proveedor p ORDER BY p.nombre LIMIT 200`,
           )
           .all<{

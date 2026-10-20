@@ -1,6 +1,8 @@
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 import { baseDeDatos } from "./d1";
 import { valorAleatorio } from "./contrasenas";
+import { leerPermisos, puedeUsar, type Modulo, type Permisos, type Rol } from "./permisos";
 
 /**
  * Sesiones del panel.
@@ -13,7 +15,7 @@ import { valorAleatorio } from "./contrasenas";
 export const COOKIE_SESION = "proinshop_sesion";
 const DIAS_DE_VIDA = 30;
 
-export type Rol = "dueno" | "vendedor" | "bodega";
+export type { Rol } from "./permisos";
 
 export type UsuarioSesion = {
   id: number;
@@ -21,6 +23,7 @@ export type UsuarioSesion = {
   correo: string;
   rol: Rol;
   negocioId: number;
+  permisos: Permisos;
 };
 
 export async function crearSesion(usuarioId: number, agente?: string): Promise<string> {
@@ -60,7 +63,7 @@ export async function usuarioActual(): Promise<UsuarioSesion | null> {
 
   const fila = await db
     .prepare(
-      `SELECT u.id, u.nombre, u.correo, u.rol, u.negocio_id
+      `SELECT u.id, u.nombre, u.correo, u.rol, u.negocio_id, u.permisos
        FROM sesion s JOIN usuario u ON u.id = s.usuario_id
        WHERE s.id = ? AND s.expira > datetime('now') AND u.activo = 1`,
     )
@@ -71,6 +74,7 @@ export async function usuarioActual(): Promise<UsuarioSesion | null> {
       correo: string | null;
       rol: string;
       negocio_id: number;
+      permisos: string | null;
     }>();
 
   if (!fila) return null;
@@ -88,6 +92,7 @@ export async function usuarioActual(): Promise<UsuarioSesion | null> {
     correo: fila.correo ?? "",
     rol: fila.rol as Rol,
     negocioId: fila.negocio_id,
+    permisos: leerPermisos(fila.permisos),
   };
 }
 
@@ -112,15 +117,19 @@ export async function hayUsuarios(): Promise<boolean> {
   return (fila?.total ?? 0) > 0;
 }
 
-const PERMISOS: Record<Rol, string[]> = {
-  dueno: ["todo"],
-  vendedor: ["ventas", "pedidos", "clientes", "cotizaciones", "inventario:ver"],
-  bodega: ["inventario", "productos", "pedidos"],
-};
+/** ¿Esta persona puede usar este módulo? Rol por defecto + lo que ajustó el dueño. */
+export function puede(usuario: UsuarioSesion | null, modulo: Modulo): boolean {
+  return puedeUsar(usuario, modulo);
+}
 
-export function puede(rol: Rol, permiso: string): boolean {
-  const permisos = PERMISOS[rol] ?? [];
-  return permisos.includes("todo") || permisos.includes(permiso);
+/**
+ * Para las acciones del servidor: devuelve la persona si puede, o null. La
+ * regla vive aquí y no solo en los botones, porque una acción se puede
+ * llamar aunque el botón esté escondido.
+ */
+export async function usuarioQuePuede(modulo: Modulo): Promise<UsuarioSesion | null> {
+  const usuario = await usuarioActual();
+  return puede(usuario, modulo) ? usuario : null;
 }
 
 export const NOMBRE_ROL: Record<Rol, string> = {
@@ -128,3 +137,14 @@ export const NOMBRE_ROL: Record<Rol, string> = {
   vendedor: "Vendedor",
   bodega: "Bodega",
 };
+
+/**
+ * Para las pantallas: si no hay sesión, a entrar; si no tiene permiso, al
+ * inicio con un aviso claro (nunca una pantalla en blanco ni un error).
+ */
+export async function exigir(modulo: Modulo): Promise<UsuarioSesion> {
+  const usuario = await usuarioActual();
+  if (!usuario) redirect("/panel/entrar");
+  if (!puede(usuario, modulo)) redirect("/panel?sin_permiso=1");
+  return usuario;
+}

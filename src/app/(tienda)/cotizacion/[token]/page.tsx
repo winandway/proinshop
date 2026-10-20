@@ -5,6 +5,7 @@ import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { obtenerConfigTienda } from "@/lib/config-tienda";
 import { enlaceWhatsapp, NEGOCIO } from "@/lib/config";
+import { BotonImprimir } from "@/componentes/panel/BotonImprimir";
 
 export const metadata: Metadata = { title: "Cotización", robots: { index: false } };
 
@@ -130,11 +131,15 @@ export default async function CotizacionPublica({
             href={enlaceWhatsapp(mensaje, config.whatsapp)}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-5 block rounded-2xl bg-whatsapp py-4 text-center text-sm font-extrabold text-white transition hover:brightness-95"
+            className="mt-5 block print:hidden rounded-2xl bg-whatsapp py-4 text-center text-sm font-extrabold text-white transition hover:brightness-95"
           >
             Aceptar por WhatsApp
           </a>
         )}
+
+        <div className="mt-3">
+          <BotonImprimir texto="Imprimir o guardar en PDF" />
+        </div>
 
         <p className="mt-6 border-t border-linea pt-4 text-center text-[11px] text-gris2">
           © {new Date().getFullYear()} {NEGOCIO.dominio} | All rights reserved. Developed by{" "}

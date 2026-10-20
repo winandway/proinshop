@@ -1,15 +1,13 @@
-import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
-import { usuarioActual } from "@/lib/sesion";
+import { exigir } from "@/lib/sesion";
 import { modificadorZona } from "@/lib/zona";
 
 export const metadata: Metadata = { title: "Estadísticas", robots: { index: false } };
 
 export default async function Estadisticas() {
-  const usuario = await usuarioActual();
-  if (usuario?.rol !== "dueno") redirect("/panel");
+  await exigir("reportes");
 
   const db = await baseDeDatos();
 
@@ -18,9 +16,9 @@ export default async function Estadisticas() {
         .prepare(
           `SELECT
              (SELECT COALESCE(SUM(total), 0) FROM venta
-               WHERE fecha >= datetime('now', '-15 days')) AS ventas,
+               WHERE fecha >= datetime('now', '-15 days') AND COALESCE(anulada, 0) = 0) AS ventas,
              (SELECT COALESCE(SUM(total), 0) FROM venta
-               WHERE fecha >= datetime('now', '-30 days') AND fecha < datetime('now', '-15 days')) AS ventas_previas,
+               WHERE fecha >= datetime('now', '-30 days') AND fecha < datetime('now', '-15 days') AND COALESCE(anulada, 0) = 0) AS ventas_previas,
              (SELECT COALESCE(SUM(monto), 0) FROM gasto
                WHERE fecha >= datetime('now', '-15 days')) AS gastos,
              (SELECT COUNT(*) FROM pedido WHERE fecha >= datetime('now', '-15 days')) AS pedidos`,
@@ -34,7 +32,7 @@ export default async function Estadisticas() {
         await db
           .prepare(
             `SELECT date(fecha, ${zona}) AS dia, SUM(total) AS total FROM venta
-             WHERE fecha >= datetime('now', '-7 days')
+             WHERE fecha >= datetime('now', '-7 days') AND COALESCE(anulada, 0) = 0
              GROUP BY dia ORDER BY dia`,
           )
           .all<{ dia: string; total: number }>()
@@ -48,7 +46,7 @@ export default async function Estadisticas() {
             `SELECT vi.descripcion, SUM(vi.cantidad) AS unidades,
                     SUM(vi.precio_unit * vi.cantidad) AS total
              FROM venta_item vi JOIN venta v ON v.id = vi.venta_id
-             WHERE v.fecha >= datetime('now', '-30 days')
+             WHERE v.fecha >= datetime('now', '-30 days') AND COALESCE(v.anulada, 0) = 0
              GROUP BY vi.descripcion ORDER BY unidades DESC LIMIT 5`,
           )
           .all<{ descripcion: string; unidades: number; total: number }>()
@@ -60,7 +58,7 @@ export default async function Estadisticas() {
         await db
           .prepare(
             `SELECT canal, COUNT(*) AS ventas, COALESCE(SUM(total), 0) AS total
-             FROM venta WHERE fecha >= datetime('now', '-30 days') GROUP BY canal`,
+             FROM venta WHERE fecha >= datetime('now', '-30 days') AND COALESCE(anulada, 0) = 0 GROUP BY canal`,
           )
           .all<{ canal: string; ventas: number; total: number }>()
       ).results

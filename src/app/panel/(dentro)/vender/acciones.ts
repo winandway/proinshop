@@ -2,129 +2,111 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos } from "@/lib/d1";
-import { usuarioActual } from "@/lib/sesion";
+import { usuarioActual, usuarioQuePuede } from "@/lib/sesion";
+import { anotarActividad } from "@/lib/actividad";
+import { guardarVenta } from "@/lib/registrar-venta";
 
 export type ResultadoVenta = { error?: string };
 
-type LineaVenta = { productoId: number; cantidad: number; precio: number };
-
 /**
- * Registra la venta y mueve todo lo que depende de ella: descuenta stock,
- * anota el movimiento de inventario y, si fue fiado, crea la deuda.
- *
- * D1 no expone transacciones por HTTP, así que el orden importa: primero la
- * venta (que es lo que no se puede perder) y después el resto.
+ * La venta desde la pantalla de vender. La regla completa vive en
+ * lib/registrar-venta, que también usa la cola de ventas hechas sin señal.
  */
 export async function registrarVenta(
   _previo: ResultadoVenta,
   datos: FormData,
 ): Promise<ResultadoVenta> {
-  const usuario = await usuarioActual();
-  if (!usuario) return { error: "Tu sesión venció" };
+  const usuario = await usuarioQuePuede("vender");
+  if (!usuario) return { error: "Tu cuenta no tiene permiso para registrar ventas" };
 
   const db = await baseDeDatos();
   if (!db) return { error: "La base de datos no está disponible" };
 
-  let lineas: LineaVenta[];
-  try {
-    lineas = JSON.parse(String(datos.get("lineas") ?? "[]"));
-  } catch {
-    return { error: "No se pudo leer la venta" };
-  }
-  if (!Array.isArray(lineas) || lineas.length === 0) {
-    return { error: "Agrega al menos un producto" };
-  }
-
-  const metodoPago = String(datos.get("metodo_pago") ?? "efectivo");
-  const clienteId = Number(datos.get("cliente_id")) || null;
-  const descuento = Math.max(0, leerMonto(datos.get("descuento")));
-
-  if (metodoPago === "fiado" && !clienteId) {
-    return { error: "Para vender fiado tienes que elegir el cliente" };
-  }
-
-  // Se leen los productos de la base: el precio y el costo no se toman del
-  // navegador, que se puede manipular.
-  const ids = lineas.map((l) => l.productoId);
-  const marcas = ids.map(() => "?").join(",");
-  const { results: productos } = await db
-    .prepare(`SELECT id, nombre_es, precio, costo, stock FROM producto WHERE id IN (${marcas})`)
-    .bind(...ids)
-    .all<{ id: number; nombre_es: string; precio: number; costo: number; stock: number }>();
-
-  let subtotal = 0;
-  const detalle: {
-    producto: (typeof productos)[number];
-    cantidad: number;
-  }[] = [];
-
-  for (const linea of lineas) {
-    const producto = productos.find((p) => p.id === linea.productoId);
-    if (!producto) return { error: "Uno de los productos ya no existe" };
-
-    const cantidad = Math.max(1, Math.round(linea.cantidad));
-    if (cantidad > producto.stock) {
-      return { error: `Solo quedan ${producto.stock} de "${producto.nombre_es}"` };
-    }
-
-    subtotal += producto.precio * cantidad;
-    detalle.push({ producto, cantidad });
-  }
-
-  const total = Math.max(0, subtotal - descuento);
-  const pagada = metodoPago === "fiado" ? 0 : 1;
-
-  const venta = await db
-    .prepare(
-      `INSERT INTO venta (canal, cliente_id, usuario_id, metodo_pago, subtotal, descuento, total, pagada)
-       VALUES ('local', ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .bind(clienteId, usuario.id, metodoPago, subtotal, descuento, total, pagada)
-    .run();
-
-  const ventaId = Number(venta.meta.last_row_id);
-
-  for (const { producto, cantidad } of detalle) {
-    await db
-      .prepare(
-        `INSERT INTO venta_item (venta_id, producto_id, descripcion, cantidad, precio_unit, costo_unit)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-      )
-      .bind(ventaId, producto.id, producto.nombre_es, cantidad, producto.precio, producto.costo)
-      .run();
-
-    const stockFinal = producto.stock - cantidad;
-    await db
-      .prepare("UPDATE producto SET stock = ? WHERE id = ?")
-      .bind(stockFinal, producto.id)
-      .run();
-
-    await db
-      .prepare(
-        `INSERT INTO movimiento_inventario
-           (producto_id, motivo, cantidad, stock_final, usuario_id, referencia)
-         VALUES (?, 'venta', ?, ?, ?, ?)`,
-      )
-      .bind(producto.id, -cantidad, stockFinal, usuario.id, `Venta #${ventaId}`)
-      .run();
-  }
-
-  if (metodoPago === "fiado" && clienteId) {
-    await db
-      .prepare(
-        `INSERT INTO deuda (cliente_id, venta_id, monto, saldo, vence)
-         VALUES (?, ?, ?, ?, date('now', '+30 days'))`,
-      )
-      .bind(clienteId, ventaId, total, total)
-      .run();
-  }
+  const resultado = await guardarVenta(db, usuario.id, {
+    lineas: datos.get("lineas"),
+    pagos: datos.get("pagos"),
+    clienteId: datos.get("cliente_id"),
+    descuento: datos.get("descuento"),
+    nota: datos.get("nota"),
+    clave: datos.get("clave"),
+  });
+  if ("error" in resultado) return { error: resultado.error };
 
   revalidatePath("/panel");
   revalidatePath("/panel/inventario");
   revalidatePath("/");
-  redirect(`/panel/vender/${ventaId}`);
+  redirect(`/panel/vender/${resultado.id}?nueva=1`);
+}
+
+/**
+ * Anula una venta registrada por error: la mercancía vuelve al inventario, la
+ * deuda que había creado se borra y la venta deja de contar en el balance.
+ * No se borra: queda marcada como anulada, para que el dueño vea qué pasó.
+ */
+export async function anularVenta(datos: FormData): Promise<void> {
+  const usuario = await usuarioQuePuede("anular");
+  if (!usuario) return;
+
+  const db = await baseDeDatos();
+  if (!db) return;
+
+  const id = Number(datos.get("id"));
+  const venta = await db
+    .prepare("SELECT id, total, canal FROM venta WHERE id = ? AND COALESCE(anulada, 0) = 0")
+    .bind(id)
+    .first<{ id: number; total: number; canal: string }>();
+  if (!venta) return;
+
+  const { results: items } = await db
+    .prepare(
+      `SELECT vi.producto_id, vi.variante_id, vi.cantidad, COALESCE(p.es_servicio, 0) AS es_servicio
+       FROM venta_item vi LEFT JOIN producto p ON p.id = vi.producto_id
+       WHERE vi.venta_id = ?`,
+    )
+    .bind(id)
+    .all<{ producto_id: number | null; variante_id: number | null; cantidad: number; es_servicio: number }>();
+
+  const operaciones = [];
+  for (const item of items) {
+    if (!item.producto_id || item.es_servicio) continue;
+    if (item.variante_id) {
+      operaciones.push(
+        db.prepare("UPDATE variante SET stock = stock + ? WHERE id = ?").bind(item.cantidad, item.variante_id),
+      );
+    }
+    operaciones.push(
+      db.prepare("UPDATE producto SET stock = stock + ? WHERE id = ?").bind(item.cantidad, item.producto_id),
+      db
+        .prepare(
+          `INSERT INTO movimiento_inventario
+             (producto_id, variante_id, motivo, cantidad, stock_final, usuario_id, referencia)
+           VALUES (?, ?, 'devolucion', ?, (SELECT stock FROM producto WHERE id = ?), ?, ?)`,
+        )
+        .bind(item.producto_id, item.variante_id, item.cantidad, item.producto_id, usuario.id, `Venta #${id} anulada`),
+    );
+  }
+  operaciones.push(
+    db.prepare("DELETE FROM abono WHERE deuda_id IN (SELECT id FROM deuda WHERE venta_id = ?)").bind(id),
+    db.prepare("DELETE FROM deuda WHERE venta_id = ?").bind(id),
+    db.prepare("UPDATE venta SET anulada = 1, pagada = 1 WHERE id = ?").bind(id),
+    // Si venía de un pedido de la tienda, el pedido queda cancelado.
+    db.prepare("UPDATE pedido SET estado = 'cancelado' WHERE venta_id = ?").bind(id),
+  );
+  await db.batch(operaciones);
+
+  await anotarActividad({
+    usuarioId: usuario.id,
+    tipo: "anulacion",
+    detalle: `Anuló la venta #${id}`,
+    monto: -venta.total,
+    enlace: `/panel/vender/${id}`,
+  });
+
+  revalidatePath("/panel");
+  revalidatePath("/panel/inventario");
+  revalidatePath(`/panel/vender/${id}`);
+  revalidatePath("/");
 }
 
 export async function crearCliente(datos: FormData): Promise<void> {

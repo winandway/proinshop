@@ -3,10 +3,12 @@ import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { registrarAbono } from "./acciones";
 import { GuardaBorrador } from "@/componentes/GuardaBorrador";
+import { exigir } from "@/lib/sesion";
 
 export const metadata: Metadata = { title: "Cuentas por cobrar", robots: { index: false } };
 
 export default async function Deudas() {
+  await exigir("clientes");
   const db = await baseDeDatos();
 
   const deudas = db

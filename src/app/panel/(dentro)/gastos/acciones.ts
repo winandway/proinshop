@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { leerMonto } from "@/lib/numeros";
 import { baseDeDatos, bucket } from "@/lib/d1";
-import { usuarioActual } from "@/lib/sesion";
+import { usuarioActual, usuarioQuePuede } from "@/lib/sesion";
+import { anotarActividad } from "@/lib/actividad";
+import { formatearPrecio } from "@/lib/i18n";
 
 export type ResultadoGasto = { error?: string };
 
@@ -12,7 +14,7 @@ export async function registrarGasto(
   _previo: ResultadoGasto,
   datos: FormData,
 ): Promise<ResultadoGasto> {
-  const usuario = await usuarioActual();
+  const usuario = await usuarioQuePuede("gastos");
   if (!usuario) return { error: "Tu sesión venció" };
 
   const db = await baseDeDatos();
@@ -56,6 +58,14 @@ export async function registrarGasto(
 
   revalidatePath("/panel");
   revalidatePath("/panel/gastos");
+  await anotarActividad({
+    usuarioId: usuario.id,
+    tipo: "gasto",
+    detalle: `Registró un gasto de ${formatearPrecio(monto)} (${categoria})`,
+    monto,
+    enlace: "/panel/gastos",
+  });
+
   redirect("/panel/gastos?registrado=1");
 }
 
