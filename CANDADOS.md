@@ -160,9 +160,10 @@
   cobertura y la auditoría de seguridad; `verify.yml` lo corre en las ramas.
 - **Cobertura:** piso fijado en `vitest.config.mts` (21 oct 2026: líneas 36 %,
   funciones 40 %, ramas 35 %, sentencias 37 %). Solo puede subir.
-- **Claves:** gitleaks revisa todo el historial antes de cada publicación
-  (`build.yml`) y en las ramas (`verify.yml`). Si encuentra una clave, no se
-  publica.
+- **Claves:** gitleaks revisa la historia del código (`--log-opts="HEAD"`)
+  antes de cada publicación (`build.yml`) y en las ramas (`verify.yml`). Si
+  encuentra una clave, no se publica. No quitar el `HEAD`: la rama
+  yapanel-build guarda el sitio compilado y da 193 falsas alarmas.
 - **No tocar:** jamás quitar un paso de la compuerta ni bajar el piso para que
   pase un cambio. Se arregla el cambio.
 
