@@ -146,3 +146,46 @@ async function guardarPagina(url, respuesta, precarga) {
     }),
   );
 }
+
+/*
+ * Avisos al celular (pedido nuevo, lo que hace el equipo). Llegan aunque el
+ * panel esté cerrado. Al tocarlo, abre la pantalla del aviso o trae al frente
+ * el panel si ya estaba abierto.
+ */
+self.addEventListener("push", (evento) => {
+  let aviso = {};
+  try {
+    aviso = evento.data ? evento.data.json() : {};
+  } catch {
+    aviso = { cuerpo: evento.data ? evento.data.text() : "" };
+  }
+  const titulo = aviso.titulo || "Proinshop";
+  evento.waitUntil(
+    self.registration.showNotification(titulo, {
+      body: aviso.cuerpo || "",
+      icon: "/icon.png",
+      badge: "/icon.png",
+      tag: aviso.etiqueta || undefined,
+      renotify: Boolean(aviso.etiqueta),
+      data: { enlace: aviso.enlace || "/panel" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (evento) => {
+  evento.notification.close();
+  const destino = new URL(evento.notification.data?.enlace || "/panel", self.location.origin).href;
+  evento.waitUntil(
+    (async () => {
+      const ventanas = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      for (const ventana of ventanas) {
+        if (new URL(ventana.url).pathname.startsWith("/panel") && "focus" in ventana) {
+          await ventana.focus();
+          if ("navigate" in ventana) await ventana.navigate(destino);
+          return;
+        }
+      }
+      await self.clients.openWindow(destino);
+    })(),
+  );
+});
