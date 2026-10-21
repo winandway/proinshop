@@ -248,12 +248,13 @@
 ## C-ENTREGA — La prueba de aceptación
 
 - `pruebas/navegador/entrega.mjs` hace, sobre una base nueva, todo lo del
-  primer día: cuenta del propietario, tienda, Excel, colores, caja, cliente,
+  primer día: cuenta del propietario, tienda con segunda moneda, Excel, colores, caja, cliente,
   ventas (simple, mixta con fiado, servicio, sin pasar el stock), anular,
   compra con costo promedio, conteo, edición masiva, cotización a venta,
   abono, vendedor con permisos, pedido de la tienda a venta, reportes, Excel,
   cierre de caja exacto y borrado de marcados. Debe dar todo en verde antes de
-  una entrega. El 21 oct 2026 dio 43 de 43.
+  una entrega. El 21 oct 2026 dio 45 de 45. Contra el sitio publicado, sin
+  tocar nada: `PROINSHOP_BASE=https://proinshop.com node pruebas/navegador/humo-en-vivo.mjs`.
 
 ## C-PAGO-MIXTO — Los pagos tienen que cuadrar al centavo
 

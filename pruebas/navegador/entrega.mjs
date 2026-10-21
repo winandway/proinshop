@@ -57,10 +57,13 @@ await intentar("mi tienda", async () => {
   await ir("/panel/tienda");
   await p.fill('input[name="whatsapp"]', "584125550100");
   await p.fill('input[name="umbral_stock"]', "3");
+  await p.fill('input[name="moneda2"]', "VES");
+  await p.fill('input[name="tasa2"]', "40");
   await p.getByRole("button", { name: "Guardar cambios" }).click();
   await p.waitForLoadState("networkidle");
   await ir("/panel/tienda");
   anotar((await p.inputValue('input[name="whatsapp"]')).includes("4125550100"), "el WhatsApp de ventas queda guardado");
+  anotar((await p.inputValue('input[name="tasa2"]')) === "40", "la segunda moneda queda guardada con su tasa");
 });
 
 paso("4. Cargar productos desde Excel");
@@ -135,7 +138,10 @@ async function vender(productos, alCobrar) {
 paso("7. Vender: simple, con color + pago mixto + fiado, y un servicio");
 let ventaTaladro = 0;
 await intentar("ventas", async () => {
-  ventaTaladro = await vender([{ nombre: "Taladro inalámbrico 20V" }]);
+  ventaTaladro = await vender([{ nombre: "Taladro inalámbrico 20V" }], async () => {
+    // 89 dólares a 40 por dólar: 3560 en la segunda moneda.
+    anotar(/3\.?560/.test(await p.locator("main").innerText()), "el total sale también en la segunda moneda (3560)");
+  });
   anotar((await p.locator("main").innerText()).includes("Taladro"), `venta simple con recibo (#${ventaTaladro})`);
 
   await vender([{ nombre: "Moto eléctrica urbana", variante: "Negro" }], async () => {

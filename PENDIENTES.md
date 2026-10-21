@@ -46,7 +46,7 @@ varias tiendas, app en la App Store. Rangos en COMPARATIVA-TREINTA, sección 4.
 - [x] 21 oct 2026 — Canario de la base en /estado (lee, escribe y revisa las 24 tablas)
 - [x] 21 oct 2026 — Cabeceras de seguridad y búsqueda de claves antes de cada publicación
 - [x] 21 oct 2026 — Aviso cuando la caja da negativo y aclaración de cómo se pagó una compra
-- [x] 21 oct 2026 — Prueba de aceptación completa sobre base nueva: 43 de 43 en verde
+- [x] 21 oct 2026 — Prueba de aceptación completa sobre base nueva: 45 de 45 en verde
 
 - [x] 19 oct 2026 — Igualar a Treinta, de corrido (plan en docs/PLAN-IGUALAR-TREINTA.md):
   pago mixto y fiado parcial, escáner, colores y tallas, servicios, nota,

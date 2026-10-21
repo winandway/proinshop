@@ -264,7 +264,7 @@ como igual. Se hizo de corrido y se publicó. Ya está en Proinshop:
 | App en el celular | Sí: se instala desde el navegador con su ícono; Google Play cuando haya cuenta |
 | Comparar entre fechas | Sí: cada número contra el período anterior |
 
-Verificado el 21 de octubre con la prueba de aceptación (43 de 43 en verde sobre
+Verificado el 21 de octubre con la prueba de aceptación (45 de 45 en verde sobre
 una base nueva), la de huella, la de sin señal y 71 pruebas automáticas. Acta en
 docs/ACTA-ENTREGA-PROINSHOP.md.
 

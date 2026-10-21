@@ -1,0 +1,86 @@
+
+▶ 1. La base nueva se arma sola
+  ✓ /estado dice ok
+  ✓ esquema completo (24 tablas; faltan: nada)
+  ✓ la base deja escribir y volver a leer
+
+▶ 2. El dueño crea su cuenta
+  ✓ sin cuentas, el panel lleva a crear la del propietario
+  ✓ entra al panel y ve sus primeros pasos
+
+▶ 3. Mi tienda
+  ✓ el WhatsApp de ventas queda guardado
+  ✓ la segunda moneda queda guardada con su tasa
+
+▶ 4. Cargar productos desde Excel
+  ✓ se cargaron (5)
+  ✓ aparecen en el inventario
+
+▶ 5. Colores en un producto
+  ✓ la moto tiene Negro y Rojo
+
+▶ 6. Abrir caja y crear un cliente
+  ✓ caja abierta con $100
+  ✓ cliente creado
+
+▶ 7. Vender: simple, con color + pago mixto + fiado, y un servicio
+  ✓ el total sale también en la segunda moneda (3560)
+  ✓ venta simple con recibo (#1)
+  ✓ venta mixta con color Negro: efectivo + fiado
+  ✓ un servicio se vende sin tener existencias
+  ✓ no deja vender más de lo que hay
+
+▶ 8. Anular una venta
+  ✓ la venta queda marcada como anulada
+  ✓ el taladro vuelve a tener 12
+
+▶ 9. Compra a proveedor con costo promedio
+  ✓ stock 12 y costo promedio 107.5 (esperado 107.5)
+
+▶ 10. Conteo de inventario
+  ✓ el conteo se aplica
+  ✓ el taladro queda en 11, lo que se contó
+
+▶ 11. Edición masiva: +10% a la planta
+  ✓ la planta pasa de 640 a 704
+
+▶ 12. Cotización que se vuelve venta
+  ✓ la cotización quedó convertida en venta
+
+▶ 13. Abono de la deuda
+  ✓ Carlos debía $600 y ahora debe $400
+
+▶ 14. Un vendedor del equipo
+  ✓ el vendedor entra con su invitación
+  ✓ el vendedor no ve el balance del día
+  ✓ si intenta abrir Reportes, vuelve al inicio con aviso
+  ✓ el vendedor registra una venta
+  ✓ el dueño ve la venta del vendedor en Actividad
+
+▶ 15. Un cliente compra en la tienda y el pedido se vuelve venta
+  ✓ el cliente confirma su pedido en la tienda
+  ✓ el dueño confirma el pedido y queda como venta
+
+▶ 16. Reportes, Excel y cierre de caja
+  ✓ reportes con la comparación contra el período anterior
+  ✓ el inventario baja en Excel
+  ✓ la caja cuadra al contar $869
+
+▶ 17. Borrar productos marcados
+  ✓ el producto marcado se borró
+  ✓ y ya no está en la tienda
+
+▶ 18. Avisos al celular (Chrome de prueba)
+  ✓ este Chrome de prueba no tiene servicio de avisos («No se pudieron activar: Registration failed - permission denied»); en un celular real sí
+
+▶ 19. Docs y salud final
+  ✓ /docs responde 200
+  ✓ /docs/install-the-app responde 200
+  ✓ /docs/phone-alerts responde 200
+  ✓ /docs/register-a-sale responde 200
+  ✓ /sitemap.xml responde 200
+  ✓ la base sigue sana al final
+  ✓ primeros pasos: 5 de 7 listos
+
+══ 45 de 45 comprobaciones en verde ══
+Errores de las páginas: ninguno

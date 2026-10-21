@@ -1,0 +1,25 @@
+
+▶ Con señal: se instala el modo sin señal y se guardan las páginas
+  ✓ el trabajador controla la página
+  copias: {"proinshop-estaticos-prueba179260":["/sin-conexion"],"proinshop-paginas-prueba179260":["/panel","/panel/vender","/panel/inventario"],"proinshop-fotos":["/icon.png"]}
+  ✓ vender quedó guardada por adelantado
+
+▶ Sin señal: abrir vender y cobrar
+  ✓ aparece la franja de sin señal
+  ✓ la venta se guardó en el dispositivo
+  ✓ hay 1 venta en la cola (89)
+
+▶ Sin señal: una página que nunca se abrió
+  ✓ sale la página «Estás sin señal»
+
+▶ Vuelve la señal: la venta se envía sola
+  ✓ se envió y lo avisa en verde
+  ✓ la cola quedó vacía
+
+▶ Reenviar la misma venta no la duplica
+  ✓ el servidor la reconoce (venta #7)
+
+▶ Salir borra las copias del panel
+  ✓ no quedan copias del panel
+
+Errores de la página: ninguno

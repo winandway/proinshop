@@ -1,0 +1,16 @@
+
+▶ Activar huella en Mi cuenta
+  ✓ la huella quedó activada
+  ✓ aparece en la lista (1)
+  ✓ el dispositivo guardó una llave que se encuentra sola
+
+▶ Activar dos veces en el mismo dispositivo
+  ✓ avisa: Este dispositivo ya tiene la huella activada para tu cuenta.
+
+▶ Entrar con huella sin cookie
+  ✓ entró al panel con la huella
+
+▶ Llave borrada del servidor
+  ✓ la cola rechaza otro origen (403)
+
+Errores de la página: ninguno
