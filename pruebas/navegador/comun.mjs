@@ -30,10 +30,25 @@ function chromeInstalado() {
   throw new Error("No encontré el navegador. Pon su ruta en CHROME.");
 }
 
+export function lanzarNavegador() {
+  return chromium.launch({ executablePath: chromeInstalado(), headless: true });
+}
+
+/** Un celular nuevo (375 px), con o sin sesión abierta. */
+export async function celular(navegador, sesion) {
+  const contexto = await navegador.newContext({ viewport: { width: 375, height: 812 }, deviceScaleFactor: 2 });
+  if (sesion) {
+    await contexto.addCookies([
+      { name: "proinshop_sesion", value: sesion, domain: new URL(BASE).hostname, path: "/", httpOnly: true },
+    ]);
+  }
+  return contexto;
+}
+
 export async function abrir({ ancho = 375, alto = 812 } = {}) {
   const sesion = process.env.PROINSHOP_SESION;
   if (!sesion) throw new Error("Falta PROINSHOP_SESION (una sesión de la base local).");
-  const navegador = await chromium.launch({ executablePath: chromeInstalado(), headless: true });
+  const navegador = await lanzarNavegador();
   const contexto = await navegador.newContext({ viewport: { width: ancho, height: alto }, deviceScaleFactor: 2 });
   await contexto.addCookies([
     { name: "proinshop_sesion", value: sesion, domain: new URL(BASE).hostname, path: "/", httpOnly: true },

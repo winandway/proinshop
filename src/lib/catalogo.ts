@@ -10,6 +10,7 @@ import { CATEGORIAS_DESARROLLO, PRODUCTOS_DESARROLLO } from "./catalogo-desarrol
 import { obtenerConfigTienda } from "./config-tienda";
 import { baseDeDatos } from "./d1";
 import type { Categoria, Especificacion, Producto, Variante } from "./tipos";
+import { filasPorLista } from "./por-trozos";
 
 /** Fila tal como la devuelve D1 para un producto con su categoría. */
 type FilaProducto = {
@@ -42,27 +43,25 @@ async function armarProductos(filas: FilaProducto[]): Promise<Producto[]> {
   if (!db || filas.length === 0) return [];
 
   const ids = filas.map((f) => f.id);
-  const marcas = ids.map(() => "?").join(",");
 
-  const [variantes, especificaciones, fotos] = await Promise.all([
-    db
-      .prepare(`SELECT * FROM variante WHERE producto_id IN (${marcas}) ORDER BY id`)
-      .bind(...ids)
-      .all(),
-    db
-      .prepare(
-        `SELECT * FROM especificacion WHERE producto_id IN (${marcas}) ORDER BY producto_id, orden, id`,
-      )
-      .bind(...ids)
-      .all(),
-    db
-      .prepare(
-        `SELECT producto_id, clave_r2_web, clave_r2 FROM foto
-         WHERE producto_id IN (${marcas}) ORDER BY producto_id, orden, id DESC`,
-      )
-      .bind(...ids)
-      .all(),
-  ]);
+  // Por trozos: con más de cien productos, una sola consulta no pasa.
+  const [variantes, especificaciones, fotos] = (
+    await Promise.all([
+      filasPorLista(db, (marcas) => `SELECT * FROM variante WHERE producto_id IN (${marcas}) ORDER BY id`, ids),
+      filasPorLista(
+        db,
+        (marcas) => `SELECT * FROM especificacion WHERE producto_id IN (${marcas}) ORDER BY producto_id, orden, id`,
+        ids,
+      ),
+      filasPorLista(
+        db,
+        (marcas) =>
+          `SELECT producto_id, clave_r2_web, clave_r2 FROM foto
+           WHERE producto_id IN (${marcas}) ORDER BY producto_id, orden, id DESC`,
+        ids,
+      ),
+    ])
+  ).map((results) => ({ results }));
 
   const porProducto = <T extends { producto_id: number }>(resultados: unknown) =>
     ((resultados as { results?: T[] })?.results ?? []).reduce<Map<number, T[]>>((mapa, fila) => {

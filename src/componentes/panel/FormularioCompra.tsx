@@ -316,6 +316,13 @@ export function FormularioCompra({
             </button>
           ))}
         </div>
+        <p className="mt-2 text-[11.5px] text-gris">
+          {metodo === "efectivo"
+            ? "Efectivo es la plata del cajón: la caja la descuenta. Si pagaste por banco, elige Transferencia."
+            : metodo === "credito"
+              ? "A crédito: el proveedor te fía y no sale plata de la caja."
+              : "No sale plata del cajón: la caja no la descuenta."}
+        </p>
         <input
           value={nota}
           onChange={(e) => setNota(e.target.value)}

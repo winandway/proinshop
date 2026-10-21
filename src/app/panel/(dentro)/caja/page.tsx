@@ -131,6 +131,13 @@ export default async function Caja({
               <span className="text-[12.5px] font-extrabold">Debe haber en efectivo</span>
               <span className="text-xl font-black tracking-tight">{formatearPrecio(esperado)}</span>
             </p>
+            {esperado < 0 && (
+              <p role="alert" className="mt-2 rounded-xl border border-rojo/40 bg-rojo-suave px-3.5 py-2.5 text-[12px] font-bold text-rojo-oscuro">
+                Da negativo: según lo registrado salió más efectivo del que había. Seguro alguna
+                compra o gasto se pagó por banco y quedó como efectivo. Revísalo en Compras o Gastos
+                antes de cerrar.
+              </p>
+            )}
           </div>
 
           <form action={cerrarCaja} className="rounded-2xl bg-white p-4 shadow-sm">

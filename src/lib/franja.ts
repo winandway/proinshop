@@ -20,7 +20,7 @@ export type Franja = {
 
 /** Lo que se está construyendo ahora. Lo ve el dueño en la franja de su panel. */
 const TRABAJO_ACTUAL =
-  "las herramientas iguales a Treinta: pago mixto, caja, compras, conteo de inventario, Excel, reportes, permisos por persona, entrar con huella, vender sin señal y las guías de ayuda";
+  "las herramientas iguales a Treinta: pago mixto, caja, compras, conteo de inventario, Excel, reportes, permisos por persona, entrar con huella, vender sin señal, avisos al celular, la app instalable y las guías de ayuda";
 
 /**
  * Textos que puso el sistema en publicaciones anteriores. Si la franja activa
@@ -29,6 +29,7 @@ const TRABAJO_ACTUAL =
  */
 const TEXTOS_AUTOMATICOS_ANTERIORES = [
   "la carga de productos con una foto, las compras a proveedores, el banner de la portada y el manual de uso",
+  "las herramientas iguales a Treinta: pago mixto, caja, compras, conteo de inventario, Excel, reportes, permisos por persona, entrar con huella, vender sin señal y las guías de ayuda",
 ];
 
 async function asegurarTabla() {

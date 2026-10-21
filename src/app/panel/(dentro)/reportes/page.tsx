@@ -5,11 +5,13 @@ import { formatearPrecio } from "@/lib/i18n";
 import { NOMBRE_METODO } from "@/lib/metodos";
 import { BotonImprimir } from "@/componentes/panel/BotonImprimir";
 import {
+  cambioPorcentual,
   condicionGastos,
   condicionVentas,
   filtrosEnDireccion,
   hoyEnZona,
   leerFiltros,
+  periodoAnterior,
 } from "@/lib/reportes";
 import { exigir, puede } from "@/lib/sesion";
 import { horaLocal, minutosZona, modificadorZona } from "@/lib/zona";
@@ -149,6 +151,30 @@ export default async function Reportes({
   const numeroVentas = resumen?.ventas ?? 0;
   const direccion = filtrosEnDireccion(filtros);
 
+  // El mismo reporte, con los mismos filtros, en el período de antes.
+  const antes = periodoAnterior(filtros.desde, filtros.hasta);
+  const ventasAntes = condicionVentas({ ...filtros, ...antes }, zona);
+  const gastosAntes = condicionGastos({ ...filtros, ...antes }, zona);
+  const [resumenAntes, gastadoAntes] = await Promise.all([
+    db
+      .prepare(
+        `SELECT COUNT(*) AS ventas, COALESCE(SUM(v.total), 0) AS ingresos,
+                COALESCE((SELECT SUM(vi.costo_unit * vi.cantidad) FROM venta_item vi
+                          JOIN venta v ON v.id = vi.venta_id WHERE ${ventasAntes.sql}), 0) AS costo
+         FROM venta v WHERE ${ventasAntes.sql}`,
+      )
+      .bind(...ventasAntes.valores, ...ventasAntes.valores)
+      .first<{ ventas: number; ingresos: number; costo: number }>(),
+    db
+      .prepare(`SELECT COALESCE(SUM(g.monto), 0) AS total FROM gasto g WHERE ${gastosAntes.sql}`)
+      .bind(...gastosAntes.valores)
+      .first<{ total: number }>(),
+  ]);
+  const ingresosAntes = resumenAntes?.ingresos ?? 0;
+  const ventasAntesNumero = resumenAntes?.ventas ?? 0;
+  const costoAntes = resumenAntes?.costo ?? 0;
+  const egresosAntes = gastadoAntes?.total ?? 0;
+
   return (
     <div className="pb-6">
       <div className="mb-4 flex items-center gap-3 print:hidden">
@@ -225,26 +251,55 @@ export default async function Reportes({
       </form>
 
       <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        {[
-          { texto: "Vendido", valor: formatearPrecio(ingresos) },
-          { texto: "Ventas", valor: String(numeroVentas) },
-          { texto: "Ticket promedio", valor: formatearPrecio(numeroVentas ? ingresos / numeroVentas : 0) },
-          { texto: "Gastos", valor: formatearPrecio(egresos) },
-          ...(verCostos
-            ? [
-                { texto: "Costo de lo vendido", valor: formatearPrecio(costo) },
-                { texto: "Ganancia bruta", valor: formatearPrecio(ingresos - costo) },
-                { texto: "Utilidad (− gastos)", valor: formatearPrecio(ingresos - costo - egresos) },
-                { texto: "Descuentos dados", valor: formatearPrecio(resumen?.descuentos ?? 0) },
-              ]
-            : []),
-        ].map((dato) => (
-          <div key={dato.texto} className="rounded-2xl bg-white p-3 shadow-sm print:shadow-none">
-            <p className="text-[10.5px] font-semibold text-gris">{dato.texto}</p>
-            <p className="mt-0.5 text-[16px] font-black tracking-tight">{dato.valor}</p>
-          </div>
-        ))}
+        {(
+          [
+            { texto: "Vendido", valor: formatearPrecio(ingresos), cambio: cambioPorcentual(ingresos, ingresosAntes) },
+            { texto: "Ventas", valor: String(numeroVentas), cambio: cambioPorcentual(numeroVentas, ventasAntesNumero) },
+            {
+              texto: "Ticket promedio",
+              valor: formatearPrecio(numeroVentas ? ingresos / numeroVentas : 0),
+              cambio: cambioPorcentual(
+                numeroVentas ? ingresos / numeroVentas : 0,
+                ventasAntesNumero ? ingresosAntes / ventasAntesNumero : 0,
+              ),
+            },
+            // En los gastos, subir es lo malo.
+            { texto: "Gastos", valor: formatearPrecio(egresos), cambio: cambioPorcentual(egresos, egresosAntes), alReves: true },
+            ...(verCostos
+              ? [
+                  { texto: "Costo de lo vendido", valor: formatearPrecio(costo), cambio: null },
+                  {
+                    texto: "Ganancia bruta",
+                    valor: formatearPrecio(ingresos - costo),
+                    cambio: cambioPorcentual(ingresos - costo, ingresosAntes - costoAntes),
+                  },
+                  {
+                    texto: "Utilidad (− gastos)",
+                    valor: formatearPrecio(ingresos - costo - egresos),
+                    cambio: cambioPorcentual(ingresos - costo - egresos, ingresosAntes - costoAntes - egresosAntes),
+                  },
+                  { texto: "Descuentos dados", valor: formatearPrecio(resumen?.descuentos ?? 0), cambio: null },
+                ]
+              : []),
+          ] as { texto: string; valor: string; cambio: number | null; alReves?: boolean }[]
+        ).map((dato) => {
+          const bueno = dato.cambio !== null && (dato.alReves ? dato.cambio <= 0 : dato.cambio >= 0);
+          return (
+            <div key={dato.texto} className="rounded-2xl bg-white p-3 shadow-sm print:shadow-none">
+              <p className="text-[10.5px] font-semibold text-gris">{dato.texto}</p>
+              <p className="mt-0.5 text-[16px] font-black tracking-tight">{dato.valor}</p>
+              {dato.cambio !== null && (
+                <p className={`text-[10.5px] font-bold ${bueno ? "text-verde" : "text-rojo-oscuro"}`}>
+                  {dato.cambio > 0 ? "↑" : dato.cambio < 0 ? "↓" : "="} {Math.abs(dato.cambio)}% vs. antes
+                </p>
+              )}
+            </div>
+          );
+        })}
       </div>
+      <p className="-mt-1.5 mb-3 text-[11px] text-gris">
+        «Antes» es del {antes.desde} al {antes.hasta}, el mismo número de días justo antes.
+      </p>
 
       <div className="mb-3 grid grid-cols-2 gap-2 print:hidden">
         <a

@@ -44,9 +44,10 @@ export default async function Inventario({
     orden?: string;
     importados?: string;
     masivo?: string;
+    borrados?: string;
   }>;
 }) {
-  const { q, categoria, eliminado, filtro, orden, importados, masivo } = await searchParams;
+  const { q, categoria, eliminado, filtro, orden, importados, masivo, borrados } = await searchParams;
   const usuario = await usuarioActual();
   // Cada quien ve lo que su permiso le deja: el vendedor consulta precios y
   // existencias; los costos y el valor del inventario son de quien ve costos.
@@ -150,6 +151,14 @@ export default async function Inventario({
           className="mb-3 rounded-xl border border-verde bg-verde-suave px-3.5 py-2.5 text-[12.5px] font-bold text-verde"
         >
           Cambios aplicados a {masivo} productos.
+        </p>
+      )}
+      {borrados && (
+        <p
+          role="status"
+          className="mb-3 rounded-xl border border-verde bg-verde-suave px-3.5 py-2.5 text-[12.5px] font-bold text-verde"
+        >
+          Se borraron {borrados} productos. Ya no aparecen en la tienda.
         </p>
       )}
 

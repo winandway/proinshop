@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
-import { ActivarNotificaciones } from "@/componentes/panel/AvisosEnVivo";
+import { AvisosCelular } from "@/componentes/panel/AvisosCelular";
 import { RefrescoAutomatico } from "@/componentes/panel/RefrescoAutomatico";
 import { usuarioActual } from "@/lib/sesion";
 import { horaLocal, minutosZona } from "@/lib/zona";
@@ -73,7 +73,7 @@ export default async function Actividad({ searchParams }: { searchParams: Promis
           Recibe un aviso en este celular o computadora cada vez que entra un pedido o alguien del
           equipo registra algo.
         </p>
-        <ActivarNotificaciones />
+        <AvisosCelular />
       </div>
 
       <div className="sin-barra mb-3 flex gap-2 overflow-x-auto">

@@ -24,6 +24,33 @@ const nextConfig: NextConfig = {
     },
   },
 
+  // Cabeceras de seguridad. La política de contenido es la mínima que no
+  // rompe nada: nadie puede meter el sitio dentro de otra página (robo de
+  // clics), ni cargar plugins, ni cambiar la base de los enlaces. La cámara
+  // (escáner) y las llaves de acceso (huella) quedan permitidas solo aquí.
+  async headers() {
+    return [
+      {
+        source: "/:ruta*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: "frame-ancestors 'none'; object-src 'none'; base-uri 'self'",
+          },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Strict-Transport-Security", value: "max-age=15552000" },
+          {
+            key: "Permissions-Policy",
+            value:
+              "camera=(self), microphone=(), geolocation=(), payment=(), usb=(), publickey-credentials-get=(self), publickey-credentials-create=(self)",
+          },
+        ],
+      },
+    ];
+  },
+
   async redirects() {
     return [
       // El manual de una sola página se reemplazó por Docs (una guía por

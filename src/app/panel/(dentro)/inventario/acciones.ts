@@ -6,6 +6,7 @@ import { leerMonto } from "@/lib/numeros";
 import { anotarActividad } from "@/lib/actividad";
 import { baseDeDatos, bucket } from "@/lib/d1";
 import { puede, usuarioActual, usuarioQuePuede, type UsuarioSesion } from "@/lib/sesion";
+import { borrarProductos } from "@/lib/borrar-productos";
 
 export type ResultadoProducto = { error?: string; guardado?: boolean };
 
@@ -361,19 +362,7 @@ export async function eliminarProducto(datos: FormData): Promise<void> {
   const id = Number(datos.get("id"));
   if (!id) return;
 
-  // Se hace a mano y en orden, sin depender de que la base aplique las
-  // cascadas: así no queda nada colgando aunque esa opción esté apagada.
-  await db.batch([
-    db.prepare("UPDATE venta_item SET producto_id = NULL, variante_id = NULL WHERE producto_id = ?").bind(id),
-    db.prepare("UPDATE pedido_item SET producto_id = NULL, variante_id = NULL WHERE producto_id = ?").bind(id),
-    db.prepare("UPDATE cotizacion_item SET producto_id = NULL WHERE producto_id = ?").bind(id),
-    db.prepare("UPDATE compra_item SET producto_id = NULL, variante_id = NULL WHERE producto_id = ?").bind(id),
-    db.prepare("DELETE FROM movimiento_inventario WHERE producto_id = ?").bind(id),
-    db.prepare("DELETE FROM especificacion WHERE producto_id = ?").bind(id),
-    db.prepare("DELETE FROM variante WHERE producto_id = ?").bind(id),
-    db.prepare("DELETE FROM foto WHERE producto_id = ?").bind(id),
-    db.prepare("DELETE FROM producto WHERE id = ?").bind(id),
-  ]);
+  await borrarProductos(db, [id]);
 
   revalidatePath("/panel/inventario");
   revalidatePath("/");

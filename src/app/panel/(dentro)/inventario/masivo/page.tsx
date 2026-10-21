@@ -4,16 +4,23 @@ import { baseDeDatos } from "@/lib/d1";
 import { formatearPrecio } from "@/lib/i18n";
 import { SeleccionarTodos } from "@/componentes/panel/SeleccionarTodos";
 import { exigir } from "@/lib/sesion";
-import { aplicarMasivo } from "./acciones";
+import { BorrarMarcados } from "@/componentes/panel/BorrarMarcados";
+import { MAXIMO_A_LA_VEZ } from "@/lib/borrar-productos";
+import { aplicarMasivo, eliminarSeleccionados } from "./acciones";
 
 export const metadata: Metadata = { title: "Edición masiva", robots: { index: false } };
 
 const CAMPO =
   "w-full rounded-xl border-[1.5px] border-linea px-3 py-2.5 text-[13px] font-semibold outline-none focus:border-rojo";
 
-export default async function Masivo({ searchParams }: { searchParams: Promise<{ nada?: string }> }) {
-  await exigir("inventario");
-  const { nada } = await searchParams;
+export default async function Masivo({
+  searchParams,
+}: {
+  searchParams: Promise<{ nada?: string; muchos?: string }>;
+}) {
+  const usuario = await exigir("inventario");
+  const esDueno = usuario.rol === "dueno";
+  const { nada, muchos } = await searchParams;
   const db = await baseDeDatos();
   const [productos, categorias] = db
     ? await Promise.all([
@@ -47,6 +54,11 @@ export default async function Masivo({ searchParams }: { searchParams: Promise<{
       {nada && (
         <p role="alert" className="mb-3 rounded-xl border border-rojo bg-rojo-suave px-3.5 py-2.5 text-[12.5px] font-bold text-rojo-oscuro">
           Marca al menos un producto y elige qué cambiarle.
+        </p>
+      )}
+      {muchos && (
+        <p role="alert" className="mb-3 rounded-xl border border-rojo bg-rojo-suave px-3.5 py-2.5 text-[12.5px] font-bold text-rojo-oscuro">
+          Se pueden borrar hasta {MAXIMO_A_LA_VEZ} productos a la vez. Marca menos y repite.
         </p>
       )}
 
@@ -98,12 +110,15 @@ export default async function Masivo({ searchParams }: { searchParams: Promise<{
           </select>
           <input name="minimo" inputMode="numeric" placeholder="Aviso en" aria-label="Avisar cuando queden" className={CAMPO} />
         </div>
-        <button
-          type="submit"
-          className="w-full rounded-2xl bg-rojo py-3.5 text-sm font-extrabold text-white transition hover:bg-rojo-oscuro"
-        >
-          Aplicar a los marcados
-        </button>
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            className="flex-1 rounded-2xl bg-rojo py-3.5 text-sm font-extrabold text-white transition hover:bg-rojo-oscuro"
+          >
+            Aplicar a los marcados
+          </button>
+          {esDueno && <BorrarMarcados accion={eliminarSeleccionados} />}
+        </div>
       </div>
     </form>
   );

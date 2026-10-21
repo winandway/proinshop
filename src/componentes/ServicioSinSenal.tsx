@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { escucharInstalacion } from "@/componentes/InstalarApp";
 
 /**
  * Pone a trabajar el archivo que guarda copias de las páginas (public/sw.js)
@@ -13,6 +14,7 @@ const VERSION = process.env.NEXT_PUBLIC_VERSION ?? "local";
 
 export function ServicioSinSenal() {
   useEffect(() => {
+    escucharInstalacion();
     if (!("serviceWorker" in navigator)) return;
     // Mientras se programa, las copias esconderían los cambios.
     if (process.env.NODE_ENV === "development") return;

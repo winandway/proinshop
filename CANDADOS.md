@@ -158,8 +158,11 @@
   `npm test` antes de compilar. Si algo falla, no se arma el `_worker.js` y el
   sitio sigue con la versión anterior. `npm run verify` hace lo mismo más la
   cobertura y la auditoría de seguridad; `verify.yml` lo corre en las ramas.
-- **Cobertura:** piso fijado en `vitest.config.mts` (líneas 33 %, funciones
-  29 %, ramas 35 %, sentencias 34 %). Solo puede subir.
+- **Cobertura:** piso fijado en `vitest.config.mts` (21 oct 2026: líneas 36 %,
+  funciones 40 %, ramas 35 %, sentencias 37 %). Solo puede subir.
+- **Claves:** gitleaks revisa todo el historial antes de cada publicación
+  (`build.yml`) y en las ramas (`verify.yml`). Si encuentra una clave, no se
+  publica.
 - **No tocar:** jamás quitar un paso de la compuerta ni bajar el piso para que
   pase un cambio. Se arregla el cambio.
 
@@ -189,6 +192,67 @@
   (rsync del proyecto sin `node_modules` + `npm ci` +
   `npx opennextjs-cloudflare build`), no en la carpeta del proyecto.
 - **No tocar:** no quitar `esbuild` de `package.json` aunque «nadie lo use».
+
+## C-POR-TROZOS — Ninguna consulta pasa de 100 valores
+
+- **Qué se habría roto:** la base de la nube rechaza consultas con más de 100
+  valores. El catálogo de la tienda pedía colores, fotos y fichas de todos los
+  productos en una sola consulta: con más de cien productos publicados, la
+  tienda entera dejaba de cargar. Lo mismo la edición masiva con más de cien
+  marcados. No se veía en las pruebas locales porque allá no hay ese límite.
+- **Qué se hizo:** `src/lib/por-trozos.ts` (`filasPorLista`, `cambiarPorLista`,
+  trozos de 90). Lo usan el catálogo, la venta, la compra, la cotización, la
+  compra de la tienda, la lista de compras, la edición masiva y el borrado.
+- **Cómo se comprueba:** `pruebas/por-trozos-y-borrado.test.ts`, con una base
+  de mentira que rechaza más de 100 valores como la real (comprobada en rojo).
+- **No tocar:** toda consulta nueva con `IN (...)` sobre una lista que viene de
+  afuera pasa por estas funciones.
+
+## C-AVISOS — Avisos al celular con el cifrado que aceptan los iPhone
+
+- **Qué se hizo:** `src/lib/avisos-push.ts` con `@block65/webcrypto-web-push`
+  2.0.0 (cifrado aes128gcm y firma «vapid», los únicos que acepta Apple). Las
+  llaves las crea el sistema la primera vez y quedan en la tabla `clave_aviso`:
+  no dependen de ninguna configuración a mano. Se avisa de pedidos nuevos (a
+  quien atiende pedidos) y de lo que hace el equipo (al dueño). Se manda «por
+  detrás» para no hacer esperar a nadie, y un aviso que falla nunca tumba la
+  venta ni el pedido. Solo se manda a los servicios de avisos de Google,
+  Mozilla, Microsoft y Apple.
+- **Trampa que ya mordió:** la primera librería probada (`@pushforge/builder`)
+  usa el formato viejo (aesgcm): a los iPhone no les habría llegado nada. La
+  prueba lo detectó.
+- **Cómo se comprueba:** `pruebas/avisos.test.ts` descifra el aviso como lo
+  haría un celular (RFC 8291) y exige aes128gcm. En un celular real: Mi cuenta,
+  «Activar avisos» y «Mandarme un aviso de prueba».
+- **No tocar:** no cambiar la llave guardada en `clave_aviso`: todos los
+  celulares suscritos dejarían de recibir avisos.
+
+## C-INSTALAR — Proinshop se instala como app
+
+- **Qué se hizo:** íconos de 192 y 512 (y de máscara) en `public/iconos/`, que
+  Android exige para ofrecer instalar; se rehacen con
+  `node herramientas/iconos-app.mjs`. El panel tiene su propio manifiesto
+  (`/panel/manifest.webmanifest`) que abre directo en el panel. El botón
+  «Instalar Proinshop en este celular» usa la invitación del navegador, que se
+  guarda apenas carga la página (`escucharInstalacion`).
+
+## C-ESTADO — El canario de la base
+
+- **Qué se hizo:** `/estado` lee, escribe un latido y lo vuelve a leer, y
+  revisa que existan las 24 tablas y las columnas nuevas. Si algo falla
+  responde 503 con `estado: "error"`.
+- **Cómo se comprueba:** abrir proinshop.com/estado: `estado: "ok"`,
+  `esquema.completo: true`, `escritura.funciona: true`.
+
+## C-ENTREGA — La prueba de aceptación
+
+- `pruebas/navegador/entrega.mjs` hace, sobre una base nueva, todo lo del
+  primer día: cuenta del propietario, tienda, Excel, colores, caja, cliente,
+  ventas (simple, mixta con fiado, servicio, sin pasar el stock), anular,
+  compra con costo promedio, conteo, edición masiva, cotización a venta,
+  abono, vendedor con permisos, pedido de la tienda a venta, reportes, Excel,
+  cierre de caja exacto y borrado de marcados. Debe dar todo en verde antes de
+  una entrega. El 21 oct 2026 dio 43 de 43.
 
 ## C-PAGO-MIXTO — Los pagos tienen que cuadrar al centavo
 
@@ -274,4 +338,5 @@ C-FORM-NO-SE-VACIA y C-PANTALLA-ERROR en a320c21; C-BORRADORES y
 C-ZONA-HORARIA en el commit siguiente (16 de octubre de 2026). Ver
 `git log -- CANDADOS.md`.
 Los de la igualación con Treinta (C-COMPUERTA en adelante) quedaron en la
-publicación del 19 de octubre de 2026.
+publicación del 19 de octubre de 2026; C-POR-TROZOS, C-AVISOS, C-INSTALAR,
+C-ESTADO y C-ENTREGA en la del 21 de octubre de 2026.

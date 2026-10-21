@@ -19,18 +19,16 @@
 - [ ] 👤 **Logo original** en vector o PNG grande.
 - [ ] 👤 **Foto del contenedor con «PROINSHOP» bien escrito** (la que llegó dice «PROVINCHO»). Va como cuarto producto de la vitrina.
 - [ ] 👤 **Qué mejoras cobrables se le cotizan al cliente** y a qué precio. Ya NO entran ahí las herramientas de Treinta: Richard ordenó igualarlas el 19 oct porque al cliente se le vendió Proinshop como igual a Treinta (van como garantía). Quedan: factura electrónica, IA, recordatorios automáticos por WhatsApp, varias tiendas y apps en las tiendas.
-- [ ] 👤 **Cuenta de Google Play del negocio** (25 dólares, una sola vez) para publicar la app de Android.
+- [ ] 👤 **Cuenta de Google Play del negocio** (25 dólares, una sola vez), solo si quieren que aparezca en la tienda de apps. Ya se instala desde el navegador.
 
 ## Fila de la IA (gratis, en este orden)
 
-1. [ ] Aviso de pedido nuevo al celular con el panel cerrado (notificaciones push; hoy avisa con el panel abierto)
-2. [ ] Blindaje que falta: cabeceras de seguridad (CSP y compañía), gitleaks y husky, pruebas de punta a punta en la nube
-3. [ ] Banner de la portada editable desde Mi tienda
-4. [ ] Recorrido de bienvenida la primera vez que entra el dueño
-5. [ ] Panel también en inglés (hoy el panel es solo en español; la tienda y Docs ya son bilingües)
-6. [ ] App de Android con la tienda y el panel (cuando llegue la cuenta de Google Play)
-7. [ ] Turnstile en entrar y crear cuenta (cuando lleguen las claves)
-8. [ ] Carga por foto con IA, con fondo recortado (cuando llegue la clave)
+1. [ ] Pruebas de punta a punta también en la nube (hoy la prueba de aceptación se corre en la copia local)
+2. [ ] Banner de la portada editable desde Mi tienda (es de la tienda, no de Treinta)
+3. [ ] Panel también en inglés (la tienda y Docs ya son bilingües; Treinta es solo en español)
+4. [ ] Turnstile en entrar y crear cuenta (cuando lleguen las claves)
+5. [ ] Carga por foto con IA, con fondo recortado (cuando llegue la clave)
+6. [ ] Publicar en Google Play (cuando llegue la cuenta; ya se instala desde el navegador)
 
 ## Cobrable (espera el visto bueno y el precio de Richard)
 
@@ -38,6 +36,17 @@ Factura electrónica, asistente con IA, recordatorios automáticos por WhatsApp,
 varias tiendas, app en la App Store. Rangos en COMPARATIVA-TREINTA, sección 4.
 
 ## Hecho
+
+- [x] 21 oct 2026 — Avisos al celular con el panel cerrado (pedidos y lo que hace el equipo), con prueba de cifrado
+- [x] 21 oct 2026 — Instalar Proinshop como app desde el navegador (íconos grandes, manifiesto del panel, botón)
+- [x] 21 oct 2026 — Primeros pasos del dueño en el inicio, que se marcan solos
+- [x] 21 oct 2026 — Reportes comparados con el período anterior
+- [x] 21 oct 2026 — Borrar productos marcados de una vez (para los de muestra)
+- [x] 21 oct 2026 — Arreglo de raíz: ninguna consulta pasa de 100 valores (la tienda se caía con más de cien productos)
+- [x] 21 oct 2026 — Canario de la base en /estado (lee, escribe y revisa las 24 tablas)
+- [x] 21 oct 2026 — Cabeceras de seguridad y búsqueda de claves antes de cada publicación
+- [x] 21 oct 2026 — Aviso cuando la caja da negativo y aclaración de cómo se pagó una compra
+- [x] 21 oct 2026 — Prueba de aceptación completa sobre base nueva: 43 de 43 en verde
 
 - [x] 19 oct 2026 — Igualar a Treinta, de corrido (plan en docs/PLAN-IGUALAR-TREINTA.md):
   pago mixto y fiado parcial, escáner, colores y tallas, servicios, nota,

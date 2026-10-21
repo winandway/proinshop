@@ -45,3 +45,6 @@ next-env.d.ts
 /.dist-worker
 /out-deploy
 /.wrangler
+
+# Sesión de la base local de pruebas (la deja la prueba de aceptación)
+/pruebas/navegador/.sesion-dueno

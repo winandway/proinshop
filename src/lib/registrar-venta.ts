@@ -3,6 +3,7 @@ import { anotarActividad } from "./actividad";
 import { NOMBRE_METODO } from "./metodos";
 import { leerMonto } from "./numeros";
 import { claveDeVentaValida, fechaDeVentaSinSenal, repartirPagos } from "./ventas";
+import { filasPorLista } from "./por-trozos";
 
 type LineaVenta = { productoId: number; varianteId?: number | null; cantidad: number };
 
@@ -75,21 +76,19 @@ export async function guardarVenta(
 
   const ids = [...new Set(lineas.map((l) => Number(l?.productoId)).filter(Boolean))];
   if (ids.length === 0) return { error: "Agrega al menos un producto" };
-  const marcas = ids.map(() => "?").join(",");
-  const [{ results: productos }, { results: variantes }] = await Promise.all([
-    db
-      .prepare(
+  const [productos, variantes] = await Promise.all([
+    filasPorLista<{ id: number; nombre_es: string; precio: number; costo: number; stock: number; es_servicio: number }>(
+      db,
+      (marcas) =>
         `SELECT id, nombre_es, precio, costo, stock, COALESCE(es_servicio, 0) AS es_servicio
          FROM producto WHERE id IN (${marcas})`,
-      )
-      .bind(...ids)
-      .all<{ id: number; nombre_es: string; precio: number; costo: number; stock: number; es_servicio: number }>(),
-    db
-      .prepare(
-        `SELECT id, producto_id, nombre_es, stock, precio_extra FROM variante WHERE producto_id IN (${marcas})`,
-      )
-      .bind(...ids)
-      .all<{ id: number; producto_id: number; nombre_es: string; stock: number; precio_extra: number }>(),
+      ids,
+    ),
+    filasPorLista<{ id: number; producto_id: number; nombre_es: string; stock: number; precio_extra: number }>(
+      db,
+      (marcas) => `SELECT id, producto_id, nombre_es, stock, precio_extra FROM variante WHERE producto_id IN (${marcas})`,
+      ids,
+    ),
   ]);
 
   // Se juntan las líneas del mismo producto y la misma variante.

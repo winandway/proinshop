@@ -6,6 +6,7 @@ import { baseDeDatos } from "@/lib/d1";
 import { valorAleatorio } from "@/lib/contrasenas";
 import { usuarioQuePuede } from "@/lib/sesion";
 import { anotarActividad } from "@/lib/actividad";
+import { filasPorLista } from "@/lib/por-trozos";
 
 export type ResultadoCotizacion = { error?: string; token?: string };
 
@@ -29,11 +30,11 @@ export async function crearCotizacion(
   if (lineas.length === 0) return { error: "Agrega al menos un producto" };
 
   const ids = lineas.map((l) => l.productoId);
-  const marcas = ids.map(() => "?").join(",");
-  const { results: productos } = await db
-    .prepare(`SELECT id, nombre_es, precio FROM producto WHERE id IN (${marcas})`)
-    .bind(...ids)
-    .all<{ id: number; nombre_es: string; precio: number }>();
+  const productos = await filasPorLista<{ id: number; nombre_es: string; precio: number }>(
+    db,
+    (marcas) => `SELECT id, nombre_es, precio FROM producto WHERE id IN (${marcas})`,
+    ids,
+  );
 
   let total = 0;
   const items = lineas

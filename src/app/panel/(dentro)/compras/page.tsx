@@ -5,6 +5,7 @@ import { formatearPrecio } from "@/lib/i18n";
 import { LimpiarBorrador } from "@/componentes/GuardaBorrador";
 import { exigir } from "@/lib/sesion";
 import { horaLocal, minutosZona } from "@/lib/zona";
+import { filasPorLista } from "@/lib/por-trozos";
 
 export const metadata: Metadata = { title: "Compras", robots: { index: false } };
 
@@ -51,16 +52,14 @@ export default async function Compras({
     : [];
 
   const ids = compras.map((c) => c.id);
-  const items = db && ids.length
-    ? (
-        await db
-          .prepare(
-            `SELECT compra_id, descripcion, cantidad, costo_unit FROM compra_item
-             WHERE compra_id IN (${ids.map(() => "?").join(",")}) ORDER BY id`,
-          )
-          .bind(...ids)
-          .all<{ compra_id: number; descripcion: string; cantidad: number; costo_unit: number }>()
-      ).results
+  const items = db
+    ? await filasPorLista<{ compra_id: number; descripcion: string; cantidad: number; costo_unit: number }>(
+        db,
+        (marcas) =>
+          `SELECT compra_id, descripcion, cantidad, costo_unit FROM compra_item
+           WHERE compra_id IN (${marcas}) ORDER BY id`,
+        ids,
+      )
     : [];
 
   const delMes = db

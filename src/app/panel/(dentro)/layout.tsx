@@ -8,6 +8,10 @@ import { EstadoConexion } from "@/componentes/panel/EstadoConexion";
 import { ProveedorBorrador } from "@/componentes/GuardaBorrador";
 import { NOMBRE_ROL, puede, usuarioActual } from "@/lib/sesion";
 import { salir } from "../acciones";
+import type { Metadata } from "next";
+
+/** Instalado desde aquí, el ícono del celular abre directo en el panel. */
+export const metadata: Metadata = { manifest: "/panel/manifest.webmanifest" };
 
 /**
  * Marco del panel. Toda ruta que cuelgue de aquí exige sesión: la comprobación

@@ -8,6 +8,7 @@ import { costoPromedio } from "@/lib/inventario";
 import { formatearPrecio } from "@/lib/i18n";
 import { leerMonto } from "@/lib/numeros";
 import { usuarioQuePuede } from "@/lib/sesion";
+import { filasPorLista } from "@/lib/por-trozos";
 
 export type ResultadoCompra = { error?: string };
 
@@ -43,18 +44,18 @@ export async function registrarCompra(
   if (!METODOS.includes(metodo)) return { error: "Elige cómo pagaste la compra" };
 
   const ids = [...new Set(lineas.map((l) => Number(l.productoId)))];
-  const marcas = ids.map(() => "?").join(",");
-  const [{ results: productos }, { results: variantes }] = await Promise.all([
-    db
-      .prepare(
+  const [productos, variantes] = await Promise.all([
+    filasPorLista<{ id: number; nombre_es: string; costo: number; stock: number; es_servicio: number }>(
+      db,
+      (marcas) =>
         `SELECT id, nombre_es, costo, stock, COALESCE(es_servicio, 0) AS es_servicio FROM producto WHERE id IN (${marcas})`,
-      )
-      .bind(...ids)
-      .all<{ id: number; nombre_es: string; costo: number; stock: number; es_servicio: number }>(),
-    db
-      .prepare(`SELECT id, producto_id, nombre_es FROM variante WHERE producto_id IN (${marcas})`)
-      .bind(...ids)
-      .all<{ id: number; producto_id: number; nombre_es: string }>(),
+      ids,
+    ),
+    filasPorLista<{ id: number; producto_id: number; nombre_es: string }>(
+      db,
+      (marcas) => `SELECT id, producto_id, nombre_es FROM variante WHERE producto_id IN (${marcas})`,
+      ids,
+    ),
   ]);
 
   let total = 0;

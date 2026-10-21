@@ -77,3 +77,20 @@ CREATE TABLE IF NOT EXISTS reto_llave (
 -- reenviar la misma venta y solo debe quedar una.
 ALTER TABLE venta ADD COLUMN clave TEXT;
 CREATE UNIQUE INDEX IF NOT EXISTS idx_venta_clave ON venta(clave);
+
+-- Avisos al celular (notificaciones push). La llave la crea el sistema.
+CREATE TABLE IF NOT EXISTS clave_aviso (
+  id      INTEGER PRIMARY KEY CHECK (id = 1),
+  privada TEXT NOT NULL,
+  creada  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE TABLE IF NOT EXISTS suscripcion_aviso (
+  endpoint   TEXT    PRIMARY KEY,
+  usuario_id INTEGER NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
+  p256dh     TEXT    NOT NULL,
+  auth       TEXT    NOT NULL,
+  agente     TEXT,
+  creada     TEXT    NOT NULL DEFAULT (datetime('now')),
+  ultimo     TEXT,
+  fallos     INTEGER NOT NULL DEFAULT 0
+);

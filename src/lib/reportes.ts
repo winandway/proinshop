@@ -80,3 +80,26 @@ export function filtrosEnDireccion(filtros: FiltrosReporte): string {
 export function hoyEnZona(minutos: number): string {
   return new Date(Date.now() + minutos * 60_000).toISOString().slice(0, 10);
 }
+
+const DIA_MS = 86_400_000;
+const aFecha = (texto: string) => new Date(`${texto}T00:00:00Z`);
+const aTexto = (fecha: Date) => fecha.toISOString().slice(0, 10);
+
+/**
+ * El período de antes, del mismo largo: si se mira del 1 al 31 de octubre, se
+ * compara con los 31 días anteriores. Así se ve si el negocio va mejor o peor.
+ */
+export function periodoAnterior(desde: string, hasta: string): { desde: string; hasta: string } {
+  const inicio = aFecha(desde);
+  const fin = aFecha(hasta);
+  const dias = Math.round((fin.getTime() - inicio.getTime()) / DIA_MS) + 1;
+  const finAnterior = new Date(inicio.getTime() - DIA_MS);
+  const inicioAnterior = new Date(finAnterior.getTime() - (dias - 1) * DIA_MS);
+  return { desde: aTexto(inicioAnterior), hasta: aTexto(finAnterior) };
+}
+
+/** Cuánto subió o bajó, en porcentaje entero. Sin base para comparar, null. */
+export function cambioPorcentual(actual: number, anterior: number): number | null {
+  if (!anterior) return null;
+  return Math.round(((actual - anterior) / Math.abs(anterior)) * 100);
+}

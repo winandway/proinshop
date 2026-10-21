@@ -83,6 +83,14 @@ export const GUIAS: Guia[] = [
           "Enter your email and password, or tap “Sign in with fingerprint or face” if you already turned it on for that device. Your session lasts 30 days on that phone or computer unless you tap “Sign out”.",
         ),
       },
+      { tipo: "subtitulo", texto: t("Tus primeros pasos", "Your first steps") },
+      {
+        tipo: "parrafo",
+        texto: t(
+          "En el inicio del panel, el dueño ve la tarjeta «Primeros pasos» con lo mínimo para dejar el negocio andando: poner el WhatsApp de ventas, cargar productos, abrir la caja, registrar la primera venta, invitar al equipo, activar la huella y los avisos. Cada paso se marca solo en verde cuando lo haces, y la tarjeta desaparece al completarlos.",
+          "On the dashboard home, the owner sees a “First steps” card with the essentials to get the business running: add the sales WhatsApp, add products, open the register, record the first sale, invite the team, and turn on fingerprint sign-in and alerts. Each step turns green on its own when done, and the card disappears once they're all complete.",
+        ),
+      },
       { tipo: "subtitulo", texto: t("Si alguien olvida su contraseña", "If someone forgets their password") },
       {
         tipo: "parrafo",
@@ -202,6 +210,96 @@ export const GUIAS: Guia[] = [
       },
     ],
     relacionadas: ["getting-started", "activity-and-alerts"],
+  },
+  {
+    slug: "install-the-app",
+    seccion: "empezar",
+    icono: "📲",
+    titulo: t("Instalar Proinshop en tu celular", "Install Proinshop on your phone"),
+    resumen: t(
+      "Deja Proinshop como una app en la pantalla de inicio: se abre con un toque y funciona aunque se vaya la señal.",
+      "Add Proinshop to your home screen like an app: it opens with one tap and works even when the signal drops.",
+    ),
+    bloques: [
+      {
+        tipo: "parrafo",
+        texto: t(
+          "No hace falta buscar Proinshop en la tienda de apps. Se instala desde el navegador, queda con su ícono junto a tus otras apps y se abre a pantalla completa, sin la barra de direcciones. Si lo instalas desde el panel, el ícono abre directo en tu negocio.",
+          "There's no need to look for Proinshop in an app store. You install it from the browser, it gets its own icon next to your other apps, and it opens full screen without the address bar. If you install it from the dashboard, the icon opens straight into your business.",
+        ),
+      },
+      { tipo: "subtitulo", texto: t("En Android", "On Android") },
+      {
+        tipo: "pasos",
+        pasos: [
+          t("Entra al panel con Chrome.", "Open the dashboard in Chrome."),
+          t("En el inicio o en Mi cuenta, toca «Instalar Proinshop en este celular».", "On the home screen or in My account, tap “Install Proinshop on this phone”."),
+          t("Confirma. El ícono rojo de Proinshop aparece en tu pantalla de inicio.", "Confirm. The red Proinshop icon appears on your home screen."),
+        ],
+      },
+      { tipo: "subtitulo", texto: t("En iPhone", "On iPhone") },
+      {
+        tipo: "pasos",
+        pasos: [
+          t("Entra al panel con Safari.", "Open the dashboard in Safari."),
+          t("Toca Compartir (el cuadrado con la flecha hacia arriba).", "Tap Share (the square with the arrow pointing up)."),
+          t("Elige «Agregar a inicio» y confirma.", "Choose “Add to Home Screen” and confirm."),
+        ],
+      },
+      { tipo: "captura", archivo: "install-the-app.png", alt: t("Instalar Proinshop desde Mi cuenta", "Installing Proinshop from My account") },
+      {
+        tipo: "nota",
+        texto: t(
+          "En iPhone, los avisos al celular solo llegan si Proinshop está instalado así. Ábrelo desde el ícono y después activa los avisos en Mi cuenta.",
+          "On iPhone, phone alerts only work when Proinshop is installed this way. Open it from the icon, then turn on alerts in My account.",
+        ),
+      },
+    ],
+    relacionadas: ["phone-alerts", "offline-mode"],
+  },
+  {
+    slug: "phone-alerts",
+    seccion: "empezar",
+    icono: "🔔",
+    titulo: t("Avisos en tu celular", "Alerts on your phone"),
+    resumen: t(
+      "Que te suene el celular cuando entra un pedido o cuando tu equipo vende, aunque tengas el panel cerrado.",
+      "Get a notification when an order comes in or your team makes a sale, even with the dashboard closed.",
+    ),
+    bloques: [
+      {
+        tipo: "parrafo",
+        texto: t(
+          "Los avisos llegan como los de cualquier app: aunque el celular esté bloqueado o tengas Proinshop cerrado. Al tocar el aviso, se abre justo la pantalla de ese pedido o de esa venta.",
+          "Alerts arrive like any other app's notifications: even with your phone locked or Proinshop closed. Tapping one opens that exact order or sale.",
+        ),
+      },
+      {
+        tipo: "lista",
+        puntos: [
+          t("Pedido nuevo de la tienda en línea: a quien atiende los pedidos.", "New online store order: to whoever handles orders."),
+          t("Ventas, anulaciones, cierres de caja, gastos, compras y ajustes de tu equipo: al dueño.", "Your team's sales, voids, register closings, expenses, purchases and adjustments: to the owner."),
+          t("Lo que haces tú mismo no te lo avisa a ti.", "You're not alerted about your own actions."),
+        ],
+      },
+      {
+        tipo: "pasos",
+        pasos: [
+          t("Ve a Explorar → Mi cuenta.", "Go to Explore → My account."),
+          t("En «Avisos en este celular», toca «Activar avisos en este celular» y permite las notificaciones.", "Under “Alerts on this phone”, tap “Turn on alerts on this phone” and allow notifications."),
+          t("Toca «Mandarme un aviso de prueba». En unos segundos te suena el celular.", "Tap “Send me a test alert”. Your phone buzzes within seconds."),
+        ],
+      },
+      { tipo: "captura", archivo: "phone-alerts.png", alt: t("Avisos en Mi cuenta", "Alerts in My account") },
+      {
+        tipo: "nota",
+        texto: t(
+          "Se activa en cada celular o computadora por separado. Para dejar de recibirlos, toca «Desactivar» en ese mismo dispositivo.",
+          "Turn it on separately on each phone or computer. To stop them, tap “Turn off” on that same device.",
+        ),
+      },
+    ],
+    relacionadas: ["install-the-app", "activity-and-alerts", "store-orders"],
   },
 
   // ─── Vender y cobrar ─────────────────────────────────────────────────────
@@ -442,12 +540,12 @@ export const GUIAS: Guia[] = [
       {
         tipo: "nota",
         texto: t(
-          "Para recibir el aviso aunque el panel esté en otra pestaña, toca «Activar notificaciones en este equipo» y acepta las notificaciones del navegador.",
-          "To get alerts even when the dashboard is in another tab, tap “Turn on notifications on this device” and allow browser notifications.",
+          "Para que te suene el celular aunque tengas el panel cerrado, activa los avisos en Mi cuenta. Mira la guía «Avisos en tu celular».",
+          "To get a phone notification even with the dashboard closed, turn on alerts in My account. See the “Alerts on your phone” guide.",
         ),
       },
     ],
-    relacionadas: ["activity-and-alerts", "online-store"],
+    relacionadas: ["phone-alerts", "activity-and-alerts", "online-store"],
   },
 
   // ─── Inventario ──────────────────────────────────────────────────────────
@@ -607,6 +705,14 @@ export const GUIAS: Guia[] = [
           "In Bulk edit, select products and choose what to do with all of them at once: raise or lower the price by percentage, change the category, publish them or remove them from the store, feature them on the home page, or change the low stock alert. Perfect when exchange rates move or a supplier sends a new price list.",
         ),
       },
+      { tipo: "subtitulo", texto: t("Borrar varios a la vez", "Delete several at once") },
+      {
+        tipo: "parrafo",
+        texto: t(
+          "Marca los productos, toca los tres puntos ⋮ junto a «Aplicar a los marcados» y confirma. Sirve, por ejemplo, para quitar de una vez los productos de muestra. Solo el propietario puede hacerlo, hasta 400 a la vez. Las ventas y pedidos viejos conservan el nombre del producto.",
+          "Select the products, tap the three dots ⋮ next to “Apply to selected” and confirm. It's handy, for example, to remove all the sample products at once. Only the owner can do it, up to 400 at a time. Past sales and orders keep the product's name.",
+        ),
+      },
     ],
     relacionadas: ["products-and-variants", "stock-count"],
   },
@@ -701,7 +807,7 @@ export const GUIAS: Guia[] = [
         pasos: [
           t("Ve a Reportes.", "Go to Reports."),
           t("Elige las fechas y, si quieres, el vendedor, el método de pago, un producto, o si la venta fue en el local o en la tienda en línea.", "Pick the dates and, optionally, the salesperson, payment method, a product, or whether the sale was in-store or online."),
-          t("Arriba ves ventas, ganancia bruta, gastos y ticket promedio. Abajo, el detalle por producto, por vendedor y por método de pago.", "At the top you see sales, gross profit, expenses and average ticket. Below, the breakdown by product, salesperson and payment method."),
+          t("Arriba ves ventas, ganancia bruta, gastos y ticket promedio, cada uno con cuánto subió o bajó frente al período anterior del mismo largo (en verde si va mejor). Abajo, el detalle por producto, por vendedor y por método de pago.", "At the top you see sales, gross profit, expenses and average ticket, each with how much it went up or down compared with the previous period of the same length (green when it's better). Below, the breakdown by product, salesperson and payment method."),
           t("Toca «Descargar» para bajar ventas, productos o gastos en Excel, o imprime el reporte.", "Tap “Download” to export sales, products or expenses to Excel, or print the report."),
         ],
       },
@@ -772,12 +878,12 @@ export const GUIAS: Guia[] = [
       {
         tipo: "parrafo",
         texto: t(
-          "Con el panel abierto, cuando alguien de tu equipo registra algo o llega un pedido de la tienda, aparece una franja verde arriba. Si activas los avisos del navegador, te llegan aunque estés en otra pestaña.",
-          "With the dashboard open, when someone on your team records something or a store order comes in, a green banner appears at the top. If you turn on browser alerts, you get them even in another tab.",
+          "Con el panel abierto, cuando alguien de tu equipo registra algo o llega un pedido de la tienda, aparece una franja verde arriba. Y si activas los avisos en Mi cuenta, te suena el celular aunque tengas el panel cerrado.",
+          "With the dashboard open, when someone on your team records something or a store order comes in, a green banner appears at the top. And if you turn on alerts in My account, your phone buzzes even with the dashboard closed.",
         ),
       },
     ],
-    relacionadas: ["team-and-permissions", "store-orders"],
+    relacionadas: ["phone-alerts", "team-and-permissions", "store-orders"],
   },
 
   // ─── Tienda ──────────────────────────────────────────────────────────────

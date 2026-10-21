@@ -19,9 +19,9 @@ export default defineConfig({
         "src/lib/sesion.ts",
         "src/lib/idioma-servidor.ts",
       ],
-      // Arranca donde estaba el 19 oct 2026 y solo puede subir (regla de
+      // Piso del 21 oct 2026 (subió desde el del 19). Solo puede subir (regla de
       // blindaje): si una prueba se borra o se agrega lógica sin prueba, rojo.
-      thresholds: { lines: 33, functions: 29, branches: 35, statements: 34 },
+      thresholds: { lines: 36, functions: 40, branches: 35, statements: 37 },
     },
   },
 });

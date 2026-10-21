@@ -8,6 +8,9 @@ import { datosNegocio } from "@/lib/negocio";
 import type { Modulo } from "@/lib/permisos";
 import { puede, usuarioActual } from "@/lib/sesion";
 import { horaLocal, minutosZona, modificadorZona } from "@/lib/zona";
+import { InstalarApp } from "@/componentes/InstalarApp";
+import { PrimerosPasos } from "@/componentes/panel/PrimerosPasos";
+import { avance, primerosPasos } from "@/lib/primeros-pasos";
 
 export const metadata: Metadata = { title: "Inicio", robots: { index: false } };
 
@@ -79,6 +82,32 @@ export default async function InicioPanel({
     : null;
 
   const caja = db && verCaja ? await cajaAbierta(db) : null;
+
+  // Los primeros pasos son para el dueño: lo que deja el negocio andando.
+  const pasos =
+    db && esDueno && usuario
+      ? primerosPasos({
+          whatsapp: negocio.whatsapp,
+          ...((await db
+            .prepare(
+              `SELECT (SELECT COUNT(*) FROM producto) AS productos,
+                      (SELECT COUNT(*) FROM venta) AS ventas,
+                      (SELECT COUNT(*) FROM caja) AS cajas,
+                      (SELECT COUNT(*) FROM usuario WHERE activo = 1) AS personas,
+                      (SELECT COUNT(*) FROM llave_acceso WHERE usuario_id = ?) AS huellas,
+                      (SELECT COUNT(*) FROM suscripcion_aviso WHERE usuario_id = ?) AS avisos`,
+            )
+            .bind(usuario.id, usuario.id)
+            .first<{ productos: number; ventas: number; cajas: number; personas: number; huellas: number; avisos: number }>()) ?? {
+            productos: 0,
+            ventas: 0,
+            cajas: 0,
+            personas: 1,
+            huellas: 0,
+            avisos: 0,
+          }),
+        })
+      : null;
   const ventas = resumen?.ventas ?? 0;
   const gastos = resumen?.gastos ?? 0;
   const otra = enMoneda2(ventas, negocio.moneda2, negocio.tasa2);
@@ -94,6 +123,8 @@ export default async function InicioPanel({
           Tu cuenta no tiene permiso para esa sección. Pídeselo al propietario.
         </p>
       )}
+
+      {pasos && <PrimerosPasos pasos={pasos} avance={avance(pasos)} />}
 
       {accesos.length > 0 && (
         <>
@@ -238,6 +269,8 @@ export default async function InicioPanel({
           Ver mi tienda ↗
         </a>
       </div>
+
+      <InstalarApp compacto />
     </>
   );
 }

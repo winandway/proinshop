@@ -39,10 +39,11 @@ function guardarVisto(visto: { pedido: number; actividad: number }) {
   }
 }
 
-function notificar(titulo: string, cuerpo: string) {
+function notificar(titulo: string, cuerpo: string, etiqueta: string) {
   if (typeof Notification === "undefined" || Notification.permission !== "granted") return;
   try {
-    new Notification(titulo, { body: cuerpo, icon: "/icon.png", tag: titulo });
+    // La misma etiqueta que el aviso al celular: si llegan los dos, se ve uno.
+    new Notification(titulo, { body: cuerpo, icon: "/icon.png", tag: etiqueta });
   } catch {
     // Algunos celulares solo dejan notificar desde la app instalada.
   }
@@ -70,7 +71,7 @@ export function AvisosEnVivo() {
           if (!primera || visto.pedido > 0) {
             const texto = `Nuevo pedido #${datos.pedido.numero} de ${datos.pedido.cliente_nombre}`;
             nuevos.push({ clave: `p${datos.pedido.id}`, texto, enlace: `/panel/pedidos/${datos.pedido.id}` });
-            notificar("🛒 Nuevo pedido", texto);
+            notificar("🛒 Nuevo pedido", texto, `pedido-${datos.pedido.id}`);
           }
           visto.pedido = datos.pedido.id;
         }
@@ -78,7 +79,7 @@ export function AvisosEnVivo() {
           if (!primera || visto.actividad > 0) {
             const texto = `${datos.actividad.nombre ?? "Alguien"}: ${datos.actividad.detalle}`;
             nuevos.push({ clave: `a${datos.actividad.id}`, texto, enlace: "/panel/actividad" });
-            notificar("Actividad del equipo", texto);
+            notificar("Actividad del equipo", texto, `actividad-${datos.actividad.id}`);
           }
           visto.actividad = datos.actividad.id;
         }
@@ -127,38 +128,5 @@ export function AvisosEnVivo() {
         </div>
       ))}
     </div>
-  );
-}
-
-/** Botón para que este celular o computadora reciba las notificaciones. */
-export function ActivarNotificaciones() {
-  const [estado, setEstado] = useState<"no-soporta" | "default" | "granted" | "denied">("default");
-
-  useEffect(() => {
-    const espera = window.setTimeout(() => {
-      setEstado(typeof Notification === "undefined" ? "no-soporta" : Notification.permission);
-    }, 0);
-    return () => window.clearTimeout(espera);
-  }, []);
-
-  if (estado === "no-soporta") return null;
-  if (estado === "granted") {
-    return <p className="text-[12px] font-bold text-verde">🔔 Las notificaciones están activas en este equipo.</p>;
-  }
-  if (estado === "denied") {
-    return (
-      <p className="text-[12px] text-gris">
-        Las notificaciones están bloqueadas en este navegador. Actívalas en los ajustes del sitio.
-      </p>
-    );
-  }
-  return (
-    <button
-      type="button"
-      onClick={async () => setEstado(await Notification.requestPermission())}
-      className="rounded-xl bg-tinta px-4 py-2.5 text-[12.5px] font-extrabold text-white"
-    >
-      🔔 Activar notificaciones en este equipo
-    </button>
   );
 }

@@ -2,6 +2,9 @@
 
 import { baseDeDatos } from "@/lib/d1";
 import { obtenerConfigTienda } from "@/lib/config-tienda";
+import { avisarPorDetras } from "@/lib/avisos-push";
+import { formatearPrecio } from "@/lib/i18n";
+import { filasPorLista } from "@/lib/por-trozos";
 
 export type LineaPedido = {
   productoSlug: string;
@@ -32,15 +35,13 @@ export async function guardarPedido(datos: {
   if (datos.lineas.length === 0) return { error: "El carrito está vacío" };
 
   const slugs = datos.lineas.map((l) => l.productoSlug);
-  const marcas = slugs.map(() => "?").join(",");
   // Solo lo publicado se puede pedir: un producto escondido no se vende
   // aunque alguien arme el pedido a mano.
-  const { results: productos } = await db
-    .prepare(
-      `SELECT id, slug, nombre_es, precio FROM producto WHERE publicado = 1 AND slug IN (${marcas})`,
-    )
-    .bind(...slugs)
-    .all<{ id: number; slug: string; nombre_es: string; precio: number }>();
+  const productos = await filasPorLista<{ id: number; slug: string; nombre_es: string; precio: number }>(
+    db,
+    (marcas) => `SELECT id, slug, nombre_es, precio FROM producto WHERE publicado = 1 AND slug IN (${marcas})`,
+    slugs,
+  );
 
   // El color, la talla o la potencia que eligió el cliente viajan con el
   // pedido. Antes se perdían: el dueño no sabía qué variante despachar y el
@@ -49,15 +50,11 @@ export async function guardarPedido(datos: {
     .map((l) => l.varianteId)
     .filter((id): id is number => Number.isInteger(id) && (id as number) > 0);
   const variantes = idsVariante.length
-    ? (
-        await db
-          .prepare(
-            `SELECT id, producto_id, nombre_es, precio_extra FROM variante
-             WHERE id IN (${idsVariante.map(() => "?").join(",")})`,
-          )
-          .bind(...idsVariante)
-          .all<{ id: number; producto_id: number; nombre_es: string; precio_extra: number }>()
-      ).results
+    ? await filasPorLista<{ id: number; producto_id: number; nombre_es: string; precio_extra: number }>(
+        db,
+        (marcas) => `SELECT id, producto_id, nombre_es, precio_extra FROM variante WHERE id IN (${marcas})`,
+        idsVariante,
+      )
     : [];
 
   // Los precios salen de la base, nunca del navegador.
@@ -133,6 +130,19 @@ export async function guardarPedido(datos: {
       .bind(pedidoId, item.productoId, item.varianteId, item.descripcion, item.cantidad, item.precio)
       .run();
   }
+
+  // Al celular de quien atiende los pedidos, aunque tenga el panel cerrado.
+  // Sin hacer esperar al cliente que está comprando.
+  await avisarPorDetras(
+    db,
+    { modulo: "pedidos" },
+    {
+      titulo: "🛒 Nuevo pedido en la tienda",
+      cuerpo: `#${numero} de ${datos.cliente.nombre.trim()} · ${formatearPrecio(total)}`.slice(0, 180),
+      enlace: `/panel/pedidos/${pedidoId}`,
+      etiqueta: `pedido-${pedidoId}`,
+    },
+  );
 
   return { numero };
 }

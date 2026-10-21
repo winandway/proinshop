@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { FormularioContrasena } from "@/componentes/panel/FormularioContrasena";
 import { ActivarHuella } from "@/componentes/panel/BotonesHuella";
+import { AvisosCelular } from "@/componentes/panel/AvisosCelular";
+import { InstalarApp } from "@/componentes/InstalarApp";
 import { MenuTresPuntos } from "@/componentes/panel/MenuTresPuntos";
 import { quitarLlave } from "../../llaves";
 import { horaLocal, minutosZona } from "@/lib/zona";
@@ -96,6 +98,23 @@ export default async function Cuenta() {
           </ul>
         )}
         <ActivarHuella />
+      </div>
+
+      <div className="mb-3 rounded-2xl border border-linea bg-white p-4">
+        <h2 className="text-[13px] font-extrabold">Proinshop en tu celular</h2>
+        <p className="mb-3 mt-1 text-[12.5px] text-gris">
+          Instálalo y ábrelo con un toque desde la pantalla de inicio, como cualquier app.
+        </p>
+        <InstalarApp />
+      </div>
+
+      <div className="mb-3 rounded-2xl border border-linea bg-white p-4">
+        <h2 className="text-[13px] font-extrabold">Avisos en este celular</h2>
+        <p className="mb-3 mt-1 text-[12.5px] text-gris">
+          Te suena el celular cuando entra un pedido de la tienda y, si eres el dueño, cuando
+          alguien de tu equipo vende o cierra la caja. Aunque tengas el panel cerrado.
+        </p>
+        <AvisosCelular />
       </div>
 
       <div className="mb-3 rounded-2xl border border-linea bg-white p-4">

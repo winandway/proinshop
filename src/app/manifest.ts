@@ -1,9 +1,11 @@
 import type { MetadataRoute } from "next";
+import { ICONOS_APP } from "@/lib/iconos-app";
+
 
 /**
- * Manifiesto de la PWA. Con esto la tienda se puede "instalar" en el celular
- * y abrir a pantalla completa, como una aplicación. En la Etapa 3 la app de
- * administración usa el mismo manifiesto con `start_url: "/admin"`.
+ * Manifiesto de la tienda instalable: se agrega al celular y abre a pantalla
+ * completa, como una aplicación. El panel tiene el suyo
+ * (src/app/panel/manifest.webmanifest), que abre directo en el panel.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -11,16 +13,15 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Proinshop",
     description:
       "Plantas eléctricas, motos, bicicletas, herramientas y repuestos importados directamente de fábrica.",
+    id: "/",
     start_url: "/",
+    scope: "/",
     display: "standalone",
     orientation: "portrait",
     background_color: "#ffffff",
     theme_color: "#ff2d2d",
     lang: "es",
     categories: ["shopping", "business"],
-    icons: [
-      { src: "/icon", sizes: "64x64", type: "image/png" },
-      { src: "/apple-icon", sizes: "180x180", type: "image/png", purpose: "maskable" },
-    ],
+    icons: ICONOS_APP,
   };
 }

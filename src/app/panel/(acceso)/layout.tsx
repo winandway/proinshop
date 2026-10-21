@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { Diana } from "@/componentes/Logo";
 import { LimpiarCopias } from "@/componentes/ServicioSinSenal";
+import type { Metadata } from "next";
+
+/** Instalado desde aquí, el ícono del celular abre directo en el panel. */
+export const metadata: Metadata = { manifest: "/panel/manifest.webmanifest" };
 
 /** Marco de las pantallas de acceso: sin encabezado de tienda ni carrito. */
 export default function DisenoAcceso({ children }: { children: React.ReactNode }) {

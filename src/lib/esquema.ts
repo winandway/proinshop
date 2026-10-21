@@ -65,6 +65,23 @@ const TABLAS = [
      ultimo_uso    TEXT
    )`,
   `CREATE INDEX IF NOT EXISTS idx_llave_usuario ON llave_acceso(usuario_id)`,
+  // Avisos al celular: la llave para firmarlos (la crea el sistema) y los
+  // celulares de cada persona que los activó.
+  `CREATE TABLE IF NOT EXISTS clave_aviso (
+     id      INTEGER PRIMARY KEY CHECK (id = 1),
+     privada TEXT NOT NULL,
+     creada  TEXT NOT NULL DEFAULT (datetime('now'))
+   )`,
+  `CREATE TABLE IF NOT EXISTS suscripcion_aviso (
+     endpoint   TEXT    PRIMARY KEY,
+     usuario_id INTEGER NOT NULL REFERENCES usuario(id) ON DELETE CASCADE,
+     p256dh     TEXT    NOT NULL,
+     auth       TEXT    NOT NULL,
+     agente     TEXT,
+     creada     TEXT    NOT NULL DEFAULT (datetime('now')),
+     ultimo     TEXT,
+     fallos     INTEGER NOT NULL DEFAULT 0
+   )`,
   // El reto de cada intento: se usa una sola vez y vence a los cinco minutos.
   `CREATE TABLE IF NOT EXISTS reto_llave (
      id         TEXT    PRIMARY KEY,

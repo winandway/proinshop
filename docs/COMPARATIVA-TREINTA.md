@@ -235,7 +235,7 @@ que se ve como una página web.
 
 ---
 
-## Estado al 19 de octubre de 2026: igualado
+## Estado al 21 de octubre de 2026: igualado y verificado
 
 Richard pidió igualar Proinshop con Treinta, porque al cliente se le vendió
 como igual. Se hizo de corrido y se publicó. Ya está en Proinshop:
@@ -259,12 +259,20 @@ como igual. Se hizo de corrido y se publicó. Ya está en Proinshop:
 | Dos monedas con la tasa del día | Sí |
 | Entrar con huella o cara | Sí |
 | Funcionar sin señal | Sí: abre y vende; las ventas se envían solas al volver la señal |
-| Ayuda dentro de la app | Sí: Docs con 20 guías en español e inglés |
+| Ayuda dentro de la app | Sí: Docs con 22 guías en español e inglés, y primeros pasos en el inicio |
+| Avisos al celular | Sí: pedidos nuevos y lo que hace el equipo, aunque el panel esté cerrado |
+| App en el celular | Sí: se instala desde el navegador con su ícono; Google Play cuando haya cuenta |
+| Comparar entre fechas | Sí: cada número contra el período anterior |
 
-Lo que sigue faltando y por qué: aviso al celular con el panel cerrado (va
-primero en la fila), factura electrónica, asistente con IA, recordatorios
-automáticos por WhatsApp, varias tiendas y las apps en las tiendas (falta la
-cuenta del negocio). Detalle en PENDIENTES.md.
+Verificado el 21 de octubre con la prueba de aceptación (43 de 43 en verde sobre
+una base nueva), la de huella, la de sin señal y 71 pruebas automáticas. Acta en
+docs/ACTA-ENTREGA-PROINSHOP.md.
+
+Lo que Treinta tiene y Proinshop no, y por qué: factura electrónica (depende del
+país y de un proveedor autorizado), asistente con IA (falta la clave),
+recordatorios de cobro que salen solos por WhatsApp (necesitan un servicio de
+mensajes pago; hoy es con un toque por cliente), varias tiendas (Proinshop es un
+solo negocio) y recetas (no es restaurante). Detalle en PENDIENTES.md.
 
 ## 6. Fuentes
 
