@@ -9,17 +9,15 @@
 
 ## 👤 Esperando por Richard o por el dueño
 
-- [ ] 👤 **El dueño crea su cuenta de propietario** en proinshop.com/panel. Mientras no exista, el primero que entre se queda con el panel.
-- [ ] 👤 **El dueño invita la cuenta de Soporte** desde Equipo, con rol Propietario. Sin ella no podemos recuperarle la clave ni manejar la franja.
-- [ ] 👤 **¿Se borran los 18 productos de muestra?** Tienen precios inventados y hoy se ven en la tienda. Sí o no.
-- [ ] 👤 **WhatsApp de ventas** en Mi tienda. Sin él, los botones verdes abren WhatsApp sin destinatario.
-- [ ] 👤 **Token nuevo de la base.** El que había ya no sirve. Hace falta para mantenimiento y para borrar en bloque.
-- [ ] 👤 **Clave de la IA** para la carga por foto.
-- [ ] 👤 **Claves de Turnstile** (escudo anti-robots).
-- [ ] 👤 **Logo original** en vector o PNG grande.
-- [ ] 👤 **Foto del contenedor con «PROINSHOP» bien escrito** (la que llegó dice «PROVINCHO»). Va como cuarto producto de la vitrina.
-- [ ] 👤 **Qué mejoras cobrables se le cotizan al cliente** y a qué precio. Ya NO entran ahí las herramientas de Treinta: Richard ordenó igualarlas el 19 oct porque al cliente se le vendió Proinshop como igual a Treinta (van como garantía). Quedan: factura electrónica, IA, recordatorios automáticos por WhatsApp, varias tiendas y apps en las tiendas.
-- [ ] 👤 **Cuenta de Google Play del negocio** (25 dólares, una sola vez), solo si quieren que aparezca en la tienda de apps. Ya se instala desde el navegador.
+> Ninguno frena la entrega: el sistema está completo y verificado (acta del 21 oct).
+
+- [ ] 👤 **Richard: avisar cuando se entregue**, para pasar la franja del dueño a verde («Terminamos… ahora te toca probarlo»).
+- [ ] 👤 **El dueño, al arrancar** (con la tarjeta «Primeros pasos» y Docs): crear su cuenta, poner el WhatsApp de ventas, borrar los 18 productos de muestra (Edición masiva → ⋮ → borrar) y cargar los suyos.
+- [ ] 👤 **El dueño: probar el aviso al celular** desde su teléfono (Mi cuenta → Activar avisos → Mandarme un aviso de prueba). Es lo único que no se puede ver llegar desde aquí.
+- [ ] 👤 Opcional: **invitar a Soporte** como Propietario, para poder recuperarle la clave.
+- [ ] 👤 Opcional: **clave de la IA** (cargar productos con una foto), **claves del escudo anti-robots**, **logo original**, **foto del contenedor** con PROINSHOP bien escrito, **cuenta de Google Play** (25 dólares, solo para aparecer en la tienda de apps).
+- [ ] 👤 Opcional: **token nuevo de la base**, solo para mantenimiento a mano. El sitio no lo necesita para funcionar.
+- [ ] 👤 **Qué mejoras cobrables se cotizan**: factura electrónica, IA, recordatorios automáticos, varias tiendas, App Store.
 
 ## Fila de la IA (gratis, en este orden)
 
